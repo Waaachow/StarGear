@@ -1,0 +1,200 @@
+{
+ "lines": {
+  "Tessa": [
+   "Drive's running clean. Enjoy it while it lasts.",
+   "If anyone's bored, the coolant lines need bleeding.",
+   "That moon didn't crack on its own. Something did that.",
+   "Hull's holding. Mostly.",
+   "That's a module gone. I can't fix it out here \u2014 we need a station.",
+   "Hold's full, Captain. We're leaving salvage behind.",
+   "Docking clamps in range. I've got a repair list as long as my arm.",
+   "Salvage on the sweep. Reel it in."
+  ],
+  "Kael": [
+   "Long-range is quiet. Suspiciously quiet.",
+   "I've been reading the fleet manifests again. They don't add up.",
+   "Particle density is climbing. Sensors are going to get vague in here.",
+   "The signal's strongest here. It's practically shouting.",
+   "Hostile transponder. They've seen us.",
+   "We're flying with a hole in the grid. Mind how you fight.",
+   "Sensors have something. Logging it."
+  ],
+  "Astra": [
+   "Course holding. Nothing on the approach vectors.",
+   "We're a long way from anywhere out here.",
+   "The nebula plays havoc with the drive. Taking it slow.",
+   "Whatever's at the centre of this, we're close.",
+   "I can burn past them if you'd rather not fight.",
+   "No more room. Nearest station's the smart move."
+  ],
+  "Rex": [
+   "You know what I miss? Weather. Space has no weather.",
+   "Guns are warm. Just saying.",
+   "Mind the debris field. I'd rather not repaint the hull.",
+   "Contact! Red profile, closing.",
+   "Scratch one. Who's next?"
+  ],
+  "Selyra": [
+   "Everyone's patched up. For once.",
+   "Try to eat something before the next fight, Captain.",
+   "So many of them. And not one light on.",
+   "No casualties. Let's keep it that way.",
+   "Station ahead. Hot food and a working shower."
+  ],
+  "Voss": [
+   "Steady as she goes.",
+   "Keep your eyes open. Quiet isn't the same as safe.",
+   "Hold formation discipline. We're guests in a graveyard."
+  ]
+ },
+ "spans": {
+  "Tessa": [
+   [
+    0.0,
+    2.3
+   ],
+   [
+    2.96,
+    5.14
+   ],
+   [
+    5.84,
+    8.5
+   ],
+   [
+    10.0,
+    11.06
+   ],
+   [
+    11.64,
+    15.12
+   ],
+   [
+    16.14,
+    18.36
+   ],
+   [
+    19.86,
+    23.52
+   ],
+   [
+    24.0,
+    25.78
+   ]
+  ],
+  "Kael": [
+   [
+    0.0,
+    3.4
+   ],
+   [
+    4.32,
+    7.68
+   ],
+   [
+    8.76,
+    12.78
+   ],
+   [
+    12.86,
+    15.14
+   ],
+   [
+    15.54,
+    17.26
+   ],
+   [
+    17.44,
+    20.22
+   ],
+   [
+    20.76,
+    22.48
+   ]
+  ],
+  "Astra": [
+   [
+    0.0,
+    3.24
+   ],
+   [
+    3.92,
+    6.4
+   ],
+   [
+    7.24,
+    11.22
+   ],
+   [
+    12.68,
+    14.66
+   ],
+   [
+    15.56,
+    18.48
+   ],
+   [
+    19.32,
+    22.92
+   ]
+  ],
+  "Rex": [
+   [
+    0.0,
+    3.26
+   ],
+   [
+    3.78,
+    5.34
+   ],
+   [
+    5.94,
+    8.76
+   ],
+   [
+    9.44,
+    12.1
+   ],
+   [
+    12.56,
+    14.14
+   ]
+  ],
+  "Selyra": [
+   [
+    0.0,
+    2.0
+   ],
+   [
+    2.54,
+    4.86
+   ],
+   [
+    5.38,
+    8.14
+   ],
+   [
+    8.58,
+    10.92
+   ],
+   [
+    10.92,
+    14.34
+   ]
+  ],
+  "Voss": [
+   [
+    0.0,
+    1.14
+   ],
+   [
+    1.62,
+    6.92
+   ],
+   [
+    8.24,
+    12.22
+   ]
+  ]
+ }
+}

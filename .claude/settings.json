@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($py = Get-Command python -ErrorAction SilentlyContinue; $py3 = Get-Command python3 -ErrorAction SilentlyContinue; $vlc = Test-Path \"C:\\\\Program Files\\\\VideoLAN\\\\VLC\\\\vlc.exe\"; \"python: $\\($py.Source\\)\"; \"python3: $\\($py3.Source\\)\"; \"vlc: $vlc\"; if \\($py\\) { python -c \"import sys; print\\(sys.version\\)\"; pip show pydub 2>$null | Select-String '^Name|^Version' })",
+      "PowerShell(winget install --id Gyan.FFmpeg -e --accept-source-agreements --accept-package-agreements --disable-interactivity)",
+      "PowerShell(Start-Process \"c:\\\\Users\\\\Steve\\\\OneDrive\\\\Desktop\\\\Skit\\\\iso_grid_prototype.html\")",
+      "PowerShell($f=\"C:\\\\Users\\\\Steve\\\\.claude\\\\projects\\\\c--Users-Steve-OneDrive-Desktop-Skit\\\\ec5cf484-1754-4f5d-b9fb-715f9a238761.jsonl\"; Select-String -Path $f -Pattern 'to-?do|todo|checklist|remaining|backlog' -AllMatches | ForEach-Object { $_.LineNumber } | Group-Object | Select-Object Name,Count | Format-Table -AutoSize)",
+      "PowerShell(python \"C:\\\\Users\\\\Steve\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Steve-OneDrive-Desktop-Skit\\\\bd50c81e-feb4-4856-90e7-21ea8b5a0f56\\\\scratchpad\\\\sable2.py\" 2>&1)"
+    ]
+  }
+}

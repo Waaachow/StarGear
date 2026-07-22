@@ -1,0 +1,302 @@
+{
+ "Rex": [
+  {
+   "file": "rex_01.mp3",
+   "start": 0.0,
+   "end": 1.56,
+   "text": "Locked on \u2014 say goodnight."
+  },
+  {
+   "file": "rex_02.mp3",
+   "start": 2.14,
+   "end": 3.01,
+   "text": "Lighting 'em up!"
+  },
+  {
+   "file": "rex_03.mp3",
+   "start": 3.08,
+   "end": 4.62,
+   "text": "This is my favourite part."
+  },
+  {
+   "file": "rex_04.mp3",
+   "start": 5.0,
+   "end": 6.66,
+   "text": "Missile away \u2014 eat that!"
+  },
+  {
+   "file": "rex_05.mp3",
+   "start": 6.86,
+   "end": 9.44,
+   "text": "One special delivery, incoming."
+  },
+  {
+   "file": "rex_06.mp3",
+   "start": 9.62,
+   "end": 11.88,
+   "text": "Danger close? Not for us."
+  },
+  {
+   "file": "rex_07.mp3",
+   "start": 12.02,
+   "end": 13.02,
+   "text": "Scratch one!"
+  },
+  {
+   "file": "rex_08.mp3",
+   "start": 13.26,
+   "end": 15.59,
+   "text": "Hey! Nobody takes my crew."
+  },
+  {
+   "file": "rex_09.mp3",
+   "start": 15.76,
+   "end": 17.9,
+   "text": "Okay \u2014 that one I felt."
+  }
+ ],
+ "Tessa": [
+  {
+   "file": "tessa_01.mp3",
+   "start": 0.0,
+   "end": 2.94,
+   "text": "Pushing the reactor \u2014 don't tell the warranty."
+  },
+  {
+   "file": "tessa_02.mp3",
+   "start": 3.34,
+   "end": 6.88,
+   "text": "Overclocking. Everyone gets a little extra reach."
+  },
+  {
+   "file": "tessa_03.mp3",
+   "start": 7.44,
+   "end": 9.88,
+   "text": "Redlining her. Make it count."
+  },
+  {
+   "file": "tessa_04.mp3",
+   "start": 10.12,
+   "end": 12.68,
+   "text": "Patching the hull \u2014 hold still."
+  },
+  {
+   "file": "tessa_05.mp3",
+   "start": 12.98,
+   "end": 15.58,
+   "text": "Welding on the fly. Classic us."
+  },
+  {
+   "file": "tessa_06.mp3",
+   "start": 15.84,
+   "end": 18.5,
+   "text": "That'll hold. Probably."
+  },
+  {
+   "file": "tessa_07.mp3",
+   "start": 18.5,
+   "end": 20.16,
+   "text": "One less thing to fix."
+  },
+  {
+   "file": "tessa_08.mp3",
+   "start": 20.3,
+   "end": 22.45,
+   "text": "They're hit \u2014 I need a second here!"
+  },
+  {
+   "file": "tessa_09.mp3",
+   "start": 22.56,
+   "end": 24.96,
+   "text": "That one hurt \u2014 the hull's screaming."
+  }
+ ],
+ "Kael": [
+  {
+   "file": "kael_01.mp3",
+   "start": 0.0,
+   "end": 2.1,
+   "text": "Shields up. Ten percent is ten percent."
+  },
+  {
+   "file": "kael_02.mp3",
+   "start": 2.46,
+   "end": 5.62,
+   "text": "Deflectors online. Mind the gaps."
+  },
+  {
+   "file": "kael_03.mp3",
+   "start": 5.92,
+   "end": 7.24,
+   "text": "Bracing the grid."
+  },
+  {
+   "file": "kael_04.mp3",
+   "start": 7.48,
+   "end": 9.61,
+   "text": "Scanning \u2014 I can read their whole hand now."
+  },
+  {
+   "file": "kael_05.mp3",
+   "start": 9.61,
+   "end": 11.9,
+   "text": "Got their specs. Aim for the seams."
+  },
+  {
+   "file": "kael_06.mp3",
+   "start": 12.24,
+   "end": 13.68,
+   "text": "Sensors have them cold."
+  },
+  {
+   "file": "kael_07.mp3",
+   "start": 13.92,
+   "end": 16.81,
+   "text": "Jamming their comms \u2014 blind for a beat."
+  },
+  {
+   "file": "kael_08.mp3",
+   "start": 16.98,
+   "end": 19.3,
+   "text": "Scrambled. That bought us a turn."
+  },
+  {
+   "file": "kael_09.mp3",
+   "start": 19.46,
+   "end": 21.22,
+   "text": "Their targeting just went dark."
+  },
+  {
+   "file": "kael_10.mp3",
+   "start": 21.42,
+   "end": 22.24,
+   "text": "Target neutralised."
+  }
+ ],
+ "Astra": [
+  {
+   "file": "astra_01.mp3",
+   "start": 0.0,
+   "end": 3.0,
+   "text": "Repositioning. Watch the burn."
+  },
+  {
+   "file": "astra_02.mp3",
+   "start": 3.48,
+   "end": 5.54,
+   "text": "Sliding to a better angle."
+  },
+  {
+   "file": "astra_03.mp3",
+   "start": 6.1,
+   "end": 8.28,
+   "text": "New vector \u2014 keep up."
+  },
+  {
+   "file": "astra_04.mp3",
+   "start": 8.44,
+   "end": 11.94,
+   "text": "Space-hop! Blink and you missed it."
+  },
+  {
+   "file": "astra_05.mp3",
+   "start": 12.2,
+   "end": 15.22,
+   "text": "Folding past them \u2014 hold on."
+  },
+  {
+   "file": "astra_06.mp3",
+   "start": 15.44,
+   "end": 17.52,
+   "text": "Not where you thought I'd be."
+  },
+  {
+   "file": "astra_07.mp3",
+   "start": 17.92,
+   "end": 20.44,
+   "text": "Clean kill. Next."
+  },
+  {
+   "file": "astra_08.mp3",
+   "start": 20.76,
+   "end": 23.48,
+   "text": "Big hit! Evasive, now."
+  }
+ ],
+ "Selyra": [
+  {
+   "file": "selyra_01.mp3",
+   "start": 0.0,
+   "end": 1.69,
+   "text": "Not today. On your feet."
+  },
+  {
+   "file": "selyra_02.mp3",
+   "start": 1.82,
+   "end": 3.78,
+   "text": "I've got you \u2014 back in the fight."
+  },
+  {
+   "file": "selyra_03.mp3",
+   "start": 3.94,
+   "end": 6.62,
+   "text": "Stay with me. There \u2014 up you go."
+  },
+  {
+   "file": "selyra_04.mp3",
+   "start": 6.92,
+   "end": 9.12,
+   "text": "Adrenaline's in \u2014 go, go!"
+  },
+  {
+   "file": "selyra_05.mp3",
+   "start": 9.32,
+   "end": 11.6,
+   "text": "One more push. You've got this."
+  },
+  {
+   "file": "selyra_06.mp3",
+   "start": 11.7,
+   "end": 12.81,
+   "text": "Move while it's hot!"
+  },
+  {
+   "file": "selyra_07.mp3",
+   "start": 12.92,
+   "end": 14.92,
+   "text": "Someone's down \u2014 cover them!"
+  }
+ ],
+ "Voss": [
+  {
+   "file": "voss_01.mp3",
+   "start": 0.84,
+   "end": 3.76,
+   "text": "I've got their station \u2014 follow my lead."
+  },
+  {
+   "file": "voss_02.mp3",
+   "start": 4.14,
+   "end": 6.24,
+   "text": "Taking the helm on this one."
+  },
+  {
+   "file": "voss_03.mp3",
+   "start": 6.98,
+   "end": 10.09,
+   "text": "Do as I do. Now."
+  },
+  {
+   "file": "voss_04.mp3",
+   "start": 10.22,
+   "end": 13.42,
+   "text": "We do not leave people behind!"
+  },
+  {
+   "file": "voss_05.mp3",
+   "start": 14.12,
+   "end": 16.66,
+   "text": "Hold together. Absorb it and answer."
+  }
+ ]
+}

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eclipse Runner — Skit 1</title>
+<style>
+  :root{
+    --voss:#46c7ff; --tessa:#5be38b; --rex:#ffae42; --astra:#b481ff;
+    --accent:#46c7ff;
+    --barH:210px;
+    --panel-bg:rgba(8,14,28,0.88); --panel-border:rgba(120,180,255,0.35);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Segoe UI",system-ui,sans-serif;
+    background:#05070f; color:#eaf2ff; overflow:hidden; user-select:none;
+  }
+  #stage{
+    position:fixed; inset:0;
+    background:
+      radial-gradient(1200px 600px at 70% -10%, rgba(40,80,160,0.35), transparent 60%),
+      radial-gradient(900px 500px at 20% 110%, rgba(80,40,140,0.30), transparent 60%),
+      linear-gradient(180deg,#070b18 0%, #04060e 100%);
+  }
+  #stars{position:fixed; inset:0; pointer-events:none;}
+
+  /* ---------- top-left scene header ---------- */
+  #header{position:fixed; top:18px; left:24px; z-index:5; opacity:.9;}
+  #skitTitle{font-size:1rem; letter-spacing:.18em; color:#9fc0ff; text-transform:uppercase;}
+  #location{font-size:.78rem; letter-spacing:.18em; color:rgba(255,255,255,0.45); margin-top:.25rem;}
+
+  /* ---------- cast ---------- */
+  #cast{position:fixed; left:0; right:0; top:0; bottom:0; pointer-events:none; z-index:2;}
+  .slot{
+    position:absolute; bottom:0;
+    width:38%; height:99vh;
+    display:flex; align-items:flex-end;
+    opacity:0; transform:translateY(26px);
+    transition:opacity .55s ease, transform .55s ease;
+  }
+  .slot.show{opacity:1; transform:translateY(0);}
+  /* --cscale normalizes each figure's on-screen height to Voss (reference) */
+  #slot-Voss { left:0;     justify-content:flex-start; padding-left:1%;  --cscale:1.00; }
+  #slot-Rex  { left:31%;   justify-content:center;                       --cscale:0.95; }
+  #slot-Tessa{ left:62%;   justify-content:flex-end;  padding-right:1%;  --cscale:0.99; }
+
+  .slot::before{   /* speaker aura, kept above the bar around the torso */
+    content:""; position:absolute; bottom:20%; left:50%; transform:translateX(-50%);
+    width:72%; height:50%;
+    background:radial-gradient(ellipse at center, var(--c,#46c7ff) 0%, transparent 65%);
+    opacity:0; filter:blur(26px); transition:opacity .4s ease; z-index:0;
+  }
+  .slot.active::before{opacity:.30;}
+
+  .cimg{
+    position:relative; z-index:1;
+    max-height:100%; max-width:100%; object-fit:contain;
+    transform-origin:bottom center;   /* scale from the feet so baselines stay aligned */
+    filter:brightness(.40) saturate(.85) drop-shadow(0 10px 20px rgba(0,0,0,0.55));
+    transform:translateY(8px) scale(calc(var(--cscale,1) * .97));
+    transition:filter .4s ease, transform .4s ease;
+  }
+  .slot.active .cimg{
+    filter:brightness(1) saturate(1) drop-shadow(0 12px 24px rgba(0,0,0,0.6));
+    transform:translateY(0) scale(calc(var(--cscale,1) * 1.02));
+  }
+  .cph{
+    position:relative; z-index:1;
+    width:min(72%,300px); aspect-ratio:3/4; align-self:flex-end; margin:0 auto;
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:16px; border:1px solid rgba(255,255,255,0.12);
+    background:linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
+    filter:brightness(.5);
+  }
+  .slot.active .cph{filter:brightness(1);}
+  .cph .i{font-size:clamp(48px,8vw,110px); font-weight:800; color:var(--c,#46c7ff);
+          text-shadow:0 0 26px var(--c,#46c7ff);}
+  .cph .n{margin-top:.3rem; letter-spacing:.22em; text-transform:uppercase; font-size:.72rem;
+          color:rgba(255,255,255,0.55);}
+  .cph .note{margin-top:.6rem; font-size:.6rem; color:rgba(255,255,255,0.3); text-align:center; padding:0 10px;}
+
+  /* ---------- full-width dialogue bar ---------- */
+  #bar{
+    position:fixed; left:0; right:0; bottom:0; z-index:6;
+    min-height:var(--barH);
+    background:linear-gradient(180deg, transparent, rgba(4,7,15,0.55) 18%, var(--panel-bg) 46%);
+    border-top:1px solid var(--panel-border);
+    padding:34px clamp(24px,6vw,90px) 26px;
+    backdrop-filter:blur(6px);
+  }
+  #nameplate{
+    display:inline-block; padding:.35rem 1.2rem; border-radius:8px;
+    font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:1rem;
+    background:#0b1426; border:1px solid var(--accent);
+    color:var(--accent);
+    box-shadow:0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);
+    margin-bottom:.7rem;
+  }
+  #bar.speaking #nameplate{animation:talk 1.1s ease-in-out infinite;}
+  @keyframes talk{
+    0%,100%{box-shadow:0 0 18px color-mix(in srgb, var(--accent) 40%, transparent);}
+    50%{box-shadow:0 0 30px color-mix(in srgb, var(--accent) 85%, transparent);}
+  }
+  #text{
+    font-size:clamp(1.15rem,2.2vw,1.7rem); line-height:1.5; max-width:1100px;
+    min-height:2.6em;
+  }
+  .cursor{display:inline-block; width:.55ch; animation:blink 1s steps(1) infinite; color:#9fc0ff;}
+  @keyframes blink{50%{opacity:0;}}
+  #advance{
+    position:absolute; right:clamp(24px,6vw,90px); bottom:16px;
+    font-size:.75rem; letter-spacing:.15em; color:rgba(255,255,255,0.5);
+    display:flex; align-items:center; gap:.5rem;
+  }
+  #advance .arrow{display:inline-block; animation:bob 1.1s ease-in-out infinite; color:#9fc0ff;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+  kbd{background:#101a30; border:1px solid rgba(255,255,255,0.2); border-bottom-width:2px;
+      border-radius:5px; padding:1px 7px; font-size:.72rem; color:#cfe0ff;}
+  #progress{position:absolute; left:0; bottom:0; height:3px; width:0%;
+    background:linear-gradient(90deg, var(--accent), transparent); transition:width .3s ease;}
+
+  #muteBtn{
+    position:fixed; top:14px; right:16px; z-index:30;
+    background:rgba(8,14,28,0.7); border:1px solid rgba(120,180,255,0.35);
+    color:#cfe0ff; font-size:1.1rem; border-radius:9px; padding:.35rem .6rem;
+    cursor:pointer; backdrop-filter:blur(4px);
+  }
+  #muteBtn:hover{border-color:#9fc0ff;}
+
+  /* ---------- overlays ---------- */
+  .overlay{
+    position:fixed; inset:0; z-index:40;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; background:rgba(3,5,12,0.8); backdrop-filter:blur(3px);
+    gap:1rem; cursor:pointer;
+  }
+  .overlay h1{font-size:clamp(1.8rem,5vw,3rem); letter-spacing:.1em; color:#cfe2ff;
+    text-shadow:0 0 30px rgba(70,150,255,0.5);}
+  .overlay .sub{color:#9fc0ff; letter-spacing:.2em; text-transform:uppercase; font-size:.9rem;}
+  .overlay .hint{margin-top:1.2rem; color:rgba(255,255,255,0.6); font-size:.9rem;}
+  .hidden{display:none !important;}
+
+  @media (max-width:760px){
+    :root{--barH:200px;}
+    .slot{width:34%;}
+    #text{font-size:1.05rem;}
+  }
+</style>
+</head>
+<body>
+  <div id="stage"></div>
+  <canvas id="stars"></canvas>
+  <button id="muteBtn" title="Mute (M)">🔊</button>
+
+  <div id="header">
+    <div id="skitTitle">Skit 1 — “Another Quiet Run”</div>
+    <div id="location">Location: Bridge</div>
+  </div>
+
+  <div id="cast">
+    <div class="slot" id="slot-Voss"  data-who="Voss">
+      <img class="cimg" alt="Voss">
+      <div class="cph"><span class="i">V</span><span class="n">Voss</span><span class="note"></span></div>
+    </div>
+    <div class="slot" id="slot-Rex"   data-who="Rex">
+      <img class="cimg" alt="Rex">
+      <div class="cph"><span class="i">R</span><span class="n">Rex</span><span class="note"></span></div>
+    </div>
+    <div class="slot" id="slot-Tessa" data-who="Tessa">
+      <img class="cimg" alt="Tessa">
+      <div class="cph"><span class="i">T</span><span class="n">Tessa</span><span class="note"></span></div>
+    </div>
+  </div>
+
+  <div id="bar">
+    <div id="nameplate">Voss</div>
+    <div id="text"></div>
+    <div id="advance"><span>Press <kbd>Space</kbd></span><span class="arrow">▼</span></div>
+    <div id="progress"></div>
+  </div>
+
+  <div id="startOverlay" class="overlay">
+    <div class="sub">Eclipse Runner</div>
+    <h1>Skit 1 — Another Quiet Run</h1>
+    <div class="hint">Press <kbd>Space</kbd> or click to begin</div>
+  </div>
+  <div id="endOverlay" class="overlay hidden">
+    <div class="sub">End of Skit 1</div>
+    <h1>Cut to Level 1</h1>
+    <div class="hint">Press <kbd>R</kbd> or click to replay</div>
+  </div>
+
+<script>
+  // ---------- characters ----------
+  const CHARS = {
+    Voss:  {color:"#46c7ff", img:"voss.png"},
+    Rex:   {color:"#ffae42", img:"rex.png"},
+    Tessa: {color:"#5be38b", img:"tessa.png"},
+    Astra: {color:"#b481ff", img:"astra.png"},
+  };
+  const CAST = ["Voss","Rex","Tessa"];   // fixed stage positions, left -> right
+
+  // ---------- Skit 1 dialogue (matches Script.txt / audio clips) ----------
+  const LINES = [
+    {who:"Voss",  text:"Tell me we've got something interesting on the schedule."},
+    {who:"Tessa", text:"Define interesting."},
+    {who:"Rex",   text:"Please don't. Last time “interesting” tried to shoot us."},
+    {who:"Voss",  text:"Fair point."},
+    {who:"Tessa", text:"Actually... That's weird."},
+    {who:"Voss",  text:"Those are the exact words I never want to hear."},
+    {who:"Tessa", text:"I'm getting a transmission. Long range. Doesn't match any known beacon."},
+    {who:"Rex",   text:"Pirates?"},
+    {who:"Tessa", text:"No. Which somehow makes it worse."},
+    {who:"Voss",  text:"Put it on screen."},
+    {who:"Voss",  text:"Set a course. Let's see who's calling."},
+  ];
+
+  // ---------- elements ----------
+  const nameplate = document.getElementById("nameplate");
+  const textEl = document.getElementById("text");
+  const progress = document.getElementById("progress");
+  const bar = document.getElementById("bar");
+  const startOverlay = document.getElementById("startOverlay");
+  const endOverlay = document.getElementById("endOverlay");
+  const root = document.documentElement;
+
+  let idx = -1, typing = false, fullText = "", typeTimer = null, started = false;
+  let audio = null, muted = false;
+
+  // ---------- cast setup ----------
+  function initCast(){
+    CAST.forEach(who=>{
+      const slot = document.getElementById("slot-"+who);
+      const img = slot.querySelector(".cimg");
+      const ph  = slot.querySelector(".cph");
+      const c = CHARS[who];
+      slot.style.setProperty("--c", c.color);
+      ph.querySelector(".note").innerHTML = "drop <b>"+c.img+"</b> here";
+      img.onload  = ()=>{ img.style.display="block"; ph.style.display="none"; };
+      img.onerror = ()=>{ img.style.display="none";  ph.style.display="flex"; };
+      img.src = c.img + "?v=" + Date.now();
+    });
+  }
+
+  function setSpeaker(who){
+    const c = CHARS[who] || {color:"#46c7ff"};
+    root.style.setProperty("--accent", c.color);
+    nameplate.textContent = who;
+    // reveal speaker + mark active, dim everyone else
+    CAST.forEach(w=>{
+      const slot = document.getElementById("slot-"+w);
+      if(w === who){ slot.classList.add("show","active"); }
+      else { slot.classList.remove("active"); }
+    });
+  }
+
+  // ---------- typewriter ----------
+  function typeLine(str, speed){
+    typing = true; fullText = str; textEl.textContent = "";
+    let i = 0;
+    const cursor = document.createElement("span");
+    cursor.className = "cursor"; cursor.textContent = "▍";
+    clearInterval(typeTimer);
+    typeTimer = setInterval(()=>{
+      textEl.textContent = str.slice(0, i);
+      textEl.appendChild(cursor);
+      i++;
+      if(i > str.length){ clearInterval(typeTimer); typing = false; textEl.textContent = str; }
+    }, speed || 22);
+  }
+  function finishTyping(){ clearInterval(typeTimer); textEl.textContent = fullText; typing = false; }
+
+  // ---------- audio ----------
+  function stopAudio(){ if(audio){ audio.pause(); audio.src=""; audio=null; } bar.classList.remove("speaking"); }
+  function playLine(n, str){
+    stopAudio();
+    audio = new Audio("audio/line_" + String(n).padStart(2,"0") + ".mp3");
+    audio.muted = muted;
+    let begun = false;
+    const begin = (dur)=>{
+      if(begun) return; begun = true;
+      const spd = Math.max(14, Math.min(46, dur ? (dur*1000*0.85)/str.length : 24));
+      typeLine(str, spd);
+      bar.classList.add("speaking");
+      audio.play().catch(()=>{});
+    };
+    audio.addEventListener("loadedmetadata", ()=>begin(audio.duration));
+    audio.addEventListener("ended", ()=>bar.classList.remove("speaking"));
+    audio.addEventListener("error", ()=>begin(0));
+    setTimeout(()=>begin(0), 140);
+  }
+
+  // ---------- flow ----------
+  function showLine(n){
+    const line = LINES[n];
+    setSpeaker(line.who);
+    playLine(n, line.text);
+    progress.style.width = ((n+1)/LINES.length*100) + "%";
+  }
+  function advance(){
+    if(!started) return;
+    if(typing){ finishTyping(); return; }
+    if(idx < LINES.length - 1){ idx++; showLine(idx); }
+    else { stopAudio(); endOverlay.classList.remove("hidden"); }
+  }
+  function startStory(){
+    started = true;
+    startOverlay.classList.add("hidden");
+    endOverlay.classList.add("hidden");
+    stopAudio();
+    CAST.forEach(w=>document.getElementById("slot-"+w).classList.remove("show","active"));
+    idx = 0; showLine(0);
+  }
+  function restart(){ startStory(); }
+  function toggleMute(){
+    muted = !muted;
+    if(audio) audio.muted = muted;
+    document.getElementById("muteBtn").textContent = muted ? "🔇" : "🔊";
+  }
+
+  // ---------- input ----------
+  document.addEventListener("keydown", (e)=>{
+    if(e.code==="Space" || e.code==="ArrowRight" || e.code==="Enter"){
+      e.preventDefault();
+      if(!started) startStory(); else advance();
+    } else if(e.code==="KeyR"){
+      if(!endOverlay.classList.contains("hidden") || started) restart();
+    } else if(e.code==="KeyM"){ toggleMute(); }
+  });
+  startOverlay.addEventListener("click", startStory);
+  endOverlay.addEventListener("click", restart);
+  bar.addEventListener("click", advance);
+  document.getElementById("muteBtn").addEventListener("click",(e)=>{ e.stopPropagation(); toggleMute(); });
+
+  // ---------- starfield ----------
+  const cv = document.getElementById("stars"), ctx = cv.getContext("2d");
+  let stars = [];
+  function resize(){
+    cv.width = innerWidth; cv.height = innerHeight;
+    stars = Array.from({length: Math.round(innerWidth*innerHeight/9000)}, ()=>({
+      x:Math.random()*cv.width, y:Math.random()*cv.height,
+      r:Math.random()*1.3+0.2, a:Math.random(), s:Math.random()*0.02+0.004
+    }));
+  }
+  function twinkle(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(const st of stars){
+      st.a += st.s; ctx.globalAlpha = 0.4+0.6*Math.abs(Math.sin(st.a));
+      ctx.fillStyle="#cfe0ff"; ctx.beginPath(); ctx.arc(st.x,st.y,st.r,0,7); ctx.fill();
+    }
+    requestAnimationFrame(twinkle);
+  }
+  addEventListener("resize", resize); resize(); twinkle();
+
+  initCast();
+</script>
+</body>
+</html>

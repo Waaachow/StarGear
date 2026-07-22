@@ -1,0 +1,413 @@
+SKIT 1 — BEFORE LEVEL 1
+"Another Quiet Run"
+
+Location: Bridge
+
+VOSS
+Tell me we've got something interesting on the schedule.
+
+TESSA (comms from engineering)
+Define interesting.
+
+REX
+Please don't.
+
+Last time "interesting" tried to shoot us.
+
+VOSS
+Fair point.
+
+A console chirps.
+
+TESSA
+Actually...
+
+That's weird.
+
+VOSS
+Those are the exact words I never want to hear.
+
+TESSA
+I'm getting a transmission.
+
+Long range.
+
+Doesn't match any known beacon.
+
+REX
+Pirates?
+
+TESSA
+No.
+
+Which somehow makes it worse.
+
+VOSS
+Put it on screen.
+
+A strange symbol appears.
+
+VOSS
+Set a course.
+
+Let's see who's calling.
+
+CUT TO LEVEL 1
+
+SKIT 2 — AFTER LEVEL 1
+"Ghost in the Dark"
+
+Location: Cockpit
+
+The ship exits a debris field.
+
+REX
+Well.
+
+Nobody shot at us.
+
+That's new.
+
+TESSA
+Don't tempt fate.
+
+Transmission's stronger now.
+
+Whatever's sending it is nearby.
+
+VOSS
+Can you identify it?
+
+TESSA
+No registry.
+
+No transponder.
+
+No power signature.
+
+Honestly, it shouldn't exist.
+
+REX
+Now you're speaking my language.
+
+A giant object appears on sensors.
+
+TESSA
+Found it.
+
+VOSS
+What am I looking at?
+
+TESSA
+An abandoned station.
+
+At least I hope it's abandoned.
+
+CUT TO LEVEL 2
+
+SKIT 3 — AFTER LEVEL 2
+"The Emblem"
+
+Location: Ancient Station
+
+The crew examines a wall.
+
+Covered in dust.
+
+REX
+You seeing this?
+
+VOSS
+Yeah.
+
+I am.
+
+An ancient StarGear emblem.
+
+TESSA
+No way.
+
+I thought those stories were made up.
+
+VOSS
+Most stories start somewhere.
+
+REX
+And usually end with someone getting shot.
+
+TESSA
+There's still power running through this place.
+
+Barely.
+
+But enough.
+
+VOSS
+Then let's find out who built it.
+
+CUT TO LEVEL 3
+
+SKIT 4 — AFTER LEVEL 3
+"The Archive"
+
+Location: Archive Chamber
+
+Ancient systems flicker to life.
+
+Blue holograms fill the room.
+
+TESSA
+I didn't do that.
+
+Just so we're clear.
+
+REX
+Good.
+
+Because I was about to blame you.
+
+Ancient text scrolls through the air.
+
+VOSS
+Can you read any of it?
+
+TESSA
+Parts of it.
+
+Looks like navigation records.
+
+Ship manifests.
+
+Military data.
+
+Wait.
+
+There's something else.
+
+A restricted section.
+
+VOSS
+What's inside?
+
+TESSA
+No idea.
+
+It's still locked.
+
+CUT TO LEVEL 4
+
+SKIT 5 — AFTER LEVEL 4
+"Project Astra"
+
+Location: Archive Core
+
+A hidden chamber opens.
+
+Dust falls from the ceiling.
+
+Inside rests a humanoid figure.
+
+Motionless.
+
+REX
+Well.
+
+That's definitely a person.
+
+TESSA
+Not a person.
+
+Android.
+
+Very advanced android.
+
+VOSS
+Operational?
+
+TESSA
+Unknown.
+
+Power systems are dormant.
+
+Name designation...
+
+Astra.
+
+REX
+Please tell me we're not taking it aboard.
+
+VOSS
+Let's see what it has to say first.
+
+CUT TO LEVEL 5
+
+SKIT 6 — AFTER LEVEL 5
+"Awakening"
+
+Location: Medical Bay
+
+The android's eyes open.
+
+Blue light.
+
+Calm expression.
+
+ASTRA
+Systems online.
+
+Crew stares.
+
+REX
+Okay.
+
+That's unsettling.
+
+ASTRA
+Statement acknowledged.
+
+TESSA
+She's got jokes.
+
+VOSS
+Do you know where you are?
+
+ASTRA
+Negative.
+
+Current date requested.
+
+Everyone exchanges looks.
+
+TESSA
+You might want to sit down for this.
+
+CUT TO LEVEL 6
+
+SKIT 7 — AFTER LEVEL 6
+"The Last Pilot"
+
+Location: Lounge
+
+Astra studies a star map.
+
+ASTRA
+Station designation: Eos Archive.
+
+Mission status: Failed.
+
+VOSS
+Failed how?
+
+ASTRA
+StarGear fleet destroyed.
+
+Archive preservation protocols initiated.
+
+Silence.
+
+REX
+Hold on.
+
+REX
+We've been sitting on a legendary ship this whole time?
+
+ASTRA
+Affirmative.
+
+Long pause.
+
+ASTRA
+Except one.
+
+Everyone looks up.
+
+CUT TO LEVEL 7
+
+SKIT 8 — AFTER LEVEL 7
+"The Eclipse Runner"
+
+Location: Bridge
+
+Astra examines the ship.
+
+ASTRA
+Identification confirmed.
+
+StarGear vessel.
+
+Eclipse Runner.
+
+TESSA
+Wait.
+
+Our ship?
+
+ASTRA
+Affirmative.
+
+REX
+You're telling me we've been flying a legendary ship this entire time?
+
+TESSA
+That explains absolutely nothing.
+
+ASTRA
+Further explanation available.
+
+Warning.
+
+Hostile vessels approaching.
+
+REX
+Now that part I understand.
+
+CUT TO LEVEL 8
+
+SKIT 9 — AFTER LEVEL 8
+"Welcome Aboard"
+
+Location: Bridge
+
+Battle damage visible.
+
+Nothing severe.
+
+The crew watches stars drift past.
+
+Astra stands beside the pilot controls.
+
+VOSS
+You planning to stay?
+
+ASTRA
+Current assessment indicates this crew requires assistance.
+
+REX
+That's the nicest insult I've ever heard.
+
+TESSA
+She's already part of the team.
+
+Whether she likes it or not.
+
+Astra considers this.
+
+ASTRA
+Acceptable.
+
+Voss smiles.
+
+VOSS
+Then welcome aboard, Astra.
+
+The ship turns toward unexplored space.
+
+ASTRA
+New signal detected.
+
+Everyone groans.
+
+REX
+Of course there is.
+
+FADE OUT — END OF EPISODE 1

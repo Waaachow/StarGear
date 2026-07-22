@@ -1,0 +1,132 @@
+{
+ "keepers": {
+  "Marla": {
+   "id": "hub",
+   "lines": [
+    "Waypoint Hub, and welcome to it. Clamps are on, take your time.",
+    "Back again. Hold's a mess, I imagine \u2014 the counter's open.",
+    "Good to see the StarGear in one piece. Mostly.",
+    "Safe lanes, Captain. Come back with something interesting.",
+    "Clamps released. Don't be a stranger."
+   ],
+   "spans": [
+    [
+     0.0,
+     3.6
+    ],
+    [
+     4.26,
+     7.86
+    ],
+    [
+     8.54,
+     11.76
+    ],
+    [
+     12.32,
+     15.06
+    ],
+    [
+     15.9,
+     17.98
+    ]
+   ]
+  },
+  "Oris": {
+   "id": "neb",
+   "lines": [
+    "The nebula let you through, then. It doesn't always.",
+    "Ah \u2014 a buyer. Or a seller. You've the look of both.",
+    "Careful what you brought in with you. Things follow, out here.",
+    "Go carefully. The Veil remembers a face.",
+    "Take what you've learned. Leave what you haven't."
+   ],
+   "spans": [
+    [
+     0.0,
+     3.24
+    ],
+    [
+     4.42,
+     9.28
+    ],
+    [
+     10.2,
+     14.32
+    ],
+    [
+     15.0,
+     19.34
+    ],
+    [
+     20.02,
+     23.34
+    ]
+   ]
+  },
+  "Dova": {
+   "id": "moon",
+   "lines": [
+    "Quarry Station. Ore's priced on the board and I don't haggle.",
+    "You're on the pad. Mind the dust, it gets everywhere.",
+    "Buying or selling? Either way, be quick about it.",
+    "Clear of the clamps. Don't scratch my dock on the way out.",
+    "Right. Go on, then."
+   ],
+   "spans": [
+    [
+     0.0,
+     4.46
+    ],
+    [
+     5.12,
+     8.2
+    ],
+    [
+     9.0,
+     12.06
+    ],
+    [
+     12.66,
+     15.84
+    ],
+    [
+     16.2,
+     17.56
+    ]
+   ]
+  },
+  "Wick": {
+   "id": "armada",
+   "lines": [
+    "Salvage Reach! You brought me something, didn't you? You did.",
+    "Ohh, that hull's got some new dents. Want me to take them off your hands?",
+    "Come in, come in \u2014 mind the cable, that one's live.",
+    "Bring me back something with SERIAL NUMBERS on it!",
+    "Fly safe! Well \u2014 fly. Safe's optional."
+   ],
+   "spans": [
+    [
+     0.0,
+     4.64
+    ],
+    [
+     5.6,
+     9.2
+    ],
+    [
+     9.2,
+     12.34
+    ],
+    [
+     12.34,
+     15.04
+    ],
+    [
+     15.04,
+     18.96
+    ]
+   ]
+  }
+ }
+}

@@ -1,0 +1,160 @@
+{
+ "bosses": {
+  "drax": {
+   "file": "red_reaver.mp3",
+   "lines": [
+    "Another bounty hunter.",
+    "Tell me... do they even know why they want me dead?",
+    "Good.",
+    "It's been years since someone made me earn a victory.",
+    "This ship...",
+    "...she still remembers war.",
+    "Heh...",
+    "Perhaps...",
+    "...it's finally time to let the dead rest."
+   ],
+   "spans": [
+    [
+     0.0,
+     1.5
+    ],
+    [
+     2.52,
+     6.92
+    ],
+    [
+     7.94,
+     8.38
+    ],
+    [
+     9.2,
+     12.98
+    ],
+    [
+     14.0,
+     14.46
+    ],
+    [
+     15.32,
+     17.18
+    ],
+    [
+     18.01,
+     18.21
+    ],
+    [
+     18.740000000000002,
+     19.580000000000002
+    ],
+    [
+     19.580000000000002,
+     23.24
+    ]
+   ]
+  },
+  "sable": {
+   "file": "afterimage.mp3",
+   "lines": [
+    "You've got a good lock. That's rare.",
+    "Hold onto it. It won't last.",
+    "There. You're learning.",
+    "Most people only ever shoot where I was.",
+    "...I can't feel the third jump any more.",
+    "That's how it takes you. A piece at a time.",
+    "Oh.",
+    "It's quiet.",
+    "...I'd forgotten quiet."
+   ],
+   "spans": [
+    [
+     0.0,
+     1.86
+    ],
+    [
+     2.9,
+     4.32
+    ],
+    [
+     5.199999999999998,
+     7.04
+    ],
+    [
+     8.18,
+     10.64
+    ],
+    [
+     11.8,
+     13.26
+    ],
+    [
+     15.02,
+     18.08
+    ],
+    [
+     18.959999999999997,
+     19.56
+    ],
+    [
+     20.18,
+     20.88
+    ],
+    [
+     21.9,
+     23.12
+    ]
+   ]
+  },
+  "dross": {
+   "file": "tollman.mp3",
+   "lines": [
+    "Southern drift is a toll road. You'll have been told.",
+    "No? Then we'll do this the other way.",
+    "You're through the first plate. That's further than most.",
+    "I'll add the repairs to your account.",
+    "...you're actually going to do it.",
+    "Twenty years I held this lane.",
+    "Ledger's closed, then.",
+    "Tell them...",
+    "...tell them I was owed."
+   ],
+   "spans": [
+    [
+     0.0,
+     4.04
+    ],
+    [
+     4.7,
+     7.76
+    ],
+    [
+     8.36,
+     11.6
+    ],
+    [
+     12.26,
+     14.72
+    ],
+    [
+     15.52,
+     17.32
+    ],
+    [
+     17.76,
+     20.02
+    ],
+    [
+     20.58,
+     22.02
+    ],
+    [
+     22.6,
+     23.18
+    ],
+    [
+     23.84,
+     25.74
+    ]
+   ]
+  }
+ }
+}

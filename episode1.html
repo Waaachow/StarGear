@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StarGear — Episode 0: The Ghost Signal</title>
+<style>
+  :root{
+    --accent:#46c7ff;
+    --panel-bg:rgba(8,14,28,0.9); --panel-border:rgba(120,180,255,0.35);
+    --barH:210px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Segoe UI",system-ui,sans-serif;
+    background:#04060e; color:#eaf2ff; overflow:hidden; user-select:none;
+  }
+
+  /* ---------- background layer ---------- */
+  #bgWrap{position:fixed; inset:0; z-index:0; overflow:hidden;}
+  #bgImg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+         filter:brightness(.62) saturate(.95); transition:opacity .5s ease;}
+  #bgPh{position:absolute; inset:0; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; gap:.4rem; text-align:center;
+        background:
+          radial-gradient(1200px 600px at 70% -10%, rgba(40,80,160,0.35), transparent 60%),
+          radial-gradient(900px 500px at 20% 110%, rgba(80,40,140,0.30), transparent 60%),
+          linear-gradient(180deg,#070b18 0%, #04060e 100%);}
+  #bgPh .id{font-size:.8rem; letter-spacing:.3em; color:#6fa6c8;}
+  #bgPh .nm{font-size:clamp(1.2rem,3vw,2rem); letter-spacing:.1em; color:#9fc0ff;
+            text-shadow:0 0 30px rgba(70,150,255,0.4);}
+  #bgPh .tag{font-size:.7rem; letter-spacing:.25em; color:rgba(255,255,255,0.3); text-transform:uppercase;}
+
+  /* ---------- cast layer ---------- */
+  #cast{position:fixed; left:0; right:0; bottom:0; top:0; z-index:2;
+        display:flex; align-items:flex-end; justify-content:space-around;
+        padding:0 2vw; pointer-events:none;}
+  .char{position:relative; display:flex; flex-direction:column; align-items:center;
+        justify-content:flex-end; width:clamp(170px,21vw,290px); height:86vh;
+        opacity:.85; transform:translateY(10px); transition:opacity .4s ease, transform .4s ease, filter .4s ease;
+        filter:brightness(.45) saturate(.8);}
+  .char.active{opacity:1; transform:translateY(0); filter:brightness(1) saturate(1);}
+  .char::before{content:""; position:absolute; bottom:18%; left:50%; transform:translateX(-50%);
+        width:78%; height:46%; opacity:0; filter:blur(28px); transition:opacity .4s ease; z-index:0;
+        background:radial-gradient(ellipse at center, var(--c,#46c7ff) 0%, transparent 65%);}
+  .char.active::before{opacity:.32;}
+  .cimg{position:relative; z-index:1; max-height:100%; max-width:100%; object-fit:contain;
+        align-self:flex-end; transform-origin:bottom center; transform:scale(2.75);
+        filter:drop-shadow(0 12px 24px rgba(0,0,0,0.6));}
+  .cph{position:relative; z-index:1; width:min(80%,250px); aspect-ratio:3/4; align-self:flex-end;
+       margin-bottom:6vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+       border-radius:14px; border:1px solid rgba(255,255,255,0.14);
+       background:linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01));}
+  .cph .i{font-size:clamp(40px,7vw,90px); font-weight:800; color:var(--c,#46c7ff);
+          text-shadow:0 0 26px var(--c,#46c7ff);}
+  .cph .n{margin-top:.2rem; letter-spacing:.22em; text-transform:uppercase; font-size:.74rem; color:rgba(255,255,255,0.7);}
+  .cph .x{margin-top:.15rem; font-size:.66rem; letter-spacing:.12em; color:var(--c,#46c7ff); text-transform:uppercase;}
+  .cph .note{margin-top:.5rem; font-size:.56rem; color:rgba(255,255,255,0.3); text-align:center; padding:0 8px;}
+
+  /* ---------- CG layer (full-screen event art) ---------- */
+  #cg{position:fixed; inset:0; z-index:14; display:none; background:#02030a;}
+  #cg.show{display:block;}
+  #cgImg{position:absolute; inset:0; width:100%; height:100%; object-fit:contain;}
+  #cgPh{position:absolute; inset:0; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; gap:.5rem; text-align:center;
+        background:radial-gradient(900px 600px at 50% 30%, rgba(40,70,150,0.4), transparent 70%), #03040c;}
+  #cgPh .id{font-size:.85rem; letter-spacing:.35em; color:#7fb0e0;}
+  #cgPh .nm{font-size:clamp(1.5rem,4vw,2.6rem); letter-spacing:.08em; color:#dceaff;
+            text-shadow:0 0 40px rgba(70,150,255,0.5);}
+  #cgPh .desc{max-width:640px; font-size:.95rem; line-height:1.5; color:rgba(255,255,255,0.55); padding:0 20px;}
+  #cgPh .tag{margin-top:.4rem; font-size:.66rem; letter-spacing:.28em; color:rgba(255,255,255,0.3); text-transform:uppercase;}
+
+  /* ---------- dialogue bar ---------- */
+  #bar{position:fixed; left:0; right:0; bottom:0; z-index:18; min-height:var(--barH);
+       background:linear-gradient(180deg, transparent, rgba(4,7,15,0.55) 18%, var(--panel-bg) 46%);
+       border-top:1px solid var(--panel-border); padding:30px clamp(24px,6vw,90px) 26px;
+       backdrop-filter:blur(6px); cursor:pointer;}
+  #bar.hidden{display:none;}
+  #nameplate{display:inline-block; padding:.32rem 1.2rem; border-radius:8px; font-weight:700;
+       letter-spacing:.12em; text-transform:uppercase; font-size:1rem; background:#0b1426;
+       border:1px solid var(--accent); color:var(--accent);
+       box-shadow:0 0 18px color-mix(in srgb, var(--accent) 40%, transparent); margin-bottom:.7rem;}
+  #nameplate.hidden{visibility:hidden;}
+  #bar.speaking #nameplate{animation:talk 1.1s ease-in-out infinite;}
+  @keyframes talk{0%,100%{box-shadow:0 0 18px color-mix(in srgb,var(--accent) 40%,transparent);}
+                  50%{box-shadow:0 0 30px color-mix(in srgb,var(--accent) 85%,transparent);}}
+  #text{font-size:clamp(1.1rem,2.1vw,1.65rem); line-height:1.5; max-width:1100px; min-height:2.6em;}
+  #text.narr{font-style:italic; color:#adbfe0;}
+  #text.signal{color:#8dffb0; text-shadow:0 0 18px rgba(141,255,176,0.4); letter-spacing:.04em; font-family:Consolas,monospace;}
+  #text.unknown{color:#ff7a7a; text-shadow:0 0 18px rgba(255,90,90,0.4); letter-spacing:.04em; font-family:Consolas,monospace;}
+  /* CG caption mode: no box, text floated top-centre over the illustration */
+  #bar.overCg{bottom:auto; top:7%; min-height:0; background:transparent; border-top:0;
+       backdrop-filter:none; padding:20px clamp(24px,6vw,90px); text-align:center;}
+  #bar.overCg #nameplate{margin-bottom:.7rem;}
+  #bar.overCg #text{margin:0 auto; text-shadow:0 3px 16px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.9);}
+  #bar.overCg #advance{display:none;}
+  .cursor{display:inline-block; width:.55ch; animation:blink 1s steps(1) infinite; color:#9fc0ff;}
+  @keyframes blink{50%{opacity:0;}}
+  #advance{position:absolute; right:clamp(24px,6vw,90px); bottom:14px; font-size:.74rem;
+       letter-spacing:.15em; color:rgba(255,255,255,0.5); display:flex; align-items:center; gap:.5rem;}
+  #advance .arrow{display:inline-block; animation:bob 1.1s ease-in-out infinite; color:#9fc0ff;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+  kbd{background:#101a30; border:1px solid rgba(255,255,255,0.2); border-bottom-width:2px;
+      border-radius:5px; padding:1px 7px; font-size:.72rem; color:#cfe0ff;}
+
+  /* ---------- header / progress ---------- */
+  #hud{position:fixed; top:16px; left:24px; z-index:22; opacity:.92;}
+  #voMute{position:fixed; top:14px; right:18px; z-index:30; cursor:pointer; font-size:1.05rem;
+       line-height:1; background:rgba(10,18,32,0.82); color:#cfe3ff;
+       border:1px solid var(--panel-border); border-radius:8px; padding:.34rem .54rem;}
+  #voMute:hover{border-color:var(--accent);}
+  #voMute.muted{color:#7a8aa0;}
+  #autoPlay{position:fixed; top:14px; right:64px; z-index:30; cursor:pointer; font-family:inherit;
+       font-size:.74rem; letter-spacing:.1em; line-height:1; color:#cfe3ff;
+       background:rgba(10,18,32,0.82); border:1px solid var(--panel-border);
+       border-radius:8px; padding:.46rem .6rem;}
+  #autoPlay:hover{border-color:var(--accent);}
+  #autoPlay.on{background:#14507a; border-color:var(--accent); color:#eafcff;}
+  #epTitle{font-size:.9rem; letter-spacing:.22em; color:#9fc0ff; text-transform:uppercase;}
+  #epScene{font-size:.74rem; letter-spacing:.2em; color:rgba(255,255,255,0.5); margin-top:.25rem;}
+  #beatBar{position:fixed; top:0; left:0; height:3px; z-index:22; width:0%;
+       background:linear-gradient(90deg,var(--accent),transparent); transition:width .4s ease;}
+
+  /* ---------- gameplay beat (embedded flight / combat) ---------- */
+  #gameplay{position:fixed; inset:0; z-index:26; display:flex; flex-direction:column; background:#04060e;}
+  #gameplay.hidden{display:none;}
+  #gpHeader{display:flex; align-items:center; gap:18px; padding:12px 22px;
+       background:linear-gradient(180deg,rgba(10,18,32,0.96),rgba(8,14,26,0.9));
+       border-bottom:1px solid var(--panel-border);}
+  #gpKind{font-size:.72rem; letter-spacing:.25em; text-transform:uppercase; color:#0b0e14;
+       background:var(--accent); padding:.3rem .8rem; border-radius:6px; font-weight:700;}
+  #gpTitle{font-weight:700; letter-spacing:.04em; font-size:1.05rem; color:#eaf2ff;}
+  #gpObj{font-size:.82rem; color:#9fc0ff; margin-left:auto; max-width:46%; text-align:right;}
+  #gpFrame{flex:1; border:0; width:100%; background:#04060e;}
+  /* Gameplay footer hidden — the flight game speaks for itself. gpStatus/gpSkip
+     stay in the DOM (JS references them). */
+  #gpFooter{display:none;}
+  #gpHint{font-size:.78rem; color:rgba(255,255,255,0.55); letter-spacing:.04em;}
+  #gpStatus{font-size:.8rem; letter-spacing:.06em; color:#7ee787; margin-left:auto; min-width:140px; text-align:right;}
+  .gpBtn{font-family:inherit; font-size:.86rem; letter-spacing:.08em; cursor:pointer;
+       color:#eaf2ff; background:#13243a; border:1px solid var(--panel-border);
+       padding:.5rem 1.1rem; border-radius:8px;}
+  .gpBtn:hover{border-color:var(--accent); box-shadow:0 0 14px rgba(70,150,255,0.3);}
+  .gpBtn.primary{background:#14507a; border-color:var(--accent); color:#eafcff;}
+  .gpBtn.skip{background:transparent; color:rgba(255,255,255,0.5);}
+  .gpBtn.hidden{display:none;}
+
+  /* ---------- start / end overlays ---------- */
+  .overlay{position:fixed; inset:0; z-index:40; display:flex; flex-direction:column;
+       align-items:center; justify-content:center; text-align:center; gap:1rem; cursor:pointer;
+       background:radial-gradient(900px 600px at 50% 20%, rgba(30,60,140,0.35), transparent 70%), rgba(3,5,12,0.92);}
+  .overlay.hidden{display:none;}
+  .overlay .sub{color:#9fc0ff; letter-spacing:.32em; text-transform:uppercase; font-size:.85rem;}
+  .overlay h1{font-size:clamp(2rem,6vw,3.6rem); letter-spacing:.06em; color:#dceaff;
+       text-shadow:0 0 40px rgba(70,150,255,0.5);}
+  .overlay .hint{margin-top:1.4rem; color:rgba(255,255,255,0.6); font-size:.92rem;}
+
+  /* ---------- start menu (layered animated title) ---------- */
+  :root{ --sg-glow:150,200,255;                /* light-blue logo glow          */
+         --sg-ship-x:25%; --sg-ship-y:70%; --sg-ship-size:60%; }  /* tune ship placement */
+  #startOverlay{cursor:default; background:#05070d; padding:0; overflow:hidden;
+       transition:opacity .6s ease;}
+  #startOverlay.fading{opacity:0; pointer-events:none;}   /* fade out when Start is pressed */
+  /* full-screen black used for fade-to-black transitions (title -> black -> scene) */
+  #fadeBlack{position:fixed; inset:0; z-index:60; background:#000; opacity:0;
+       pointer-events:none; transition:opacity .5s ease;}
+  #fadeBlack.on{opacity:1;}
+  /* Blurred copy of the background. The frame now covers the viewport so this is
+     never visible — kept as insurance for the moment before the art loads. */
+  .sgBgfill{position:absolute; inset:0; z-index:0;
+       background:url("Assets/Start_Menu/Menu_1_background.png") center/cover no-repeat;
+       filter:blur(28px) brightness(.45); transform:scale(1.1);}
+  /* The art frame holds the 1376:768 ratio and COVERS the viewport — whichever axis
+     is short is scaled up and the overflow is cropped, so there are never bars.
+     179.17vh is 1376/768 expressed as a height multiple; min() here would letterbox.
+     Anchored to the TOP, not the centre: when the viewport is wider than 16:9 the frame
+     is taller than the screen, and cropping from the bottom (empty nebula) keeps the
+     logo intact. On narrow viewports the height lands at exactly 100vh, so top:0 is
+     the same as centring. */
+  .sgFrame{position:absolute; top:0; left:50%; z-index:1;
+       width:max(100vw, 179.17vh); aspect-ratio:1376 / 768;
+       transform:translateX(-50%); overflow:hidden;}
+  .sgFull{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+       user-select:none; -webkit-user-drag:none; pointer-events:none;}
+  /* The background is deliberately STILL — the slow sgDrift pan read as a wobble
+     rather than as parallax (playtest, 2026-07-20). The ship bounce and logo glow
+     are the only motion on the title now. */
+  .sgShipBox{position:absolute; left:var(--sg-ship-x); top:var(--sg-ship-y);
+       width:var(--sg-ship-size); aspect-ratio:1376 / 768;
+       transform:translate(-50%,-50%); pointer-events:none;}
+  .sgShipAlign{width:100%; height:100%; transform:translate(16%,-7%);}  /* ship art centre -> box centre */
+  .sgShip{width:100%; height:100%; object-fit:contain;
+       animation:sgBounce 4.8s ease-in-out infinite; will-change:transform;}
+  @keyframes sgBounce{0%,100%{transform:translateY(-2%) rotate(-.5deg);}
+                      50%    {transform:translateY( 2%) rotate( .5deg);}}
+  .sgLogo{animation:sgGlow 3.2s ease-in-out infinite; will-change:filter;}
+  @keyframes sgGlow{
+    0%,100%{filter:drop-shadow(0 0 6px  rgba(var(--sg-glow),.35))
+                   drop-shadow(0 0 14px rgba(var(--sg-glow),.20));}
+    50%    {filter:drop-shadow(0 0 14px rgba(var(--sg-glow),.75))
+                   drop-shadow(0 0 34px rgba(var(--sg-glow),.45));}}
+  /* Anchored to the VIEWPORT, not the art frame — the frame now overflows and gets
+     cropped, which would take the buttons with it. Bottom-anchored so the stack can
+     grow downward-safe as options are added. */
+  #startMenu{position:absolute; left:50%; bottom:6vh; transform:translateX(-50%);
+       z-index:5; display:flex; flex-direction:column; align-items:center; gap:14px; margin:0;}
+  .menuBtn{font-family:inherit; cursor:pointer; min-width:260px;
+       font-size:1.15rem; letter-spacing:.28em; text-transform:uppercase; font-weight:600;
+       color:#eafcff; padding:.9rem 2.6rem; border-radius:10px;
+       background:linear-gradient(180deg, rgba(20,80,122,0.92), rgba(11,32,58,0.92));
+       border:1px solid var(--accent);
+       box-shadow:0 0 22px rgba(70,150,255,0.35), inset 0 0 18px rgba(70,150,255,0.15);
+       transition:transform .15s ease, box-shadow .2s ease, background .2s ease;}
+  .menuBtn:hover{transform:translateY(-2px);
+       background:linear-gradient(180deg, rgba(30,110,160,0.96), rgba(16,44,78,0.96));
+       box-shadow:0 0 34px rgba(70,150,255,0.6), inset 0 0 22px rgba(70,150,255,0.25);}
+  .menuBtn:active{transform:translateY(0);}
+  #startMenu .hint{margin-top:.4rem; color:rgba(255,255,255,0.65); font-size:.85rem;
+       text-shadow:0 2px 8px rgba(0,0,0,0.9);}
+  /* ---------- title-screen LOAD GAME slot picker ---------- */
+  #loadPanel{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+       z-index:6; width:min(92vw,560px); display:flex; flex-direction:column; gap:12px;
+       padding:26px 26px 20px; border-radius:14px; text-align:left;
+       background:rgba(4,10,18,0.93); border:1px solid rgba(120,200,220,0.45);
+       box-shadow:0 0 60px rgba(0,0,0,0.8);}
+  #loadPanel.hidden{display:none;}
+  /* `.hidden` is per-element in this file, not a global utility — these two need
+     their own rules or the title buttons stay visible behind the picker, and LOAD
+     shows even when there's nothing to load. */
+  #startMenu.hidden{display:none;}
+  #loadBtn.hidden{display:none;}
+  #loadPanel .lpTitle{font-size:1rem; letter-spacing:.3em; color:#8af2ff; font-weight:700;}
+  #loadSlots{display:flex; flex-direction:column; gap:10px;}
+  .lpSlot{font-family:inherit; text-align:left; cursor:pointer; padding:.7rem .9rem;
+       border-radius:10px; color:#cfeef6; background:rgba(11,32,58,0.9);
+       border:1px solid rgba(120,200,220,0.35); transition:background .15s, border-color .15s;}
+  .lpSlot:hover:not(:disabled){background:rgba(20,80,122,0.95); border-color:#8af2ff;}
+  .lpSlot:disabled{opacity:.45; cursor:default;}          /* empty slot */
+  .lpSlot .lpMain{font-weight:600; letter-spacing:.06em;}
+  .lpSlot .lpSub{font-size:.8rem; color:rgba(150,200,220,0.8); margin-top:.25rem;}
+  /* slot row = the slot button plus its download button */
+  .lpRow{display:flex; gap:8px; align-items:stretch;}
+  .lpRow .lpSlot{flex:1;}
+  .lpDl{font-family:inherit; cursor:pointer; width:44px; font-size:1.1rem; color:#8af2ff;
+       border-radius:10px; background:rgba(11,32,58,0.9); border:1px solid rgba(120,200,220,0.35);}
+  .lpDl:hover{background:rgba(20,80,122,0.95); border-color:#8af2ff;}
+  #loadPanel .lpFile{font-family:inherit; cursor:pointer; text-align:center; padding:.6rem .9rem;
+       border-radius:10px; color:#cfeef6; background:rgba(11,32,58,0.6);
+       border:1px dashed rgba(120,200,220,0.5);}
+  #loadPanel .lpFile:hover{background:rgba(20,80,122,0.9); border-color:#8af2ff;}
+  #loadPanel .lpMsg{min-height:1.1em; font-size:.8rem; color:#7ee787;}
+  #loadPanel .lpBack{min-width:0; align-self:flex-start; font-size:.9rem; padding:.5rem 1.2rem;}
+
+  /* ---------- opening narration (title -> prologue -> Scene 1) ----------
+     A shot list: each narration block gets a still that drifts (Ken Burns) while
+     the line fades in over it, crossfading shot-to-shot in step with the VO clip.
+     The line timings are derived from the clip's real duration at runtime
+     (see startPrologue), so re-recording the VO doesn't need new numbers.
+     Stills are optional — a shot whose image is missing simply plays black, so
+     the sequence still reads before Assets/intro/ is filled in. */
+  #prologue{position:fixed; inset:0; z-index:50; cursor:pointer; background:#000;
+       transition:opacity .8s ease; overflow:hidden;}
+  #prologue.hidden{display:none;}
+  #prologue.fading{opacity:0;}
+  /* stage = the two crossfading image layers */
+  #prologue .plStage{position:absolute; inset:0; z-index:0;}
+  #prologue .plShot{position:absolute; inset:0; opacity:0; background:#000 center/cover no-repeat;
+       transition:opacity 1.4s ease; will-change:opacity,transform;}
+  #prologue .plShot.on{opacity:1;}
+  /* vignette + floor gradient so the narration stays legible over any still */
+  #prologue .plScrim{position:absolute; inset:0; z-index:1; pointer-events:none;
+       background:radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.55) 100%),
+                  linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 30%,
+                                          rgba(0,0,0,0) 55%, rgba(0,0,0,0.75) 100%);}
+  /* Ken Burns moves. Duration is set per shot from the derived timing. */
+  @keyframes kbZoomIn { from{transform:scale(1.02);} to{transform:scale(1.20);} }
+  @keyframes kbZoomOut{ from{transform:scale(1.20);} to{transform:scale(1.02);} }
+  @keyframes kbPanL   { from{transform:scale(1.16) translateX( 3%);} to{transform:scale(1.16) translateX(-3%);} }
+  @keyframes kbPanR   { from{transform:scale(1.16) translateX(-3%);} to{transform:scale(1.16) translateX( 3%);} }
+  @keyframes kbOrbit  { from{transform:scale(1.10) rotate(-1.4deg);} to{transform:scale(1.22) rotate(1.4deg);} }
+  @keyframes kbRush   { from{transform:scale(1.00);} to{transform:scale(1.55);} }
+  #prologue .plText{position:absolute; z-index:2; left:50%; bottom:18vh; transform:translate(-50%,10px);
+       width:min(90vw,1000px); text-align:center; opacity:0;
+       font-size:clamp(1.15rem,2.6vw,2rem); line-height:1.6; letter-spacing:.04em;
+       color:#dceaff; text-shadow:0 2px 12px rgba(0,0,0,0.95), 0 0 30px rgba(70,150,255,0.45);
+       transition:opacity .9s ease, transform .9s ease;}
+  #prologue .plText.on{opacity:1; transform:translate(-50%,0);}
+  /* title card — replaces the narration text for the final beat */
+  #prologue .plCard{position:absolute; z-index:2; inset:0; display:flex; flex-direction:column;
+       align-items:center; justify-content:center; gap:1.1rem; opacity:0;
+       transition:opacity 1.6s ease; pointer-events:none;}
+  #prologue .plCard.on{opacity:1;}
+  #prologue .plCard .pcLogo{width:min(76vw,820px); height:auto; margin-bottom:.4rem;
+       filter:drop-shadow(0 0 44px rgba(70,150,255,0.75));}
+  #prologue .plCard .pcEp{font-size:clamp(.85rem,1.8vw,1.2rem); letter-spacing:.42em;
+       color:rgba(160,210,255,0.85);}
+  #prologue .plCard .pcSub{font-size:clamp(1.1rem,2.4vw,1.8rem); letter-spacing:.14em;
+       color:#dceaff; text-shadow:0 0 26px rgba(70,150,255,0.5);}
+  #prologue .plSkip{position:absolute; z-index:2; bottom:5vh; left:50%; transform:translateX(-50%);
+       color:rgba(255,255,255,0.4); font-size:.82rem; letter-spacing:.16em;
+       text-shadow:0 2px 8px rgba(0,0,0,0.9);}
+
+  /* ---------- thanks-for-playing end screen ---------- */
+  #endOverlay{justify-content:flex-end; padding-bottom:8vh;
+       background:#04060e url("Assets/THANKS.png") center/cover no-repeat;}
+  #endOverlay.defeat{background-image:url("Assets/DEFEAT.png");}
+  #endOverlay::after{content:""; position:absolute; inset:0; z-index:0;
+       background:linear-gradient(180deg, rgba(3,5,12,0) 55%, rgba(3,5,12,0.8) 100%);
+       pointer-events:none;}
+  #endOverlay .hint{position:relative; z-index:1; text-shadow:0 2px 10px rgba(0,0,0,0.9);}
+  #endOverlay #freePlayBtn{position:relative; z-index:2; margin-bottom:18px;}
+  #endOverlay.defeat #freePlayBtn{display:none;}   /* dying doesn't earn free play */
+</style>
+</head>
+<body>
+  <div id="bgWrap">
+    <img id="bgImg" alt="" hidden />
+    <div id="bgPh"><div class="id"></div><div class="nm"></div><div class="tag">background placeholder</div></div>
+  </div>
+
+  <div id="cast"></div>
+
+  <div id="cg">
+    <img id="cgImg" alt="" hidden />
+    <div id="cgPh"><div class="id"></div><div class="nm"></div><div class="desc"></div><div class="tag">event CG placeholder</div></div>
+  </div>
+
+  <div id="hud">
+    <div id="epTitle">StarGear — Episode 0</div>
+    <div id="epScene">The Ghost Signal</div>
+  </div>
+  <button id="autoPlay" title="Auto-play off — click to play the story automatically" aria-label="Toggle auto-play">▶ AUTO</button>
+  <button id="voMute" title="Mute / unmute voice" aria-label="Mute voice">🔊</button>
+  <div id="beatBar"></div>
+
+  <div id="bar" class="hidden">
+    <div id="nameplate">Voss</div>
+    <div id="text"></div>
+    <div id="advance"><span>Press <kbd>Space</kbd></span><span class="arrow">▼</span></div>
+  </div>
+
+  <div id="gameplay" class="hidden">
+    <div id="gpHeader">
+      <span id="gpKind">Flight</span>
+      <span id="gpTitle"></span>
+      <span id="gpObj"></span>
+    </div>
+    <iframe id="gpFrame" title="StarGear flight"></iframe>
+    <div id="gpFooter">
+      <span id="gpHint">Click into the view to fly. Arrows / WASD to move. Open the Star Map (M) for your objective.</span>
+      <span id="gpStatus"></span>
+      <!-- TESTING ONLY — remove before release -->
+      <button id="gpSkip" class="gpBtn skip" title="Testing: skip this segment">Skip ▸</button>
+      <!-- free play only: the story is over, so this is the way back to the title.
+           (Esc alone can't do it — the flight game holds keyboard focus.) -->
+      <button id="gpExit" class="gpBtn skip hidden" title="Back to the title screen">◀ Title</button>
+    </div>
+  </div>
+
+  <div id="startOverlay" class="overlay">
+    <div class="sgBgfill"></div>
+    <div class="sgFrame">
+      <img class="sgFull sgBg"   src="Assets/Start_Menu/Menu_1_background.png" alt="">
+      <div class="sgShipBox"><div class="sgShipAlign">
+        <img class="sgShip" src="Assets/Start_Menu/Menu_2_Ship.png" alt="">
+      </div></div>
+      <img class="sgFull sgLogo" src="Assets/Start_Menu/Menu_3_logo.png" alt="">
+    </div>
+    <div id="startMenu">
+      <button id="startBtn" class="menuBtn">Start</button>
+      <!-- Always available, even with every slot empty, so a save file can be
+           imported on a fresh browser — see refreshLoadBtn(). -->
+      <button id="loadBtn" class="menuBtn">Load Game</button>
+      <div class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> to begin</div>
+    </div>
+    <div id="loadPanel" class="hidden">
+      <div class="lpTitle">LOAD GAME</div>
+      <div id="loadSlots"></div>
+      <button id="loadFileBtn" class="lpFile">⤒ Load from file…</button>
+      <input id="loadFileInput" type="file" accept=".sgsave,.json,application/json" hidden>
+      <div class="lpMsg" id="lpMsg"></div>
+      <button id="loadCancel" class="menuBtn lpBack">◀ Back</button>
+    </div>
+  </div>
+  <!-- Opening narration. Sits between the title screen and Scene 1; click or any
+       advance key skips straight through to the episode. -->
+  <div id="prologue" class="hidden">
+    <!-- two layers so shots crossfade into each other rather than cutting -->
+    <div class="plStage"><div class="plShot" id="plShotA"></div><div class="plShot" id="plShotB"></div></div>
+    <div class="plScrim"></div>
+    <div class="plText" id="plText"></div>
+    <div class="plCard" id="plCard">
+      <img class="pcLogo" src="Assets/Start_Menu/Menu_3_logo.png" alt="STARGEAR">
+      <div class="pcEp">EPISODE 0</div>
+      <div class="pcSub">The Ghost Signal</div>
+    </div>
+    <div class="plSkip">Press <kbd>Space</kbd> to skip</div>
+  </div>
+  <div id="endOverlay" class="overlay hidden">
+    <!-- After the story is beaten you can drop back into the sector for optional
+         content (bounties, side missions) instead of returning to the title. The
+         button is hidden on the DEFEAT screen — see #endOverlay.defeat rules. -->
+    <button id="freePlayBtn" class="menuBtn">◀ RETURN TO THE SECTOR</button>
+    <div class="hint">Press <kbd>Space</kbd> or click the backdrop to return to the title</div>
+  </div>
+  <div id="fadeBlack"></div>
+
+<script>
+"use strict";
+// ============================================================
+// ASSET REGISTRY — placeholders render until the real files are dropped in.
+// Expected upload paths are listed in EPISODE1_ASSETS.md.
+// ============================================================
+const BACKGROUNDS = {
+  BG01:"Bridge — Normal", BG02:"Bridge — Red Alert", BG03:"Captain's Chair",
+  BG04:"Holographic Tactical Display", BG05:"Deep Space Exterior",
+  BG06:"Silent Armada Exterior", BG07:"Final Battlefield Exterior",
+};
+const CGS = {
+  CG01:["The Ghost Signal","The bridge illuminated by the eerie transmission."],
+  CG02:["Ocean of Silent Warships","The StarGear impossibly small against thousands of dormant cruisers, destroyers and carriers stretching into the dark."],
+  CG03:["The Fleet Awakens","The StarGear surrounded as thousands of blue engine lights ignite simultaneously across the ancient fleet."],
+  CG04:["Ancient Command Dreadnought","The colossal dreadnought emerges from hyperspace, the StarGear tiny in the foreground."],
+  CG05:["Silence","The battlefield after victory."],
+  CGBURN:["Field Treatment","Selyra tends to the burn on Kael's arm."],
+};
+const CHARS = {
+  Voss:  {color:"#46c7ff", i:"V"},
+  Kael:  {color:"#5be3c4", i:"K"},
+  Selyra:{color:"#ff9ec4", i:"S"},
+  Rex:   {color:"#ffae42", i:"R"},
+  Tessa: {color:"#5be38b", i:"T"},
+  Astra: {color:"#b481ff", i:"A"},
+  // voice-only transmissions (never staged)
+  SIGNAL: {color:"#8dffb0", i:"?", voiceOnly:true, label:"Ghost Signal", style:"signal"},
+  UNKNOWN:{color:"#ff5a5a", i:"?", voiceOnly:true, label:"Unknown", style:"unknown"},
+};
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+// Real art that doesn't follow the assets/bg/bg0X.png convention can be mapped here
+// by its id; anything not listed falls back to the default path.
+const BG_OVERRIDE = {
+  BG01: "Assets/Bridge.png",            // Bridge — Normal
+  BG02: "Assets/Bridge Red Alert.png",  // Bridge — Red Alert
+  BG03: "Assets/Bg03.png",              // Captain's Chair
+  BG04: "Assets/bg04.png",              // Holographic Tactical Display
+  BG06: "Assets/bg06.png",              // Silent Armada Exterior
+};
+const CG_OVERRIDE = {
+  CG01:   "Assets/CG/CG01-Ghost Signal.png",    // The Ghost Signal — eerie transmission
+  CGBURN: "Assets/CG/CG01-Burn.png",            // Selyra treating Kael's burn
+  CG02:   "Assets/CG/CG02 — An Ocean of Silent Warships.png",  // the Silent Armada revealed
+  CG03:   "Assets/CG/CG03 – The Fleet Awakens.png",            // ancient fleet ignites (en-dash in filename)
+  CG04:   "Assets/CG/CG04 — Ancient Command Dreadnought.png",  // dreadnought emerges from hyperspace
+  CG05:   "Assets/CG/CG05 — Silence.png",                      // battlefield after victory
+};
+const bgFile   = id => BG_OVERRIDE[id] || `Assets/bg/${id.toLowerCase()}.png`;
+const cgFile   = id => CG_OVERRIDE[id] || `Assets/cg/${id.toLowerCase()}.png`;
+// Real character art lives in Assets/char/<NAME>/<Expression>.png — folders are
+// UPPERCASE, basenames are per-character (some files carry a " (n)" suffix). The
+// script uses a few expression names with no dedicated art, so we alias them to
+// the nearest available pose and ultimately fall back to Neutral.
+const CHAR_ART = {
+  ASTRA: ["Alert","Angry","Curious","Injured","Laughing","Neutral","Shocked","Smile","Stern","Thinking"],
+  KAEL:  ["Angry","Concerned","Curious","Determined","Embarrassed","Excited","Injured","Laughing","Neutral","Shocked","Thinking"],
+  REX:   ["Angry","Battle","Injured","Laughing","Neutral","Serious","Shocked","Smirk","Thinking","Uneasy"],
+  SELYRA:["Angry","Concerned","GentleSmile","Injured","Laughing","Neutral","Serious","Shocked","Smile","Thinking"],
+  TESSA: ["Angry","Determined","Focused","Injured","Laughing","Neutral","Shocked","Smile","Smirk","Thinking"],
+  VOSS:  ["Angry","Concerned","Injured","Laughing","Neutral","Shocked","Smirk","Stern","Thinking"],
+};
+// normalize for matching: "Shocked (4)"->"shocked", "Gentle Smile"->"gentlesmile"
+const enorm = s => (s||"").toLowerCase().replace(/\s*\(\d+\)\s*/g,"").replace(/[^a-z0-9]/g,"");
+// script expression -> ordered fallback candidates (matched via enorm to real files)
+const EXPR_ALIAS = {
+  analytical:["Curious","Stern","Thinking","Alert"],
+  worried:   ["Concerned","Uneasy","Thinking","Shocked"],
+  confident: ["Smirk","Determined","Smile"],
+  smallsmile:["Smile","GentleSmile","Smirk","Laughing"],
+  softsmile: ["Smile","GentleSmile","Smirk","Laughing"],
+  gentlesmile:["GentleSmile","Smile","Laughing"],
+  focused:   ["Focused","Serious","Determined","Stern"],
+  determined:["Determined","Serious","Stern"],
+  stern:     ["Stern","Serious","Uneasy"],
+  concerned: ["Concerned","Uneasy","Serious"],
+  curious:   ["Curious","Thinking","Alert"],
+  excited:   ["Excited","Laughing","Smile"],
+  smirk:     ["Smirk","Smile","Laughing"],
+  smile:     ["Smile","GentleSmile","Smirk"],
+};
+function charFile(who, expr){
+  const dir = (who||"").toUpperCase();
+  const files = CHAR_ART[dir] || [];
+  const byNorm = {}; files.forEach(f => { byNorm[enorm(f)] = f; });
+  const cands = [expr||"Neutral", ...(EXPR_ALIAS[enorm(expr||"neutral")] || [])];
+  for(const c of cands){ const hit = byNorm[enorm(c)]; if(hit) return `Assets/char/${dir}/${hit}.png`; }
+  const nf = byNorm["neutral"] || files[0];
+  return `Assets/char/${dir}/${nf || "Neutral"}.png`;
+}
+
+// ============================================================
+// EPISODE 0 SCRIPT — beats run in order. VN beats hold dialogue steps;
+// travel/combat beats embed the playable StarGear flight game.
+//   step fields: bg, cg(string|null), clearCast, cast[], who, expr, text, narr
+// ============================================================
+const EP1 = [
+  { type:"vn", scene:"Scene 1 · Bridge", steps:[
+    // Hold on the empty bridge for a beat before Astra walks into frame — the 1.5s
+    // covers fadeBlack's 0.5s fade-in, leaving ~1s of clear background.
+    {bg:"BG01", clearCast:true, pause:1500, quiet:true},
+    {who:"Astra", expr:"Neutral",    text:"Captain."},
+    {who:"Astra", expr:"Analytical", text:"Long-range sensors have detected an automated transmission."},
+    {who:"Astra", expr:"Analytical", text:"Estimated age..."},
+    {who:"Astra", expr:"Neutral",    text:"Three hundred and twelve years."},
+    {who:"Kael",  expr:"Worried",    text:"That... That's impossible."},
+    {who:"Rex",   expr:"Smirk",      text:"Unless someone forgot to switch it off.", vo:"audio/Episode0/vo/rex_01.mp3"},
+    {who:"Tessa", expr:"Confident",  text:"Military hardware tends to do that."},
+    {who:"Voss",  expr:"Stern",      text:"Play it."},
+    {cg:"CG01"},
+    {narr:"A distorted transmission crackles across the bridge."},
+    {who:"SIGNAL", text:"Fleet Seven...",          transmit:"audio/Episode0/Ghost Signal/signal_01.mp3"},
+    {who:"SIGNAL", text:"Hold Position...",        transmit:"audio/Episode0/Ghost Signal/signal_02.mp3"},
+    {who:"SIGNAL", text:"Await Reinforcements...", transmit:"audio/Episode0/Ghost Signal/signal_03.mp3"},
+    {cg:null},
+    // Split back into two lines so it uses kael_02 + kael_03 from the original VO batch.
+    // The combined kael_02_03.mp3 was rendered in a later session from the other voice
+    // sample and was the audible mismatch in Steve's playthrough (P8).
+    {who:"Kael",  expr:"Determined", text:"That's not a distress call."},
+    {who:"Kael",  expr:"Determined", text:"It's an order."},
+    {who:"Voss",  expr:"Stern",      text:"Helm."},
+    {who:"Voss",  expr:"Neutral",    text:"Set course."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC01", title:"Whispering Nebula",
+    objective:"Fly the StarGear into the Whispering Nebula. Learn movement and scanning.",
+    recap:"Flew the StarGear across the Whispering Nebula toward the source of the ancient transmission.",
+    embed:"iso_grid_prototype.html#goto=nebula" },
+  { type:"combat", kind:"Mission 1", loc:"LOC02", title:"Broken Moon Orbit",
+    objective:"Ancient Patrol Fleet inbound — destroy the automated patrol ships.",
+    recap:"Destroyed the ancient automated patrol at the Broken Moon Orbit. One drone broke off and escaped — it was reporting our position.",
+    embed:"iso_grid_prototype.html#mission&at=moon&enemies=3&flee=1" },
+
+  { type:"vn", scene:"Scene 2 · Bridge", steps:[
+    {bg:"BG01", clearCast:true},
+    {who:"Astra",  expr:"Neutral",     text:"Enemy vessels destroyed."},
+    {who:"Kael",   expr:"Worried",     text:"Captain..."},
+    {who:"Kael",   expr:"Worried",     text:"One drone escaped."},
+    {who:"Voss",   expr:"Stern",       text:"Meaning?"},
+    {who:"Kael",   expr:"Determined",  text:"It wasn't retreating."},
+    {who:"Kael",   expr:"Worried",     text:"It was reporting us."},
+    {who:"Selyra", expr:"Concerned",   text:"Doctor Mercer."},
+    {who:"Selyra", expr:"Focused",     text:"Your arm."},
+    {cg:"CGBURN"},                     // full-screen burn-treatment illustration from here on
+    {narr:"Kael has a burn."},
+    {who:"Kael",   expr:"Embarrassed", text:"It's fine—"},
+    {who:"Selyra", expr:"Neutral",     text:"Sit."},
+    {narr:"She treats him."},
+    {who:"Kael",   expr:"Embarrassed", text:"Thank... Thank you."},
+    {who:"Selyra", expr:"Gentle Smile",text:"You don't have to impress me every time we talk."},
+    {narr:"Kael freezes. Tessa quietly smiles."},
+    {cg:null},                         // clear before returning to gameplay
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC02", title:"Broken Moon Orbit → The Silent Armada",
+    objective:"Pursue the drone's transmission. Avoid the asteroid debris; scan optional wrecks.",
+    recap:"Tracked the fugitive drone's transmission through the debris fields to the edge of the Silent Armada.",
+    embed:"iso_grid_prototype.html#goto=armada" },
+
+  { type:"vn", scene:"Scene 3 · The Silent Armada", steps:[
+    {bg:"BG06", clearCast:true},
+    {cg:"CG02"},
+    {who:"Rex",  expr:"Stern", text:"..."},
+    {who:"Rex",  expr:"Stern", text:"That's... a lot of ships.", vo:"audio/Episode0/vo/rex_02.mp3"},
+    {who:"Kael", expr:"Curious", text:"An entire fleet..."},
+    {who:"Voss", expr:"Stern",   text:"No."},
+    {who:"Voss", expr:"Concerned",text:"An entire war."},
+    {cg:null},
+  ]},
+  { type:"vn", scene:"Scene 4 · Tactical Display", steps:[
+    {bg:"BG04", clearCast:true},
+    {narr:"Fleet scans resolve across the holographic display."},
+    {who:"Kael", expr:"Determined", text:"The command signal originates here."},
+    {who:"Voss", expr:"Stern",      text:"We observe."},
+    {who:"Voss", expr:"Stern",      text:"Nothing more."},
+    {who:"Kael", expr:"Worried",    text:"Captain—"},
+    {who:"Voss", expr:"Stern",      text:"That's an order."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC04", title:"Command Nexus",
+    objective:"Fly to the Command Nexus at the heart of the Armada.",
+    recap:"Crossed the dormant Silent Armada to reach the Command Nexus at its heart.",
+    embed:"iso_grid_prototype.html#goto=nexus" },
+  { type:"combat", kind:"Mission 2", loc:"LOC04", title:"Command Nexus",
+    objective:"Defense Platforms, Drone Frigates and Mine Layers — clear the approach.",
+    recap:"Cleared the Nexus approach — defense platforms, drone frigates and mine layers neutralized.",
+    embed:"iso_grid_prototype.html#mission&at=nexus" },
+
+  { type:"vn", scene:"Scene 5 · Captain's Chair", steps:[
+    {bg:"BG03", clearCast:true},
+    {cg:"CG03"},
+    {narr:"Across the ancient fleet, engines ignite."},
+    {who:"Astra", expr:"Analytical", text:"Multiple power signatures."},
+    {who:"Astra", expr:"Neutral",    text:"Thousands."},
+    {who:"Kael",  expr:"Worried",    text:"We activated them..."},
+    {who:"Rex",   expr:"Stern",    text:"Please tell me that isn't all of them.", vo:"audio/Episode0/vo/rex_03.mp3"},
+    {who:"Astra", expr:"Neutral",    text:"Negative."},
+    {who:"Voss",  expr:"Stern",      text:"Battle stations."},
+    {cg:"CG04", sfx:"audio/Episode0/Dreadnaught.mp3"},   // dreadnought arrival cue
+    {narr:"The Command Dreadnought emerges from hyperspace."},
+    {pause:900},                                          // let the arrival land before combat
+    {cg:null},
+  ]},
+  { type:"combat", kind:"Final Mission", loc:"LOC04", title:"Ancient Command Dreadnought",
+    objective:"Three-phase boss fight — destroy the shield generators, then the core. Survive.",
+    recap:"Survived the Ancient Command Dreadnought and the awakened fleet.",
+    embed:"iso_grid_prototype.html#mission&at=nexus&boss=1" },
+
+  { type:"vn", scene:"Scene 6 · Aftermath", steps:[
+    {cg:"CG05", clearCast:true},
+    {narr:"The battlefield. Silent."},
+    {who:"Voss",   expr:"Neutral",     text:"Status."},
+    {who:"Tessa",  expr:"Focused",     text:"Hull's still together."},
+    {who:"Tessa",  expr:"Smirk",       text:"Mostly."},
+    {who:"Rex",    expr:"Smirk",       text:"I'll take mostly.", vo:"audio/Episode0/vo/rex_04.mp3"},
+    {who:"Selyra", expr:"Neutral",     text:"No critical casualties."},
+    {cg:null, bg:"BG01"},              // back to the bridge — crew appear as they speak
+    // "Captain..." appears twice in the episode and VO_MAP is keyed by who|text, so both
+    // beats would share one clip. Kael_2.mp3 holds two takes; this is the elated one (P8).
+    {who:"Kael",   expr:"Excited",     text:"Captain...", vo:"audio/Episode0/vo/kael_04b.mp3"},
+    {who:"Kael",   expr:"Excited",     text:"We actually did it."},
+    {pause:1100},
+    {who:"Voss",   expr:"Small Smile", text:"Good work."},
+    {who:"Voss",   expr:"Small Smile", text:"All of you."},
+    {narr:"Kael walks over."},
+    {who:"Kael",   expr:"Determined",  text:"Thank you."},
+    {who:"Kael",   expr:"Embarrassed", text:"For earlier."},
+    {who:"Selyra", expr:"Gentle Smile",text:"You're welcome, Kael."},
+    {who:"Astra",  expr:"Soft Smile",  text:"Observation."},
+    {who:"Astra",  expr:"Soft Smile",  text:"Doctor Mercer completed a conversation without excessive scientific explanation."},
+    {laugh:"audio/Episode0/Group Laugh.mp3"},   // whole crew laughs together, all lit
+    {narr:"Incoming transmission."},
+    {who:"UNKNOWN", text:"Command Network Restored.", transmit:"audio/Episode0/Transmission.mp3", hold:2000},
+    {who:"UNKNOWN", text:"Recovery Fleet Dispatched.", hold:2000},
+    {pause:1100},
+    {who:"Rex",  expr:"Stern",   text:"..."},
+    {who:"Rex",  expr:"Stern",   text:"I don't like the sound of that.", vo:"audio/Episode0/vo/rex_05.mp3"},
+    {who:"Voss", expr:"Concerned", text:"Neither do I."},
+    {who:"Voss", expr:"Stern",     text:"Prepare the StarGear for jump."},
+    {who:"Voss", expr:"Neutral",   text:"We're going home."},
+    {narr:"Fade to black."},
+  ]},
+];
+
+// ============================================================
+// ELEMENTS
+// ============================================================
+const $ = id => document.getElementById(id);
+const bgImg=$("bgImg"), bgPh=$("bgPh");
+const castEl=$("cast");
+const cgEl=$("cg"), cgImg=$("cgImg"), cgPh=$("cgPh");
+const bar=$("bar"), nameplate=$("nameplate"), textEl=$("text");
+const epScene=$("epScene"), beatBar=$("beatBar");
+const gameplay=$("gameplay"), gpKind=$("gpKind"), gpTitle=$("gpTitle"), gpObj=$("gpObj"),
+      gpFrame=$("gpFrame"), gpStatus=$("gpStatus"), gpSkip=$("gpSkip");
+const startOverlay=$("startOverlay"), endOverlay=$("endOverlay");
+const voMuteBtn=$("voMute"), autoBtn=$("autoPlay");
+const root=document.documentElement;
+
+let beatIdx=-1, stepIdx=-1, started=false;
+let lastPos=null;   // carried-over sector position so each segment resumes where the last ended
+let typing=false, fullText="", typeTimer=null;
+// auto-play: advance VN dialogue on its own once the line's text + voice finish
+let autoPlay=false, autoTimer=null, lineClip=null, lineClipDone=true;
+let pausing=false, pauseTimer=null;      // silent directorial beat between lines
+let lineHold=null;                       // per-line auto-play hold override (ms)
+let present=[], exprOf={}, cardOf={};
+
+// ============================================================
+// ASSET HELPERS — try the real file, fall back to a labelled placeholder.
+// ============================================================
+// warm the browser cache with every real BG/CG file so they're decoded before use
+// (kills the placeholder flash the first time a background/CG is shown).
+const imgCache = {};
+function preloadImg(src){ if(!imgCache[src]){ const im=new Image(); im.src=src; imgCache[src]=im; } return imgCache[src]; }
+function preloadImages(){
+  for(const id in BG_OVERRIDE) preloadImg(BG_OVERRIDE[id]);
+  for(const id in CG_OVERRIDE) preloadImg(CG_OVERRIDE[id]);
+  // every character expression, so speaker sprites are decoded before their first line
+  for(const name in CHAR_ART) for(const base of CHAR_ART[name]) preloadImg(`Assets/char/${name}/${base}.png`);
+}
+let curBg = "BG01";                       // last background set — travels with a save so a load re-stages the scene
+function setBackground(id){
+  curBg = id;
+  const name = BACKGROUNDS[id] || id;
+  bgPh.querySelector(".id").textContent = id;
+  bgPh.querySelector(".nm").textContent = name;
+  bgImg.onload  = ()=>{ bgImg.hidden=false; bgPh.style.display="none"; };
+  bgImg.onerror = ()=>{ bgImg.hidden=true;  bgPh.style.display="flex"; };
+  bgImg.src = bgFile(id);
+  // if it's already cached, reveal immediately — don't flash the placeholder
+  if(bgImg.complete && bgImg.naturalWidth){ bgImg.hidden=false; bgPh.style.display="none"; }
+  else { bgImg.hidden=true; bgPh.style.display="flex"; }
+}
+let curCG = null;
+function setCG(id){
+  const hud = document.getElementById("hud");
+  if(id===null || id===undefined){ curCG=null; cgEl.classList.remove("show"); if(hud) hud.style.display=""; stopCGAudio(); return; }
+  curCG = id;
+  startStatic(id);                            // quiet looping static bed (no-op if this CG has none)
+  const [name,desc] = CGS[id] || [id,""];
+  cgPh.querySelector(".id").textContent = id;
+  cgPh.querySelector(".nm").textContent = name;
+  cgPh.querySelector(".desc").textContent = desc;
+  cgImg.onload  = ()=>{ cgImg.hidden=false; cgPh.style.display="none"; };
+  cgImg.onerror = ()=>{ cgImg.hidden=true;  cgPh.style.display="flex"; };
+  cgImg.src = cgFile(id);
+  // cached CG → show it at once so the placeholder never flashes in first
+  if(cgImg.complete && cgImg.naturalWidth){ cgImg.hidden=false; cgPh.style.display="none"; }
+  else { cgImg.hidden=true; cgPh.style.display="flex"; }
+  cgEl.classList.add("show");
+  if(hud) hud.style.display="none";          // a full-screen CG owns the frame
+}
+
+// ---- cast ----
+function buildCard(who){
+  const c = CHARS[who] || {color:"#46c7ff", i:"?"};
+  const el = document.createElement("div");
+  el.className = "char"; el.dataset.who = who;
+  el.style.setProperty("--c", c.color);
+  el.innerHTML =
+    `<img class="cimg" alt="${who}" hidden>` +
+    `<div class="cph"><span class="i">${c.i}</span><span class="n">${who}</span>` +
+    `<span class="x"></span><span class="note">Assets/char/${who.toUpperCase()}/*.png</span></div>`;
+  castEl.appendChild(el);
+  cardOf[who] = el;
+  return el;
+}
+function rebuildCast(){
+  castEl.innerHTML = ""; cardOf = {};
+  present.forEach(buildCard);
+  present.forEach(updateCard);
+}
+function setCast(list){ present = list.slice(); rebuildCast(); }
+function ensurePresent(who){
+  if(CHARS[who] && CHARS[who].voiceOnly) return;
+  if(!present.includes(who)){ present.push(who); rebuildCast(); }
+}
+function updateCard(who){
+  const el = cardOf[who]; if(!el) return;
+  const expr = exprOf[who] || "Neutral";
+  const img = el.querySelector(".cimg"), ph = el.querySelector(".cph");
+  el.querySelector(".x").textContent = expr;
+  img.onload  = ()=>{ img.hidden=false; ph.style.display="none"; };
+  img.onerror = ()=>{ img.hidden=true;  ph.style.display="flex"; };
+  img.src = charFile(who, expr);
+  // cached sprite → show immediately so the placeholder never flashes in first
+  if(img.complete && img.naturalWidth){ img.hidden=false; ph.style.display="none"; }
+  else { img.hidden=true; ph.style.display="flex"; }
+}
+function setActive(who){
+  for(const name in cardOf) cardOf[name].classList.toggle("active", name===who);
+}
+// Speaker shows their expression; every other staged character reverts to Neutral.
+function faceSpeaker(speaker, expr){
+  for(const who of present){
+    const want = (who===speaker) ? (expr || exprOf[who] || "Neutral") : "Neutral";
+    if(exprOf[who] !== want){ exprOf[who] = want; updateCard(who); }
+  }
+}
+
+// ============================================================
+// DIALOGUE
+// ============================================================
+// ---- per-line voice-over ----
+let voMuted = false, curVO = null;
+const voCache = {};
+function getVO(src){ if(!voCache[src]){ const a=new Audio(src); a.preload="auto"; voCache[src]=a; } return voCache[src]; }
+function stopVO(){ if(curVO){ try{ curVO.pause(); curVO.currentTime=0; }catch(e){} curVO=null; } }
+function playVO(src){
+  stopVO();
+  const a=getVO(src); a.muted=voMuted; try{ a.currentTime=0; }catch(e){}
+  curVO=a; a.play().catch(()=>{});       // ignore autoplay rejections (user gesture starts the episode)
+  return a;
+}
+
+// ---- CG transmission layer: a quiet looping static bed + an intercom voice
+// (which carries the transmission's spoken dialogue) played over the top. ----
+const CG_STATIC = {
+  CG01: { src:"audio/Episode0/Ghost Signal/radio_static.mp3", vol:0.22 },
+};
+let cgStatic=null, cgVoice=null;
+function startStatic(id){
+  stopStatic();
+  const s = CG_STATIC[id]; if(!s) return;
+  const a = new Audio(s.src); a.loop=true; a.volume=s.vol; a.muted=voMuted;
+  a.play().catch(()=>{}); cgStatic=a;
+}
+function stopStatic(){ if(cgStatic){ try{ cgStatic.pause(); }catch(e){} cgStatic=null; } }
+function playTransmit(src){
+  stopTransmit();
+  const a = new Audio(src); a.muted=voMuted; a.play().catch(()=>{}); cgVoice=a;
+}
+function stopTransmit(){ if(cgVoice){ try{ cgVoice.pause(); }catch(e){} cgVoice=null; } }
+function stopCGAudio(){ stopStatic(); stopTransmit(); }
+// ---- one-shot sound effect (own channel, layers over dialogue/VO) ----
+let sfxAudio=null;
+function playSfx(src){
+  stopSfx();
+  const a=new Audio(src); a.muted=voMuted; a.volume=0.7; a.play().catch(()=>{}); sfxAudio=a;
+  return a;
+}
+function stopSfx(){ if(sfxAudio){ try{ sfxAudio.pause(); }catch(e){} sfxAudio=null; } }
+// per-line voice map: "who|exact line text" -> clip (generated, see cut_crew.py)
+const VO_MAP = {
+  "Voss|Play it.": "audio/Episode0/vo/voss_01.mp3",
+  "Voss|Helm.": "audio/Episode0/vo/voss_02.mp3",
+  "Voss|Set course.": "audio/Episode0/vo/voss_03.mp3",
+  "Voss|Meaning?": "audio/Episode0/vo/voss_04.mp3",
+  "Voss|No.": "audio/Episode0/vo/voss_05.mp3",
+  "Voss|An entire war.": "audio/Episode0/vo/voss_06.mp3",
+  "Voss|We observe.": "audio/Episode0/vo/voss_07.mp3",
+  "Voss|Nothing more.": "audio/Episode0/vo/voss_08.mp3",
+  "Voss|That's an order.": "audio/Episode0/vo/voss_09.mp3",
+  "Voss|Battle stations.": "audio/Episode0/vo/voss_10.mp3",
+  "Voss|Status.": "audio/Episode0/vo/voss_11.mp3",
+  "Voss|Good work.": "audio/Episode0/vo/voss_12.mp3",
+  "Voss|All of you.": "audio/Episode0/vo/voss_13.mp3",
+  "Voss|Neither do I.": "audio/Episode0/vo/voss_14.mp3",
+  "Voss|Prepare the StarGear for jump.": "audio/Episode0/vo/voss_15.mp3",
+  "Voss|We're going home.": "audio/Episode0/vo/voss_16.mp3",
+  "Kael|That... That's impossible.": "audio/Episode0/vo/kael_01.mp3",
+  "Kael|That's not a distress call.": "audio/Episode0/vo/kael_02.mp3",
+  "Kael|It's an order.": "audio/Episode0/vo/kael_03.mp3",
+  "Kael|Captain...": "audio/Episode0/vo/kael_04.mp3",
+  "Kael|One drone escaped.": "audio/Episode0/vo/kael_05.mp3",
+  "Kael|It wasn't retreating.": "audio/Episode0/vo/kael_06.mp3",
+  "Kael|It was reporting us.": "audio/Episode0/vo/kael_07.mp3",
+  "Kael|It's fine—": "audio/Episode0/vo/kael_08.mp3",
+  "Kael|Thank... Thank you.": "audio/Episode0/vo/kael_09.mp3",
+  "Kael|An entire fleet...": "audio/Episode0/vo/kael_10.mp3",
+  "Kael|The command signal originates here.": "audio/Episode0/vo/kael_11.mp3",
+  "Kael|Captain—": "audio/Episode0/vo/kael_12.mp3",
+  "Kael|We activated them...": "audio/Episode0/vo/kael_13.mp3",
+  "Kael|We actually did it.": "audio/Episode0/vo/kael_14.mp3",
+  "Kael|Thank you.": "audio/Episode0/vo/kael_15.mp3",
+  "Kael|For earlier.": "audio/Episode0/vo/kael_16.mp3",
+  "Selyra|Doctor Mercer.": "audio/Episode0/vo/selyra_01.mp3",
+  "Selyra|Your arm.": "audio/Episode0/vo/selyra_02.mp3",
+  "Selyra|Sit.": "audio/Episode0/vo/selyra_03.mp3",
+  "Selyra|You don't have to impress me every time we talk.": "audio/Episode0/vo/selyra_04.mp3",
+  "Selyra|No critical casualties.": "audio/Episode0/vo/selyra_05.mp3",
+  "Selyra|You're welcome, Kael.": "audio/Episode0/vo/selyra_06.mp3",
+  "Astra|Captain.": "audio/Episode0/vo/astra_01.mp3",
+  "Astra|Long-range sensors have detected an automated transmission.": "audio/Episode0/vo/astra_02.mp3",
+  "Astra|Estimated age...": "audio/Episode0/vo/astra_03.mp3",
+  "Astra|Three hundred and twelve years.": "audio/Episode0/vo/astra_04.mp3",
+  "Astra|Enemy vessels destroyed.": "audio/Episode0/vo/astra_05.mp3",
+  "Astra|Multiple power signatures.": "audio/Episode0/vo/astra_06.mp3",
+  "Astra|Thousands.": "audio/Episode0/vo/astra_07.mp3",
+  "Astra|Negative.": "audio/Episode0/vo/astra_08.mp3",
+  "Astra|Observation.": "audio/Episode0/vo/astra_09.mp3",
+  "Astra|Doctor Mercer completed a conversation without excessive scientific explanation.": "audio/Episode0/vo/astra_10.mp3",
+  "Tessa|Military hardware tends to do that.": "audio/Episode0/vo/tessa_01.mp3",
+  "Tessa|Hull's still together.": "audio/Episode0/vo/tessa_02.mp3",
+  "Tessa|Mostly.": "audio/Episode0/vo/tessa_03.mp3",
+};
+function preloadVO(){
+  for(const b of EP1){ if(b.steps) for(const s of b.steps){ if(s.vo) getVO(s.vo); } }
+  for(const k in VO_MAP) getVO(VO_MAP[k]);
+}
+
+function typeLine(str, speed){
+  typing=true; fullText=str; textEl.textContent="";
+  let i=0;
+  const cursor=document.createElement("span"); cursor.className="cursor"; cursor.textContent="▍";
+  clearInterval(typeTimer);
+  typeTimer=setInterval(()=>{
+    textEl.textContent = str.slice(0,i); textEl.appendChild(cursor); i++;
+    if(i>str.length){ clearInterval(typeTimer); typing=false; textEl.textContent=str; }
+  }, speed||20);
+}
+function finishTyping(){ clearInterval(typeTimer); textEl.textContent=fullText; typing=false; }
+
+// ---- auto-play engine ----
+// Each line records the clip it should wait on (per-line VO or the SIGNAL
+// intercom). When auto-play is on, autoTick polls until the text has finished
+// typing AND that clip has ended, then advances after a short readable hold.
+function clearAuto(){ if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; } }
+function waitOn(a){                       // mark this line's voice as the thing to wait for
+  lineClip=a; lineClipDone=false;
+  const done=()=>{ if(lineClip===a) lineClipDone=true; };
+  a.addEventListener("ended", done, {once:true});
+  a.addEventListener("error", done, {once:true});
+  setTimeout(done, 9000);                 // safety: never wait forever on a stuck clip
+}
+function armAuto(){ clearAuto(); if(autoPlay) autoTimer=setTimeout(autoTick, 200); }
+function autoTick(){
+  autoTimer=null;
+  if(!autoPlay || !started || beatIdx<0 || EP1[beatIdx].type!=="vn") return;  // gameplay drives itself
+  if(typing || !lineClipDone){ autoTimer=setTimeout(autoTick, 150); return; } // still speaking/typing
+  const holdMs = lineHold!=null ? lineHold
+               : lineClip ? Math.max(1200, Math.min(2600, 32*(fullText||"").length))
+                          : Math.min(4600, 1400 + 55*(fullText||"").length);
+  autoTimer=setTimeout(()=>{
+    autoTimer=null;
+    if(autoPlay && started && beatIdx>=0 && EP1[beatIdx].type==="vn") nextStep();
+  }, holdMs);
+}
+function toggleAuto(){
+  autoPlay=!autoPlay;
+  autoBtn.classList.toggle("on", autoPlay);
+  autoBtn.textContent = autoPlay ? "⏸ AUTO" : "▶ AUTO";
+  autoBtn.title = autoPlay ? "Auto-play on — click to stop" : "Auto-play off — click to play the story automatically";
+  clearAuto();
+  if(autoPlay) autoTick();                // start advancing from wherever we are
+}
+
+function showLine(s){
+  textEl.className = "";
+  stopVO();                              // halt any previous line's voice
+  clearAuto(); lineClip=null; lineClipDone=true;   // reset auto-play wait-state
+  lineHold = (s.hold!=null) ? s.hold : null;       // optional explicit auto-play hold for this line
+  bar.classList.toggle("overCg", !!curCG);   // caption-over-image whenever a CG is showing
+  if(s.narr!==undefined){
+    nameplate.classList.add("hidden");
+    bar.classList.remove("speaking");
+    textEl.classList.add("narr");
+    typeLine(s.narr, 16);
+    armAuto();
+    return;
+  }
+  const who=s.who, c=CHARS[who]||{color:"#46c7ff"};
+  root.style.setProperty("--accent", c.color);
+  nameplate.classList.remove("hidden");
+  nameplate.textContent = c.label || who;
+  bar.classList.add("speaking");
+  if(c.style) textEl.classList.add(c.style);
+  if(!c.voiceOnly){
+    ensurePresent(who);
+    faceSpeaker(who, s.expr);     // speaker emotes; others go Neutral
+    setActive(who);
+  } else {
+    faceSpeaker(null, null);      // transmission: nobody's speaking → all Neutral
+    setActive("__none__");        // and dim all staged cast
+  }
+  // intercom transmission: this SIGNAL line's own spoken clip, played over the
+  // looping static on a separate channel. Each of the three lines has its own
+  // clip, so advancing swaps to the next (playTransmit stops the prior); the
+  // static keeps looping until the CG clears (stopCGAudio).
+  if(s.transmit){ playTransmit(s.transmit); if(s.hold==null) waitOn(cgVoice); }
+  // voiced lines pace the typewriter to the clip; otherwise a steady default
+  let speed = 20;
+  const src = s.vo || VO_MAP[s.who + "|" + s.text];
+  if(src){
+    const a = playVO(src), dur = a.duration;
+    if(dur && isFinite(dur) && dur>0 && s.text.length)
+      speed = Math.min(55, Math.max(14, (dur*1000*0.9)/s.text.length));
+    waitOn(a);
+  }
+  typeLine(s.text, speed);
+  armAuto();
+}
+
+// ============================================================
+// SEQUENCER
+// ============================================================
+function updateProgress(){ beatBar.style.width = ((beatIdx)/EP1.length*100)+"%"; }
+
+function runBeat(i){
+  beatIdx=i; stepIdx=-1;
+  updateProgress();
+  writeStoryProgress();               // so an in-game SAVE captures where the story is
+  if(i>=EP1.length){ hideGameplay(); endEpisode(); return; }
+  const b=EP1[i];
+  if(b.type==="vn"){
+    hideGameplay();                    // tear down the flight game behind the dialogue
+    epScene.textContent = b.scene || "";
+    bar.classList.remove("hidden");
+    nextStep();
+  } else {
+    // gameplay beat — showGameplay sets a fresh (cache-busted) src directly. We
+    // deliberately do NOT hideGameplay() first: when one gameplay beat follows
+    // another (e.g. travel → combat), an about:blank reset would race the new
+    // src assignment and the iframe could stick on about:blank (blank screen).
+    epScene.textContent = `${b.loc} · ${b.title}`;
+    bar.classList.add("hidden");
+    showGameplay(b);
+  }
+}
+function nextStep(){
+  const b=EP1[beatIdx];
+  stepIdx++;
+  if(stepIdx>=b.steps.length){ runBeat(beatIdx+1); return; }
+  const s=b.steps[stepIdx];
+  if(s.bg!==undefined) setBackground(s.bg);
+  if(s.cg!==undefined) setCG(s.cg);
+  if(s.clearCast){ present=[]; rebuildCast(); }
+  if(s.cast) setCast(s.cast);
+  if(s.sfx) playSfx(s.sfx);                              // one-shot cue (e.g. the dreadnought)
+  // `quiet` also drops the dialogue bar for the hold, so an opening pause shows the
+  // bare background rather than an empty text box.
+  if(s.pause!==undefined){ doPause(s.pause, !!s.quiet); return; }
+  if(s.laugh!==undefined){ doGroupLaugh(s.laugh); return; }   // whole crew laughs together
+  if(s.text!==undefined || s.narr!==undefined) showLine(s);
+  else nextStep();          // pure directive — keep going
+}
+// hold on the current frame for `ms` with no dialogue, then continue. Works in
+// both manual and auto-play; clicking/Space during the hold skips it.
+let pauseQuiet=false;                    // this hold hid the dialogue bar — restore it on the way out
+function doPause(ms, quiet){
+  clearAuto(); clearPause();
+  pausing=true; pauseQuiet=!!quiet;
+  if(pauseQuiet) bar.classList.add("hidden");
+  pauseTimer=setTimeout(()=>{ pauseTimer=null; clearPause(); nextStep(); }, ms||900);
+}
+// also the "skip this hold" path (click / Space), so a skipped quiet pause still
+// brings the dialogue box back
+function clearPause(){
+  if(pauseTimer){ clearTimeout(pauseTimer); pauseTimer=null; }
+  pausing=false;
+  if(pauseQuiet){ pauseQuiet=false; bar.classList.remove("hidden"); }
+}
+// every staged character switches to their Laughing sprite and brightens (all
+// active, nobody dimmed); the group-laugh clip plays and we hold until it ends.
+function doGroupLaugh(src){
+  clearAuto(); clearPause();
+  for(const who of present){ exprOf[who]="Laughing"; updateCard(who); }
+  for(const name in cardOf) cardOf[name].classList.add("active");   // highlight the whole cast
+  bar.classList.remove("speaking");
+  nameplate.classList.add("hidden");
+  textEl.className=""; textEl.textContent="";
+  pausing=true;
+  const go = ()=>{ if(!pausing) return; if(pauseTimer){ clearTimeout(pauseTimer); pauseTimer=null; } pausing=false; nextStep(); };
+  let a=null;
+  if(src){ try{ a=playVO(src); a.addEventListener("ended", go, {once:true}); }catch(e){} }
+  const safety = (a && isFinite(a.duration) && a.duration>0) ? a.duration*1000+400 : 5000;
+  pauseTimer=setTimeout(go, safety);
+}
+function advance(){
+  if(!started) return;
+  if(beatIdx<0 || EP1[beatIdx].type!=="vn") return;   // gameplay beats don't advance on click
+  if(typing){ finishTyping(); return; }
+  if(pausing){ stopVO(); clearPause(); nextStep(); return; }   // skip a pause / group laugh on click
+  nextStep();
+}
+
+// ---- gameplay beats ----
+function showGameplay(b){
+  gpKind.textContent = b.kind || (b.type==="combat" ? "Combat" : "Flight");
+  gpTitle.textContent = `${b.loc} — ${b.title}`;
+  gpObj.textContent = b.objective || "";
+  gpStatus.textContent = b.type==="combat" ? "Defeat the hostiles to continue…" : "Reach the objective to continue…";
+  gpStatus.style.color = "#9fc0ff";
+  stopVO(); stopCGAudio(); stopSfx(); clearAuto(); clearPause();
+  voMuteBtn.style.display = "none"; autoBtn.style.display = "none";   // no VN voice/static/auto during gameplay
+  // focus the flight game as soon as it loads so keys work without clicking first
+  gpFrame.onload = ()=>{ try{ gpFrame.focus(); gpFrame.contentWindow.focus(); }catch(err){} };
+  gpFrame.src = bustCache(embedWithPos(b.embed));
+  gameplay.classList.remove("hidden");
+}
+// Append the carried-over position so the flight game resumes there instead of
+// snapping back to the rim spawn each segment. (iso reads it from the hash.)
+function embedWithPos(embed){
+  if(!lastPos) return embed;                       // first segment: use the default spawn
+  const sep = embed.indexOf("#") < 0 ? "#" : "&";
+  let out = embed + sep + "start=" + lastPos.ax + "," + lastPos.ay;
+  // One-shot: only the embed launched straight from the title's LOAD carries this,
+  // so a later segment reload doesn't re-load the slot over the live run.
+  if(pendingLoadSlot >= 0){ out += "&load=" + pendingLoadSlot; pendingLoadSlot = -1; }
+  return out;
+}
+// Two consecutive embeds can differ only by URL fragment (e.g. "#goto=nebula"
+// → "#mission"), which the browser treats as in-page navigation and will NOT
+// reload — so the flight game never re-inits into the new mode. Inserting a
+// unique query before the hash makes every embed a distinct URL, forcing a
+// full reload. The iso game reads location.hash (not the query), so adding
+// "?n=…" leaves "#mission" / "#goto=…" intact.
+function bustCache(url){
+  const h = url.indexOf("#");
+  const path = h < 0 ? url : url.slice(0, h);
+  const hash = h < 0 ? "" : url.slice(h);
+  return path + (path.indexOf("?") < 0 ? "?" : "&") + "n=" + Date.now() + hash;
+}
+function hideGameplay(){
+  voMuteBtn.style.display = ""; autoBtn.style.display = "";   // VN is back — show voice + auto toggles
+  if(!gameplay.classList.contains("hidden")){
+    gameplay.classList.add("hidden");
+    gpFrame.onload=null; gpFrame.src="about:blank";   // don't let the blank load grab focus
+    try{ window.focus(); }catch(e){}                   // return focus to the VN (Space to advance)
+  }
+}
+// Gameplay can't be skipped — the only way forward is the embedded game telling us
+// the battle was won (combat) or the objective waypoint was reached (travel).
+// Build the mission log shown in the flight game's pause menu: every gameplay
+// segment up to and including the current one (earlier = complete, current =
+// active). Future segments are withheld to avoid spoilers.
+function buildMissionLog(){
+  const items=[]; let active=0;
+  EP1.forEach((b,i)=>{
+    if((b.type==="travel"||b.type==="combat") && i<=beatIdx){
+      const status = i===beatIdx ? "active" : "done";
+      if(status==="active") active=items.length;
+      items.push({
+        title: `${b.loc} — ${b.title}`,
+        kind:  b.kind || (b.type==="combat" ? "Combat" : "Flight"),
+        status,
+        text:  status==="active" ? (b.objective||"") : (b.recap || b.objective || "")
+      });
+    }
+  });
+  return { items, active };
+}
+window.addEventListener("message", (e)=>{
+  if(!e.data) return;
+  if(e.data.type==="requestMissions"){
+    try{ gpFrame.contentWindow.postMessage({type:"missions", log:buildMissionLog()}, "*"); }catch(err){}
+    return;
+  }
+  if(e.data.type==="pos" && typeof e.data.ax==="number"){ lastPos={ax:e.data.ax, ay:e.data.ay}; return; }
+  if(e.data.type==="defeated"){ gameOver(); return; }     // ship destroyed → game-over screen
+  const b = beatIdx>=0 ? EP1[beatIdx] : null;
+  if(!b) return;
+  if(e.data.type==="missionComplete" && b.type==="combat"){
+    gpStatus.textContent = "Mission complete ✓"; gpStatus.style.color = "#7ee787";
+    setTimeout(()=>{ if(EP1[beatIdx]===b) runBeat(beatIdx+1); }, 1500);
+  } else if(e.data.type==="reachedObjective" && b.type==="travel"){
+    gpStatus.textContent = "Objective reached ✓"; gpStatus.style.color = "#7ee787";
+    setTimeout(()=>{ if(EP1[beatIdx]===b) runBeat(beatIdx+1); }, 1200);
+  }
+});
+
+// ============================================================
+// FLOW
+// ============================================================
+// ---- opening narration --------------------------------------------------
+// Title -> fade to black -> "Journey Begins" narration over the VO clip -> title
+// card -> Scene 1. Each shot pairs one narration line with one still.
+//
+// SYNC: shots are driven off the VO's own `currentTime`, not off timers started
+// alongside it. `at` is the second the line is spoken. An earlier version spaced
+// the shots with setTimeout by word count, which drifted badly — the timers and
+// the audio ran on independent clocks, so any delay in play() (buffering, decode,
+// a backgrounded tab) offset them permanently, and word count is a poor proxy for
+// how long a line actually takes to speak. Reading currentTime each frame instead
+// means the text cannot drift: it re-derives the correct shot continuously and
+// self-corrects after a stall.
+//
+// `at` values are specific to audio/Intro/Speech_v3.mp3 — **a re-recorded VO needs
+// them re-measured**. Open episode1.html?cuetune=1 and tap Space on each line as
+// you hear it; the tuner prints a ready-to-paste table to the console.
+//
+// `img` is a file under Assets/intro/ — a shot whose still is missing plays black
+// and the line still reads, so the sequence works before the art lands.
+// `motion` picks a Ken Burns keyframe (see the kb* rules in the stylesheet).
+const PROLOGUE_SHOTS = [
+  {at: 0.00, text:"Out here…",                                     img:"1.png",  motion:"kbZoomIn"},
+  {at: 1.94, text:"It's easy to believe we're alone.",             img:"2.png",  motion:"kbZoomOut"},
+  {at: 4.70, text:"Just one ship drifting through an endless sea of stars.", img:"3.png", motion:"kbOrbit"},
+  {at: 8.14, text:"But space isn't empty.",                        img:"4.png",  motion:"kbPanR"},
+  {at:10.16, text:"It's alive.",                                   img:"5.png",  motion:"kbPanL"},
+  {at:11.30, text:"Every star…",                                   img:"6.png",  motion:"kbZoomIn"},
+  {at:12.62, text:"Every world…",                                  img:"7.png",  motion:"kbPanR"},
+  {at:14.10, text:"Every life…",                                   img:"8.png",  motion:"kbZoomIn"},
+  {at:15.56, text:"They're all connected…",                        img:"9.png",  motion:"kbPanL"},
+  {at:17.04, text:"…turning together like gears in a machine…",    img:"10.png", motion:"kbOrbit"},
+  {at:19.92, text:"Sometimes a single choice…",                    img:"11.png", motion:"kbZoomIn"},
+  {at:21.14, text:"…is enough to set that machine in motion.",     img:"12.png", motion:"kbRush"},
+];
+const PROLOGUE_IMG_DIR = "Assets/intro/";
+const PROLOGUE_SRC = "audio/Intro/Speech_v3.mp3";
+const PROLOGUE_FALLBACK = 24.66;     // clip length, used if the audio never loads
+const PROLOGUE_CARD_HOLD = 4000;     // how long the STARGEAR title card sits before Scene 1
+// `at` is the moment the line is *spoken*; the swap costs 300ms of fade-out before
+// the new text appears, so cue the shot slightly early and the words are on screen
+// as the voice reaches them rather than trailing it.
+const PROLOGUE_TEXT_LEAD = 0.35;
+// A beat of stars before the first word — "Black screen. Stars slowly fade into
+// view." The VO leaves ~1.9s after "Out here…" so the opening line can carry
+// itself; this is just the runway in front of it.
+const PROLOGUE_LEAD_IN = 1.2;
+const CUE_TUNE = /[?&]cuetune=1/.test(location.search);   // dev: re-measure `at` by ear
+let prologueActive=false, prologueCarding=false, prologueAudio=null, prologueTimers=[];
+let plShotFlip=false, plShotIdx=-1, plRaf=0, plStartedAt=0, plTuned=[];
+function clearPrologueTimers(){ prologueTimers.forEach(clearTimeout); prologueTimers=[]; }
+
+function startPrologue(){
+  prologueActive=true;
+  const fb=document.getElementById("fadeBlack");
+  fb.classList.add("on");
+  setTimeout(()=>{
+    if(!prologueActive) return;
+    startOverlay.classList.add("hidden");
+    const pl=document.getElementById("prologue"), txt=document.getElementById("plText");
+    txt.textContent=""; txt.classList.remove("on");
+    document.getElementById("plCard").classList.remove("on");
+    ["plShotA","plShotB"].forEach(id=>{
+      const s=document.getElementById(id);
+      s.classList.remove("on"); s.style.backgroundImage=""; s.style.animation="";
+    });
+    plShotFlip=false; plShotIdx=-1; plTuned=[];
+    pl.classList.remove("hidden","fading");
+    fb.classList.remove("on");                       // the prologue is itself black
+
+    prologueAudio=new Audio(PROLOGUE_SRC);
+    prologueAudio.muted=voMuted;
+    prologueAudio.addEventListener("ended", ()=>endPrologue(false));  // ran its course -> title card
+    plStartedAt=performance.now();
+    const leadUntil=plStartedAt + PROLOGUE_LEAD_IN*1000;
+    prologueTimers.push(setTimeout(()=>{
+      if(prologueActive && prologueAudio) prologueAudio.play().catch(()=>{});
+    }, PROLOGUE_LEAD_IN*1000));
+
+    // Wall clock only stands in when the audio genuinely isn't running (during the
+    // lead-in, or if the file is missing / autoplay is blocked) — once it is
+    // playing, the VO's own clock is the only source of truth.
+    const tick=()=>{
+      if(!prologueActive) return;
+      plRaf=requestAnimationFrame(tick);
+      const a=prologueAudio, live=a && !a.paused && a.currentTime>0;
+      const now=performance.now();
+      // hold at t=0 through the lead-in so shot 1 gets a beat to itself
+      const t = live ? a.currentTime
+              : now < leadUntil ? 0
+              : (now-leadUntil)/1000;
+      // last shot whose cue has passed — recomputed every frame, so it re-syncs
+      // itself after a stall instead of accumulating error
+      let i=0; while(i+1<PROLOGUE_SHOTS.length && PROLOGUE_SHOTS[i+1].at-PROLOGUE_TEXT_LEAD<=t) i++;
+      if(i!==plShotIdx){
+        plShotIdx=i;
+        const next=PROLOGUE_SHOTS[i+1];
+        const dur=(a && a.duration>1) ? a.duration : PROLOGUE_FALLBACK;
+        showPrologueShot(PROLOGUE_SHOTS[i], (next ? next.at : dur) - PROLOGUE_SHOTS[i].at);
+      }
+      if(!live && t > PROLOGUE_FALLBACK + 1.2) endPrologue();   // audio never played
+    };
+    plRaf=requestAnimationFrame(tick);
+    if(CUE_TUNE) startCueTuner();
+  }, 500);
+}
+// Cross the incoming still onto the idle layer, then fade the line in under it.
+// `hold` (seconds) drives the Ken Burns duration so the drift spans the whole shot.
+function showPrologueShot(shot, hold){
+  const txt=document.getElementById("plText");
+  txt.classList.remove("on");
+  if(shot.img){
+    plShotFlip=!plShotFlip;
+    const incoming=document.getElementById(plShotFlip?"plShotB":"plShotA");
+    const outgoing=document.getElementById(plShotFlip?"plShotA":"plShotB");
+    const url=shot.img.includes("/") ? shot.img : PROLOGUE_IMG_DIR+shot.img;   // "/" = path from the project root
+    // Preload so a missing still leaves the layer black instead of flashing a broken box.
+    const probe=new Image();
+    probe.onload=()=>{
+      if(!prologueActive) return;
+      incoming.style.backgroundImage=`url("${url}")`;
+      // restart the animation even when the same keyframe name repeats
+      incoming.style.animation="none"; void incoming.offsetWidth;
+      incoming.style.animation=`${shot.motion} ${(hold+1.6).toFixed(2)}s linear forwards`;
+      incoming.classList.add("on");
+      outgoing.classList.remove("on");
+    };
+    probe.src=url;
+  }
+  setTimeout(()=>{ txt.textContent=shot.text; txt.classList.add("on"); }, 300);
+}
+// Finished (or skipped) — hold the title card, then drop into Scene 1.
+// Skipping goes straight through; only a full playthrough earns the card.
+function endPrologue(skipped){
+  if(!prologueActive) return;
+  clearPrologueTimers();
+  cancelAnimationFrame(plRaf);
+  prologueActive=false;
+  if(CUE_TUNE) reportCues();
+  if(!skipped){
+    if(prologueAudio){ try{ prologueAudio.pause(); }catch(e){} prologueAudio=null; }
+    prologueCarding=true;                            // Space/click still skips the card
+    const txt=document.getElementById("plText");
+    txt.classList.remove("on");
+    // let the last shot keep drifting under the card, then fade card -> black -> Scene 1
+    prologueTimers.push(setTimeout(()=>document.getElementById("plCard").classList.add("on"), 500));
+    prologueTimers.push(setTimeout(finishPrologue, PROLOGUE_CARD_HOLD));
+    return;
+  }
+  finishPrologue();
+}
+function finishPrologue(){
+  prologueCarding=false;
+  clearPrologueTimers();
+  if(prologueAudio){ try{ prologueAudio.pause(); }catch(e){} prologueAudio=null; }
+  document.getElementById("plCard").classList.remove("on");
+  // Hold black across the handoff: fadeBlack comes up under the (still black)
+  // prologue, so hiding it reveals black rather than the bare bridge background,
+  // and startEpisode's own fade-in takes it from there.
+  document.getElementById("fadeBlack").classList.add("on");
+  const pl=document.getElementById("prologue");
+  const txt=document.getElementById("plText");
+  txt.classList.remove("on");
+  setTimeout(()=>{ pl.classList.add("hidden"); startEpisode(); }, 600);
+}
+// ---- cue tuner (dev only, episode1.html?cuetune=1) -----------------------
+// The `at` values above can't be derived from the text — only heard. Run the
+// prologue with ?cuetune=1, listen, and tap Space the instant each line starts.
+// Every tap stamps the audio's real currentTime; at the end the exact
+// `at:` column is printed to the console, ready to paste over PROLOGUE_SHOTS.
+// Nothing here runs in a normal playthrough.
+function startCueTuner(){
+  reportCues.done=false;
+  const old=document.getElementById("cueHud"); if(old) old.remove();   // re-runs are fine
+  const hud=document.createElement("div");
+  hud.id="cueHud";
+  hud.style.cssText="position:absolute;z-index:5;top:2vh;left:50%;transform:translateX(-50%);"+
+    "font:13px/1.7 monospace;color:#8dffb0;background:rgba(0,0,0,0.8);padding:.7rem 1.1rem;"+
+    "border:1px solid rgba(141,255,176,0.4);border-radius:8px;text-align:center;white-space:pre;";
+  document.getElementById("prologue").appendChild(hud);
+  const paint=()=>{
+    if(!prologueActive){ return; }
+    const t=prologueAudio ? prologueAudio.currentTime : 0;
+    const nextIdx=plTuned.length;
+    hud.textContent =
+      `CUE TUNER  ${t.toFixed(2)}s   tapped ${nextIdx}/${PROLOGUE_SHOTS.length}\n` +
+      (nextIdx<PROLOGUE_SHOTS.length
+        ? `SPACE when you hear:  "${PROLOGUE_SHOTS[nextIdx].text}"`
+        : `done — cues printed to the console`);
+    requestAnimationFrame(paint);
+  };
+  requestAnimationFrame(paint);
+}
+// Called by the keyboard handler while tuning, instead of skipping the prologue.
+function tapCue(){
+  if(plTuned.length>=PROLOGUE_SHOTS.length) return;
+  plTuned.push(prologueAudio ? +prologueAudio.currentTime.toFixed(2) : 0);
+  if(plTuned.length===PROLOGUE_SHOTS.length) reportCues();
+}
+function reportCues(){
+  if(!plTuned.length || reportCues.done) return;
+  reportCues.done=true;
+  const lines=PROLOGUE_SHOTS.map((s,i)=>{
+    const at=(plTuned[i]!==undefined ? plTuned[i] : s.at).toFixed(2).padStart(5);
+    return `  {at:${at}, text:${JSON.stringify(s.text)}, img:"${s.img}", motion:"${s.motion}"},`;
+  });
+  console.log("Measured cues — paste over PROLOGUE_SHOTS:\n\nconst PROLOGUE_SHOTS = [\n"+
+              lines.join("\n")+"\n];\n");
+}
+// Abandon the narration without starting the episode (used by the title reset).
+function cancelPrologue(){
+  prologueActive=false; prologueCarding=false;
+  clearPrologueTimers();
+  cancelAnimationFrame(plRaf);
+  if(prologueAudio){ try{ prologueAudio.pause(); }catch(e){} prologueAudio=null; }
+  const pl=document.getElementById("prologue");
+  pl.classList.add("hidden"); pl.classList.remove("fading");
+  document.getElementById("plCard").classList.remove("on");
+}
+
+function startEpisode(){
+  started=true;
+  lastPos=null;                       // fresh playthrough starts at the rim spawn
+  try{ localStorage.removeItem("stargear_fog_v1"); }catch(e){}  // clear the iso's saved fog (FOG_KEY)
+  try{ localStorage.removeItem("stargear_ep0_done"); }catch(e){} // and the "episode finished" achievement flag
+  endOverlay.classList.add("hidden");
+  present=[]; exprOf={}; rebuildCast();
+  // fade the title to black (0.5s), build Scene 1 behind the black, then fade into it
+  const fb=document.getElementById("fadeBlack");
+  fb.classList.add("on");
+  setTimeout(()=>{
+    startOverlay.classList.add("hidden");
+    runBeat(0);                                    // Scene 1 renders under the black
+    requestAnimationFrame(()=>fb.classList.remove("on"));   // then fade black -> scene
+  }, 500);
+}
+function endEpisode(){
+  // Flag the completion for the iso game's "The Ghost Signal" achievement. The iso
+  // isn't running at this point (the END beat is a VN scene, so its iframe is torn
+  // down), so this is a shared-localStorage handshake it reads at its next boot.
+  try{ localStorage.setItem("stargear_ep0_done","1"); }catch(e){}
+  bar.classList.add("hidden"); hideGameplay(); stopVO();
+  setCG(null);
+  beatBar.style.width="100%";
+  endOverlay.classList.remove("defeat");                  // victory → thanks-for-playing screen
+  endOverlay.classList.remove("hidden");
+}
+// Ship destroyed — show the thanks-for-playing screen; clicking it resets to the
+// title (toStartMenu, same as the episode-complete overlay).
+function gameOver(){
+  bar.classList.add("hidden"); hideGameplay(); stopVO(); stopSfx();
+  setCG(null);
+  endOverlay.classList.add("defeat");                     // swap to the DEFEAT.png screen
+  endOverlay.classList.remove("hidden");
+}
+// FREE PLAY — beating the story doesn't end the run. This drops the player back
+// into the sector in plain free-roam: no story waypoint, no mission, nothing to
+// advance past. Everything they earned carries over (scrap/coin, ship loadout,
+// codex, achievements, charted map) because the iso restores that state whenever
+// the embed carries a `start=` position, which `embedWithPos` supplies.
+let freePlay=false;
+// `status` overrides the footer line — the title screen's LOAD reuses this whole
+// path (a loaded save always resumes in free roam) and says so instead.
+function startFreePlay(status){
+  freePlay=true;
+  writeStoryProgress();               // a save taken in free roam should load back into free roam
+  endOverlay.classList.add("hidden");
+  bar.classList.add("hidden");
+  stopVO(); stopCGAudio(); stopSfx(); clearAuto(); clearPause();
+  setCG(null);
+  // A `start=` position is what tells the iso this is a CONTINUATION rather than a
+  // fresh game — without it, it wipes fog, codex, loadout and economy on boot. So
+  // free play always carries one, falling back to the hub if we never got a `pos`.
+  if(!lastPos) lastPos={ax:0, ay:0};
+  showGameplay({ type:"travel", kind:"Free Play", loc:"Open Sector", title:"Free Play",
+                 objective:"Take on bounties and side missions — M for the ship menu.",
+                 embed:"iso_grid_prototype.html" });
+  gpStatus.textContent = status || "Free play — the story is complete.";
+  gpStatus.style.color = "#7ee787";
+  document.getElementById("gpExit").classList.remove("hidden");
+}
+// ---- story progress -> the iso's save snapshot ------------------------------
+// The iso owns the save slots, but it can't see where the STORY is — so the VN
+// publishes its position to a shared localStorage key on every beat, and the
+// iso's saveSnapshot() folds that key into the slot. Loading reads it back out
+// and resumes the episode at that beat instead of dumping you into free roam.
+const STORY_KEY = "stargear_story_v1";
+function writeStoryProgress(){
+  try{
+    localStorage.setItem(STORY_KEY, JSON.stringify({
+      beat: beatIdx, bg: curBg, freePlay, started,
+    }));
+  }catch(e){}
+}
+// ---- title-screen LOAD GAME ------------------------------------------------
+// The iso owns the save slots; this only reads them to build the picker and then
+// hands the chosen index to the embed as `load=<n>`. Slot format is the iso's
+// saveSnapshot() — keep SAVE_KEY in step with it there.
+// NOTE: a save carries economy/ship/codex/map but not a story beat, so loading
+// always resumes in FREE ROAM, even if the run was saved mid-episode.
+const SAVE_SLOT_COUNT = 3;
+// "f" is the import slot: a save loaded from a downloaded file lands here rather
+// than overwriting one of the player's three slots. The iso understands `load=f`.
+const SAVE_KEY = i => i === "f" ? "stargear_save_file" : "stargear_save_" + i;
+let pendingLoadSlot = -1;                 // consumed by embedWithPos on the next embed
+function readSaveSlot(i){
+  try{ const raw = localStorage.getItem(SAVE_KEY(i)); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+// LOAD GAME is always on the title screen, even with no slots filled — otherwise
+// there'd be no way in to "load from file" on a fresh browser / new machine.
+function refreshLoadBtn(){
+  document.getElementById("loadBtn").classList.remove("hidden");
+}
+function slotSummary(s){
+  const d = new Date(s.at || 0);
+  const coin = s.econ ? s.econ.coin : 0, scrap = s.econ ? s.econ.scrap : 0;
+  const where = s.story && !s.story.freePlay && (s.story.beat|0) >= 0
+    ? (EP1[s.story.beat] ? (EP1[s.story.beat].scene || EP1[s.story.beat].title || "In story") : "In story")
+    : "Free roam";
+  return { when: `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`,
+           sub: `${where} · ${coin} coin · ${scrap} scrap · ${(s.dex||[]).length} scanned · ` +
+                `${(s.ach||[]).length} achievements · at (${s.ax|0}, ${s.ay|0})` };
+}
+function buildLoadPanel(){
+  const host = document.getElementById("loadSlots");
+  host.innerHTML = "";
+  for(let i=0;i<SAVE_SLOT_COUNT;i++){
+    const s = readSaveSlot(i);
+    const row = document.createElement("div");
+    row.className = "lpRow";
+    const b = document.createElement("button");
+    b.className = "lpSlot";
+    if(!s){
+      b.disabled = true;
+      b.innerHTML = `<div class="lpMain">Slot ${i+1} — empty</div>`;
+    }else{
+      const info = slotSummary(s);
+      b.innerHTML = `<div class="lpMain">Slot ${i+1} — ${info.when}</div>` +
+                    `<div class="lpSub">${info.sub}</div>`;
+      b.addEventListener("click", ()=> startLoadedGame(i));
+    }
+    row.appendChild(b);
+    if(s){                                        // download this slot as a .sgsave file
+      const dl = document.createElement("button");
+      dl.className = "lpDl"; dl.title = "Download this save to a file";
+      dl.textContent = "⤓";
+      dl.addEventListener("click", (ev)=>{ ev.stopPropagation(); downloadSlot(i); });
+      row.appendChild(dl);
+    }
+    host.appendChild(row);
+  }
+}
+// ---- save files ------------------------------------------------------------
+// A save is just the iso's snapshot JSON, so a downloaded file can be re-imported
+// here or in the in-game SAVE / LOAD screen — same format either way.
+function saveFileName(s){
+  const d = new Date((s && s.at) || Date.now());
+  const p = n => String(n).padStart(2,"0");
+  return `stargear-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.sgsave`;
+}
+function downloadSlot(i){
+  const s = readSaveSlot(i); if(!s) return;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(s)], { type:"application/json" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = saveFileName(s);
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  setLoadMsg("Downloaded slot " + (i+1) + ".");
+}
+function setLoadMsg(t, bad){
+  const el = document.getElementById("lpMsg");
+  if(!el) return;
+  el.textContent = t || "";
+  el.style.color = bad ? "#ff9a8a" : "#7ee787";
+}
+function importSaveFile(file){
+  if(!file) return;
+  const rd = new FileReader();
+  rd.onload = ()=>{
+    let s = null;
+    try{ s = JSON.parse(rd.result); }catch(e){}
+    // a save always carries a position and a timestamp — anything else isn't one
+    if(!s || typeof s !== "object" || s.ax === undefined || s.ay === undefined){
+      setLoadMsg("That file isn't a StarGear save.", true); return;
+    }
+    try{ localStorage.setItem(SAVE_KEY("f"), JSON.stringify(s)); }
+    catch(e){ setLoadMsg("Couldn't store that save — browser storage is full.", true); return; }
+    startLoadedGame("f");
+  };
+  rd.onerror = ()=> setLoadMsg("Couldn't read that file.", true);
+  rd.readAsText(file);
+}
+function openLoadPanel(){
+  buildLoadPanel();
+  setLoadMsg("");
+  document.getElementById("loadPanel").classList.remove("hidden");
+  document.getElementById("startMenu").classList.add("hidden");
+}
+function closeLoadPanel(){
+  document.getElementById("loadPanel").classList.add("hidden");
+  document.getElementById("startMenu").classList.remove("hidden");
+}
+function startLoadedGame(i){
+  const s = readSaveSlot(i); if(!s) return;
+  pendingLoadSlot = i;
+  lastPos = { ax: s.ax|0, ay: s.ay|0 };    // also the continuation signal the iso needs
+  closeLoadPanel();
+  const label = i === "f" ? "Loaded save file." : "Loaded slot " + (i+1) + ".";
+  // A save taken mid-episode carries the story beat it was taken on, so it resumes
+  // the episode there; one taken after the credits (or with no story record at all,
+  // i.e. an older save) drops into free roam.
+  const st = s.story || null;
+  const resumeBeat = (st && !st.freePlay && st.started && (st.beat|0) >= 0 && (st.beat|0) < EP1.length)
+    ? (st.beat|0) : -1;
+  // Same fade-to-black handoff as Start. startFreePlay() is normally entered from the
+  // end screen, where the title overlay is already down — coming from the title it has
+  // to be dismissed here or it sits on top of the running game.
+  const fb = document.getElementById("fadeBlack");
+  fb.classList.add("on");
+  setTimeout(()=>{
+    startOverlay.classList.add("hidden");
+    if(resumeBeat >= 0){
+      started = true; freePlay = false;
+      endOverlay.classList.add("hidden");
+      present=[]; exprOf={}; rebuildCast();
+      setBackground(st.bg || "BG01");
+      runBeat(resumeBeat);               // replays the beat it was saved on, from its first line
+    }else{
+      startFreePlay(label);
+    }
+    requestAnimationFrame(()=>fb.classList.remove("on"));
+  }, 500);
+}
+
+// Return to the title screen and reset the game (advancing past "To Be Continued").
+function toStartMenu(){
+  started=false; freePlay=false; beatIdx=-1; stepIdx=-1;
+  cancelPrologue();   // never leave the narration (or its audio) running behind the title
+  document.getElementById("gpExit").classList.add("hidden");
+  bar.classList.add("hidden"); hideGameplay(); stopVO();
+  setCG(null); present=[]; exprOf={}; rebuildCast();
+  setBackground("BG01");
+  beatBar.style.width="0%";
+  endOverlay.classList.add("hidden");
+  document.getElementById("fadeBlack").classList.remove("on");
+  startOverlay.classList.remove("hidden","fading");
+  closeLoadPanel();   // never come back to the title with the picker still up
+  refreshLoadBtn();   // a run just ended — it may have written its first save
+}
+
+// ============================================================
+// INPUT
+// ============================================================
+document.addEventListener("keydown",(e)=>{
+  const advanceKey = e.code==="Space" || e.code==="ArrowRight" || e.code==="Enter";
+  // the opening narration owns the keyboard while it runs — any advance key skips it
+  if(prologueActive || prologueCarding){
+    // while tuning, Space stamps a cue instead of skipping (Esc still exits)
+    if(CUE_TUNE && prologueActive && advanceKey){ e.preventDefault(); tapCue(); return; }
+    if(advanceKey || e.code==="Escape"){
+      e.preventDefault();
+      prologueCarding ? finishPrologue() : endPrologue(true);
+    }
+    return;
+  }
+  // The load picker owns the keyboard while it's up, or Space would start a new game
+  // behind it. Esc backs out.
+  if(!document.getElementById("loadPanel").classList.contains("hidden")){
+    if(e.code==="Escape"){ e.preventDefault(); closeLoadPanel(); }
+    return;
+  }
+  // free play has no story left to advance — Esc is the only way out, back to the title
+  if(freePlay){ if(e.code==="Escape"){ e.preventDefault(); toStartMenu(); } return; }
+  if(!endOverlay.classList.contains("hidden")){           // "To Be Continued" — advance → title
+    if(advanceKey || e.code==="KeyR"){ e.preventDefault(); toStartMenu(); }
+    return;
+  }
+  if(e.code==="KeyA" && started && gameplay.classList.contains("hidden")){
+    e.preventDefault(); toggleAuto(); return;              // A toggles auto-play during dialogue
+  }
+  if(advanceKey){
+    if(!gameplay.classList.contains("hidden")) return;     // don't steal keys from the flight game
+    e.preventDefault();
+    if(!started) startPrologue(); else advance();
+  }
+});
+document.getElementById("startBtn").addEventListener("click", startPrologue);
+document.getElementById("prologue").addEventListener("click", ()=>{
+  if(CUE_TUNE && prologueActive){ tapCue(); return; }   // clicking also stamps a cue
+  prologueCarding ? finishPrologue() : endPrologue(true);
+});
+document.getElementById("loadBtn").addEventListener("click", (e)=>{ e.stopPropagation(); openLoadPanel(); });
+document.getElementById("loadCancel").addEventListener("click", (e)=>{ e.stopPropagation(); closeLoadPanel(); });
+document.getElementById("loadFileBtn").addEventListener("click", (e)=>{
+  e.stopPropagation();
+  const inp = document.getElementById("loadFileInput");
+  inp.value = "";                   // so picking the same file twice still fires change
+  inp.click();
+});
+document.getElementById("loadFileInput").addEventListener("change", (e)=>{
+  importSaveFile(e.target.files && e.target.files[0]);
+});
+refreshLoadBtn();   // LOAD is always on the title (file import needs a way in)
+document.getElementById("freePlayBtn").addEventListener("click", (e)=>{ e.stopPropagation(); startFreePlay(); });
+document.getElementById("gpExit").addEventListener("click", toStartMenu);
+endOverlay.addEventListener("click", toStartMenu);
+bar.addEventListener("click", advance);
+// TESTING ONLY — remove before release: jump past the current gameplay segment.
+gpSkip.addEventListener("click", ()=>{
+  const b = beatIdx>=0 ? EP1[beatIdx] : null;
+  if(b && b.type!=="vn") runBeat(beatIdx+1);
+});
+autoBtn.addEventListener("click", toggleAuto);
+voMuteBtn.addEventListener("click", ()=>{
+  voMuted = !voMuted;
+  if(curVO) curVO.muted = voMuted;
+  if(cgStatic) cgStatic.muted = voMuted;
+  if(cgVoice)  cgVoice.muted  = voMuted;
+  if(prologueAudio) prologueAudio.muted = voMuted;
+  if(sfxAudio) sfxAudio.muted = voMuted;
+  voMuteBtn.textContent = voMuted ? "🔇" : "🔊";
+  voMuteBtn.classList.toggle("muted", voMuted);
+});
+
+// boot: show the bridge placeholder behind the start overlay
+setBackground("BG01");
+preloadVO();          // warm the voice clips so the typewriter can pace to them
+preloadImages();      // warm the BG/CG art so it never flashes a placeholder first
+
+</script>
+</body>
+</html>

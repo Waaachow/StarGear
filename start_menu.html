@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Star Gear Odyssey — Start</title>
+<style>
+  :root{
+    --glow: 150, 200, 255;         /* light-blue glow colour            */
+
+    /* ---- tunable composition (all relative to the art frame) ---- */
+    --ship-x: 25%;                 /* ship centre, horizontal            */
+    --ship-y: 70%;                 /* ship centre, vertical              */
+    --ship-size: 60%;              /* ship width as % of frame width     */
+
+    --btn-y: 82%;                  /* START button vertical position     */
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; background:#05070d; overflow:hidden;
+             font-family:"Trebuchet MS",system-ui,sans-serif; }
+
+  /* Blurred, dimmed copy of the background fills any letterbox bars */
+  .bgfill{
+    position:fixed; inset:0;
+    background:url("Assets/Start_Menu/Menu_1_background.png") center/cover no-repeat;
+    filter:blur(28px) brightness(.45); transform:scale(1.1);
+  }
+
+  /* The art frame keeps the 1376:768 ratio and is always fully visible */
+  .frame{
+    position:fixed; top:50%; left:50%;
+    width:min(100vw, 177.78vh);    /* 1376/768 = 1.7917 */
+    aspect-ratio:1376 / 768;
+    transform:translate(-50%,-50%);
+    overflow:hidden;
+  }
+
+  .full{ position:absolute; inset:0; width:100%; height:100%;
+         object-fit:cover; user-select:none; -webkit-user-drag:none;
+         pointer-events:none; }
+
+  /* --- Background: slow, subtle drift --- */
+  .bg{ animation:drift 40s ease-in-out infinite alternate; }
+  @keyframes drift{
+    from{ transform:scale(1.05) translate(-1%,-.5%); }
+    to  { transform:scale(1.05) translate( 1%, .5%); }
+  }
+
+  /* --- Ship: scaled down, placed lower-left, light bounce --- */
+  .ship-box{
+    position:absolute;
+    left:var(--ship-x); top:var(--ship-y);
+    width:var(--ship-size); aspect-ratio:1376 / 768;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+  }
+  .ship-align{ width:100%; height:100%;
+    transform:translate(16%,-7%);   /* aligns ship art centre to box centre */ }
+  .ship{ width:100%; height:100%; object-fit:contain;
+         animation:bounce 4.8s ease-in-out infinite; will-change:transform; }
+  @keyframes bounce{
+    0%,100%{ transform:translateY(-2%) rotate(-.5deg); }
+    50%    { transform:translateY( 2%) rotate( .5deg); }
+  }
+
+  /* --- Logo: full-frame, pulsing light-blue glow --- */
+  .logo{ animation:glow 3.2s ease-in-out infinite; will-change:filter; }
+  @keyframes glow{
+    0%,100%{ filter:drop-shadow(0 0 6px  rgba(var(--glow),.35))
+                    drop-shadow(0 0 14px rgba(var(--glow),.20)); }
+    50%    { filter:drop-shadow(0 0 14px rgba(var(--glow),.75))
+                    drop-shadow(0 0 34px rgba(var(--glow),.45)); }
+  }
+
+  /* --- START button + hint --- */
+  .ui{
+    position:absolute; left:50%; top:var(--btn-y);
+    transform:translate(-50%,-50%);
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+    z-index:5; width:100%;
+  }
+  .start{
+    min-width:min(360px,42%); padding:16px 40px;
+    font-size:clamp(18px,2.4vw,26px); letter-spacing:6px; font-weight:bold;
+    color:#eaf3ff; text-transform:uppercase;
+    background:linear-gradient(180deg,#3f79d6,#254e9c);
+    border:1px solid rgba(var(--glow),.7); border-radius:10px;
+    cursor:pointer; box-shadow:0 4px 20px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.25);
+    transition:transform .12s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .start:hover{ transform:translateY(-2px); filter:brightness(1.12);
+                box-shadow:0 6px 26px rgba(var(--glow),.55), inset 0 1px 0 rgba(255,255,255,.3); }
+  .start:active{ transform:translateY(0); }
+
+  .hint{ color:rgba(210,224,250,.75); font-size:clamp(12px,1.4vw,15px); letter-spacing:1px; }
+  .hint kbd{
+    font-family:inherit; padding:2px 9px; margin:0 2px;
+    background:rgba(20,32,58,.75); border:1px solid rgba(var(--glow),.4);
+    border-radius:5px; box-shadow:0 1px 0 rgba(0,0,0,.5);
+  }
+
+  #root{ transition:opacity .6s ease; }
+
+  @media (prefers-reduced-motion: reduce){ .bg,.ship,.logo{ animation:none; } }
+</style>
+</head>
+<body>
+  <div id="root">
+    <div class="bgfill"></div>
+    <div class="frame">
+      <img class="full bg"   src="Assets/Start_Menu/Menu_1_background.png" alt="">
+      <div class="ship-box"><div class="ship-align">
+        <img class="ship" src="Assets/Start_Menu/Menu_2_Ship.png" alt="">
+      </div></div>
+      <img class="full logo" src="Assets/Start_Menu/Menu_3_logo.png" alt="">
+
+      <div class="ui">
+        <button class="start" id="start">Start</button>
+        <div class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> to begin</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function startGame(){
+      document.getElementById('root').style.opacity = 0;
+      console.log('START');              // hook up to the game here
+    }
+    document.getElementById('start').addEventListener('click', startGame);
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); startGame(); }
+    });
+  </script>
+</body>
+</html>
