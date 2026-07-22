@@ -9,7 +9,7 @@ $root  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $build = Join-Path $root "dist\build"
 $A     = Join-Path $build "Assets"
 $index = Join-Path $build "index.html"
-$zip   = Join-Path $root "StarGear - Episode 0 - The Ghost Signal - v0.3.zip"
+$zip   = Join-Path $root "StarGear - Episode 0 - The Ghost Signal - v0.4.zip"
 
 # ---------- 1. stage a clean tree ----------
 if (Test-Path $build) { Remove-Item $build -Recurse -Force }
@@ -68,6 +68,11 @@ $converted = @()
 foreach ($f in Get-ChildItem "$A\CG" -File -Filter *.png) {
   $converted += (To-Jpeg $f.FullName 1920 88)
 }
+# NOTE: the four station dock interiors (Waypoint_Hub/Veil_Anchorage/Quarry_Station/
+# Salvage_Reach.png) are opaque and look like JPEG candidates, but the iso builds their
+# path DYNAMICALLY (`Assets/${s.name.replace(/ /g,"_")}.png`), so the literal .png->.jpg
+# rewrite below can't reach it and the built game would silently fall back to the flat
+# fill. They stay PNG (~6 MB) unless the loader grows a .jpg retry.
 foreach ($n in @("Bridge.png","Bridge Red Alert.png","Bg03.png","bg04.png","bg06.png","START_SCREEN.png","THANKS.png","DEFEAT.png")) {
   $p = Join-Path $A $n; if (Test-Path $p) { $converted += (To-Jpeg $p 0 88) }
 }

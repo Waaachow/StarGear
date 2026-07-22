@@ -54,7 +54,13 @@ per-hull attack visuals · SFX layer · save/load · **title-screen Load Game** 
    and `BOSS_SHIPS` for unique hulls with a per-hull draw `scale`.
 4. **Mix playtest** — `SFX_VOL` levels were set before the audio existed. `ui_select` (~0.9s vs a
    0.15s spec) and `scrap` (~0.5s) are still trimmed in code and would be better regenerated short.
-5. **Not yet packaged** — nothing since the v0.3 zip (2026-07-18) is in a build.
+5. ✅ **Packaged 2026-07-22** — `StarGear - Episode 0 - The Ghost Signal - v0.4.zip` built
+   (~407 files, ~137 MB; up from 74.6 mostly on clean char art + new VO + station art).
+   ⚠️ **The four dock interiors stay PNG, not JPEG** — the iso builds their path dynamically
+   (`Assets/${s.name.replace(/ /g,"_")}.png`, [iso_grid_prototype.html:458]), so the build's
+   literal `.png→.jpg` rewrite can't reach it; converting them shipped flat-fill dock screens.
+   Documented in `build_itch.ps1`; don't re-add them to the JPEG list without a `.jpg` retry
+   in the loader. `char/` left at native PNG (needs alpha). Historical note below:
    ⚠️ **This entry used to claim the build script was broken; it wasn't.** Checked properly
    2026-07-21: `START_SCREEN.png` still exists *and* its compression step is guarded by
    `Test-Path`, and `Assets/`+`audio/` are copied **recursively** — so `Start_Menu/`, `ui/`,
@@ -67,8 +73,9 @@ per-hull attack visuals · SFX layer · save/load · **title-screen Load Game** 
      (the iso references `Assets/CG` too and would have pointed at a deleted file), and the
      CG JPEG cap is general rather than CG02-by-name.
    Current zip would land ~80 MB, up from 74.6.
-6. **`DEVLOG-v0.4.md` predates most of this** — no mention of the station keepers, their VO,
-   Drax, or any of the 07-21 work. Needs a pass before the export.
+6. ✅ **`DEVLOG-v0.4.md` is current (verified 2026-07-22)** — covers the keepers + VO, all
+   three bounty identities, the economy pass (spread, intel, sell-at-profit guard), combat
+   barks, Field Manual/tips, menu restructure and the mixer. Ready to post as-is.
 7. ~~**Station art**~~ — ✅ **complete 2026-07-21.** 4/4 backdrops, 4/4 space sprites, 4/4 keeper
    portraits, the dock-screen re-layout, and welcome/send-off dialogue for each keeper, all voiced.
 
