@@ -65,7 +65,7 @@ Calm confidence. "Target neutralised" (10) is a clinical note, not a cheer.
 1. Shields up. Ten percent is ten percent.
 2. Deflectors online. Mind the gaps.
 3. Bracing the grid.
-4. Scanning — I can read their whole hand now.
+4. Scan complete — I can see everything they've got.
 5. Got their specs. Aim for the seams.
 6. Sensors have them cold.
 7. Jamming their comms — blind for a beat.

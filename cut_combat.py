@@ -38,7 +38,7 @@ LINES = {
  "Kael":  ["Shields up. Ten percent is ten percent.",
            "Deflectors online. Mind the gaps.",
            "Bracing the grid.",
-           "Scanning — I can read their whole hand now.",
+           "Scan complete — I can see everything they've got.",
            "Got their specs. Aim for the seams.",
            "Sensors have them cold.",
            "Jamming their comms — blind for a beat.",

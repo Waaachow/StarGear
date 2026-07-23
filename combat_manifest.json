@@ -115,61 +115,61 @@
   {
    "file": "kael_01.mp3",
    "start": 0.0,
-   "end": 2.1,
+   "end": 2.26,
    "text": "Shields up. Ten percent is ten percent."
   },
   {
    "file": "kael_02.mp3",
-   "start": 2.46,
-   "end": 5.62,
+   "start": 2.76,
+   "end": 5.88,
    "text": "Deflectors online. Mind the gaps."
   },
   {
    "file": "kael_03.mp3",
-   "start": 5.92,
-   "end": 7.24,
+   "start": 6.16,
+   "end": 7.46,
    "text": "Bracing the grid."
   },
   {
    "file": "kael_04.mp3",
-   "start": 7.48,
-   "end": 9.61,
-   "text": "Scanning \u2014 I can read their whole hand now."
+   "start": 7.74,
+   "end": 10.81,
+   "text": "Scan complete \u2014 I can see everything they've got."
   },
   {
    "file": "kael_05.mp3",
-   "start": 9.61,
-   "end": 11.9,
+   "start": 10.92,
+   "end": 13.58,
    "text": "Got their specs. Aim for the seams."
   },
   {
    "file": "kael_06.mp3",
-   "start": 12.24,
-   "end": 13.68,
+   "start": 13.84,
+   "end": 15.39,
    "text": "Sensors have them cold."
   },
   {
    "file": "kael_07.mp3",
-   "start": 13.92,
-   "end": 16.81,
+   "start": 15.56,
+   "end": 18.22,
    "text": "Jamming their comms \u2014 blind for a beat."
   },
   {
    "file": "kael_08.mp3",
-   "start": 16.98,
-   "end": 19.3,
+   "start": 18.5,
+   "end": 20.89,
    "text": "Scrambled. That bought us a turn."
   },
   {
    "file": "kael_09.mp3",
-   "start": 19.46,
-   "end": 21.22,
+   "start": 21.04,
+   "end": 22.86,
    "text": "Their targeting just went dark."
   },
   {
    "file": "kael_10.mp3",
-   "start": 21.42,
-   "end": 22.24,
+   "start": 23.02,
+   "end": 23.86,
    "text": "Target neutralised."
   }
  ],

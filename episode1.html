@@ -38,9 +38,14 @@
         padding:0 2vw; pointer-events:none;}
   .char{position:relative; display:flex; flex-direction:column; align-items:center;
         justify-content:flex-end; width:clamp(170px,21vw,290px); height:86vh;
+        flex:0 0 auto; z-index:1;   /* never shrink — a crowded stage overlaps instead (below) */
         opacity:.85; transform:translateY(10px); transition:opacity .4s ease, transform .4s ease, filter .4s ease;
         filter:brightness(.45) saturate(.8);}
-  .char.active{opacity:1; transform:translateY(0); filter:brightness(1) saturate(1);}
+  .char.active{opacity:1; transform:translateY(0); filter:brightness(1) saturate(1); z-index:3;}
+  /* five or six on stage: keep everyone full-size and overlap shoulders; the active
+     speaker pops to the front (z-index above). rebuildCast stamps data-n. */
+  #cast[data-n="5"] .char{margin:0 -1.2vw;}
+  #cast[data-n="6"] .char{margin:0 -2.8vw;}
   .char::before{content:""; position:absolute; bottom:18%; left:50%; transform:translateX(-50%);
         width:78%; height:46%; opacity:0; filter:blur(28px); transition:opacity .4s ease; z-index:0;
         background:radial-gradient(ellipse at center, var(--c,#46c7ff) 0%, transparent 65%);}
@@ -733,6 +738,7 @@ function buildCard(who){
 }
 function rebuildCast(){
   castEl.innerHTML = ""; cardOf = {};
+  castEl.dataset.n = present.length;    // drives the crowded-stage overlap CSS
   present.forEach(buildCard);
   present.forEach(updateCard);
 }
@@ -1093,8 +1099,8 @@ function hideGameplay(){
 function buildMissionLog(){
   const items=[]; let active=0;
   EP1.forEach((b,i)=>{
-    if((b.type==="travel"||b.type==="combat") && i<=beatIdx){
-      const status = i===beatIdx ? "active" : "done";
+    if((b.type==="travel"||b.type==="combat") && (freePlay || i<=beatIdx)){
+      const status = (!freePlay && i===beatIdx) ? "active" : "done";
       if(status==="active") active=items.length;
       items.push({
         title: `${b.loc} — ${b.title}`,
@@ -1104,6 +1110,15 @@ function buildMissionLog(){
       });
     }
   });
+  // Free play — post-credits, or a loaded free-roam save — runs outside the beat
+  // list, so `i<=beatIdx` used to return NOTHING and the STORY tab sat empty.
+  // The whole episode is behind you at that point: show it as the completed log,
+  // topped with the open-sector entry as the active line.
+  if(freePlay){
+    active = items.length;
+    items.push({ title:"Open Sector — Free Play", kind:"Free Play", status:"active",
+                 text:"Episode 0 complete. The sector stays open — bounties, side jobs and trade are all still live." });
+  }
   return { items, active };
 }
 window.addEventListener("message", (e)=>{
@@ -1596,11 +1611,11 @@ document.addEventListener("keydown",(e)=>{
   // The load picker owns the keyboard while it's up, or Space would start a new game
   // behind it. Esc backs out.
   if(!document.getElementById("loadPanel").classList.contains("hidden")){
-    if(e.code==="Escape"){ e.preventDefault(); closeLoadPanel(); }
+    if(e.code==="Escape" || e.code==="KeyQ"){ e.preventDefault(); closeLoadPanel(); }
     return;
   }
-  // free play has no story left to advance — Esc is the only way out, back to the title
-  if(freePlay){ if(e.code==="Escape"){ e.preventDefault(); toStartMenu(); } return; }
+  // free play has no story left to advance — Q / Esc is the way out, back to the title
+  if(freePlay){ if(e.code==="Escape" || e.code==="KeyQ"){ e.preventDefault(); toStartMenu(); } return; }
   if(!endOverlay.classList.contains("hidden")){           // "To Be Continued" — advance → title
     if(advanceKey || e.code==="KeyR"){ e.preventDefault(); toStartMenu(); }
     return;

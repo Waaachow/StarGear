@@ -50,6 +50,7 @@
     Scan: <span class="keys">F</span> &nbsp;|&nbsp;
     Dock: <span class="keys">E</span> &nbsp;|&nbsp;
     Menu: <span class="keys">Enter / M</span> &nbsp;|&nbsp;
+    Back: <span class="keys">Q</span> &nbsp;|&nbsp;
     Grid: <span class="keys">G</span>
     <span id="status" style="float:right; color:#8b949e;"></span>
   </div>
@@ -562,6 +563,24 @@ function cycleCrewSlot(c, slot) {
     c.slot0.equipped = avail[(cur + 1 + avail.length) % avail.length];
   } else if (avail.length === 0 && opts.length > 1) {
     c.slot0.equipped = (c.slot0.equipped + 1) % opts.length;
+  }
+  saveCrewEquip();
+}
+// Crew action swaps persist like the ship loadout does: across a run's segment
+// reloads (the episode reloads this iframe on every beat) and inside save slots.
+// Without this, starting a story mission silently reset every swap to default.
+const CREWEQ_KEY = "stargear_creweq_v1";
+function saveCrewEquip() {
+  try {
+    const m = {}; for (const c of CREW) m[c.name] = c.slot0.equipped;
+    localStorage.setItem(CREWEQ_KEY, JSON.stringify(m));
+  } catch (e) {}
+}
+function applyCrewEquip(m) {
+  if (!m || typeof m !== "object") return;
+  for (const c of CREW) {
+    const k = m[c.name];
+    if (Number.isInteger(k) && k >= 0 && k < c.slot0.options.length) c.slot0.equipped = k;
   }
 }
 
@@ -1460,6 +1479,8 @@ function update(dt) {
   tickChatter(dt);                                           // crew banter: region changes + idle timer
   tickKeeper(dt);                                            // station keeper's line + the leaving beat
   tickSides();                                               // advance the active side mission
+  // a tip that fired while a Y/N prompt was up waits its turn here
+  if (!tutorialOpen && !objectivePrompt && !dockPrompt && _tutQueue.length) showTutorial(_tutQueue.shift());
   if (menuOpen || objectivePrompt || dockPrompt || tutorialOpen) return;   // menu / prompt / tutorial up → game paused
   // per-tile rise/drop
   for (let x = 0; x < GRID_SIZE; x++)
@@ -2646,7 +2667,10 @@ function say(trigger) {
 }
 // called every frame from update(): region changes + the idle timer
 function tickChatter(dt) {
-  if (combat || menuOpen || tutorialOpen) { chatterIdle = 0; return; }
+  // the prompt checks matter: this tick runs BEFORE update()'s pause gate, and it can
+  // fire a first-time tip (cargo, below) — which used to pop on top of the docking /
+  // story Y/N panel (Brett's overlapping-popups defect)
+  if (combat || menuOpen || tutorialOpen || objectivePrompt || dockPrompt) { chatterIdle = 0; return; }
   const rg = currentRegion();
   if (rg !== _lastRegion) {
     const key = { [REGION.NEBULA]: "enterNebula", [REGION.MOON]: "enterMoon",
@@ -2748,7 +2772,7 @@ const CREW_BARKS = {
     { who: "Kael", text: "Bracing the grid.", vo: "kael_03.mp3" },
   ],
   "kael-scan": [
-    { who: "Kael", text: "Scanning — I can read their whole hand now.", vo: "kael_04.mp3" },
+    { who: "Kael", text: "Scan complete — I can see everything they've got.", vo: "kael_04.mp3" },
     { who: "Kael", text: "Got their specs. Aim for the seams.", vo: "kael_05.mp3" },
     { who: "Kael", text: "Sensors have them cold.", vo: "kael_06.mp3" },
   ],
@@ -3198,7 +3222,7 @@ function dockAt(s) {
   dockPrompt = null;
   touchStock(s.id);                       // catch this station's shelves up on arrival
   recordIntel(s.id);                      // and remember what it's paying today
-  dockedAt = s; stationTab = 0; stationSel = 0; stationMsg = "";
+  dockedAt = s; stationTab = 0; stationSel = 0; stationMsg = ""; stationConfirm = null;
   menuOpen = true; menuView = "station";
   mapOpen = false;
   dockLeaving = 0;
@@ -3914,6 +3938,9 @@ function clog(msg) { combat.log.unshift(msg); if (combat.log.length > 3) combat.
 
 function startCombat(trigger) {
   mapOpen = false; menuOpen = false;     // drop the map/menu overlays if they were open
+  // Where the ship stood when the fight began — restored on exit. Captured before
+  // the Nexus arena reframe below so even that fight puts you back where you were.
+  const entryOX = world.worldOriginX, entryOY = world.worldOriginY;
   bgm("combat");                         // swap to the battle track
   showTutorial("combat");                // first-ever fight → explain the rules
   // a battle at the Command Nexus is the BOSS fight (the fortress itself, no other
@@ -3938,6 +3965,16 @@ function startCombat(trigger) {
     }
     list = b.parts; bossMeta = b.meta;
   } else {
+    // Mission 2 at the Nexus: same fixed framing as the finale. The fortress is the
+    // SUBJECT of this fight, and without this its on-screen position varied with the
+    // approach direction carried in `start=` (Steve's v0.4 #14). The Nexus stays
+    // dormant — only the finale wakes it — and entryOrigin (captured above) still
+    // returns the player to their true approach position afterwards.
+    if (MISSION_MODE && COMBAT_AT === "nexus") {
+      world.worldOriginX = nz.cx - NEXUS_ARENA_CELL.gx;
+      world.worldOriginY = nz.cy - NEXUS_ARENA_CELL.gy;
+      regenerateGrid();
+    }
     // The wandering hulls right on top of you make up the battle: the ship you
     // collided with is guaranteed to appear (first), then any other nearby patrols,
     // then random hulls to fill out the encounter size.
@@ -3974,6 +4011,7 @@ function startCombat(trigger) {
               hp: playerMaxHp(), maxhp: playerMaxHp(), ammo: START_AMMO, shieldPct: 0 },
     enemies: list, boss: bossMeta, flashes: [], explosions: [], shots: [], floaters: [], log: [], pending: null,
     trigger: trigger || null,                  // kept so a lost story fight can restage itself
+    entryOrigin: { x: entryOX, y: entryOY },   // world position to restore when the fight ends
     bountyId: pendingBountyId,                 // set when this fight IS a bounty contract
     // Each boss announces itself: an explicit `banner` if the spec sets one, otherwise its
     // own name. ("THE NEXUS AWAKENS" used to be hardcoded here, so every bounty boss
@@ -3984,6 +4022,7 @@ function startCombat(trigger) {
                              : "COMBAT!",
               kind: bossMeta ? "enemy" : "info", t: 1600, dur: 1600 },
   };
+  if (bossMeta) faceBossPartsAtPlayer();       // open facing the player, not their spawn facing
   bossSay = null; stopBossVO();                // no leftover barks from the last fight
   crewBark = null; stopCrewBarkVO(); crewBarkLast = -1e9;   // and no leftover crew barks
   // A boss with encounter art opens ON the art: the splash goes up on the very first
@@ -4242,7 +4281,7 @@ function targetPrompt(t) {
   else if (t.kind === "crew") ask = "click a crew member";
   else if (t.kind === "role") ask = "click a crew member to assume their role";
   else ask = "";
-  return nm + " — " + ask + "   ·   Esc / right-click cancels";
+  return nm + " — " + ask + "   ·   Q / right-click cancels";
 }
 
 // Clicking a crew face opens a small menu: USE their assigned action, or CHANGE
@@ -4277,7 +4316,7 @@ function changeAction(i) {
 function assignAction(i, slot, optIdx, spendCi) {
   if (spendCi == null) spendCi = i;
   const c = CREW[i];
-  if (slot === 0) c.slot0.equipped = optIdx;          // only slot 1 holds an ability today
+  if (slot === 0) { c.slot0.equipped = optIdx; saveCrewEquip(); }   // only slot 1 holds an ability today
   clog(c.name + " reassigns Slot " + (slot + 1) + " to " + c.slot0.options[optIdx].name + ".");
   spendAction(spendCi);
 }
@@ -4449,10 +4488,12 @@ function applyEnemyTarget(name, e) {
     // borrows — scanning the Wolfpack's flagship shouldn't just tick "Dread" — but an
     // escort with a real hull still credits that hull.
     if (e.ship && e.ship.shipName) discoverShip(e.ship.shipName);
-    // Only the CORE unlocks the contract's own codex entry. Crediting it for any boss
-    // part meant scanning a throwaway escort revealed the target's card (and ticked
-    // "Know Your Enemy") without ever identifying the flagship.
-    if (e.boss && e.part === "core") discoverShip(bossDexId());
+    // Any piece OF the boss identifies the boss (Steve, v0.5): the core, a Nexus
+    // shield generator, a Tithe blast plate — scan whichever you can reach and the
+    // codex entry unlocks. The anti-cheese rule survives via the hull check: an
+    // ESCORT (a Hound) is its own ship, not a piece of the flagship, so scanning
+    // one still credits only its own hull.
+    if (e.boss && (e.part === "core" || !e.ship)) discoverShip(bossDexId());
   }
   else if (name === "Transmission") {
     if (Math.random() < JAM_CHANCE) { e.skipTurn = true; clog("Transmission jams the enemy — it loses its next action."); crewBarkSay("kael-jam"); }
@@ -4958,13 +4999,19 @@ function bossAdvance() {
 function updateBossPhase() {
   const b = combat.boss; if (!b) return;
   bossSpec().updatePhase(b);
-  faceBossPartsAtPlayer();               // boss ships don't move, so nothing else turns them
+  // Boss ships don't move, so nothing else turns them — but only on THEIR phase:
+  // tracking the player every frame meant they visibly swivelled while you took
+  // your own turn (Steve, v0.4). They now face you at fight start (startCombat)
+  // and re-face when the turn passes to them.
+  if (combat.phase !== "player") faceBossPartsAtPlayer();
   bossCheckHpLines();                    // "you made me earn it" / "she still remembers war"
   // Killing the CORE ends the fight even if lesser parts (escorts, armour plates)
   // are still standing — otherwise the "all enemies dead" win check never fires.
   if (!bossCore() && combat.enemies.length) {
     bossTalk("defeat");                  // last words, over the win banner
-    for (const e of combat.enemies) spawnExplosion(e.gx, e.gy, false);
+    // swept survivors (escorts still up when the flagship falls, leftover shield
+    // generators) explode AND pay their salvage — they died, however it happened
+    for (const e of combat.enemies) { spawnExplosion(e.gx, e.gy, false); grantScrapFor(e); }
     combat.enemies = [];
     winCombat();
   }
@@ -5629,9 +5676,16 @@ function drawFloaters() {
 // If the hold is full nothing is taken and the floater says so — that's the nudge
 // back to a station, since scrap left behind is gone for good.
 function grantScrapFor(e) {
-  if (!e || e.boss) return;                              // boss parts aren't salvage
-  sideKills++;                                           // counts toward a "kill N" mission step
-  const base = (e.ship && e.ship.profile && e.ship.profile.scrap) || 6;
+  if (!e) return;
+  // "kill N" side-job steps still count regular hulls only — a boss piece is a
+  // contract or a story beat, not an odd-job tally mark
+  if (!e.boss) sideKills++;
+  // Everything that dies pays out now (Steve, v0.5): boss SHIPS carry real scrap
+  // values in their profiles (Blood Crown 40, Hound 8, Half-Light 26, Tithe 34 —
+  // defined since v0.4 but never paid); fortress pieces pay small for a shield
+  // generator, big for the core.
+  const base = (e.ship && e.ship.profile && e.ship.profile.scrap)
+            || (e.boss ? (e.part === "core" ? 30 : 5) : 6);
   const amt = Math.max(1, Math.round(base * (0.8 + Math.random() * 0.4)));
   const got = addScrap(amt);
   spawnFloater(e.gx, e.gy, got ? "+" + got + " SCRAP" : "HOLD FULL", got ? "#8dffb0" : "#ff9a6a");
@@ -5773,13 +5827,18 @@ function regenerateGrid() {
       world.grid[x][y] = generateTile(world.worldOriginX + x, world.worldOriginY + y, 0.0);
   world.droppingTiles.length = 0;
 }
-// Slide the grid so the player's combat tile becomes the centre, then free-roam.
+// Exit combat back onto the map AT THE SPOT THE FIGHT STARTED. Combat movement is
+// tactical, not travel — carrying it over meant the ship resurfaced a few squares
+// from where the player remembered stopping, which read as a position glitch (two
+// playtesters), and a combat Space Hop was silently worth free sector distance.
+// The camera still starts on the ship's final combat tile and eases home, so the
+// return reads as flying back rather than a cut.
 function recenterAndExit() {
   const p = combat.player;
   const dx = (p.gx - p.gy) * HALF_W;
   const dy = (p.gx + p.gy) * HALF_H - CENTER_WORLD_Y;
-  world.worldOriginX += p.gx - CENTER;
-  world.worldOriginY += p.gy - CENTER;
+  world.worldOriginX = combat.entryOrigin.x;
+  world.worldOriginY = combat.entryOrigin.y;
   regenerateGrid();
   world.shipFacing = p.facing;
   world.moving = false;
@@ -6020,7 +6079,7 @@ function combatPanelLayout() {
   const pad = 14, w = COMBAT_PANEL_W;
   const x = r.width - w - 16, y = 56;
   const shieldOn = combat && combat.player && combat.player.shieldPct > 0;
-  const nStats = 2 + (shieldOn ? 1 : 0);           // HULL, ACTIONS, (SHIELD)
+  const nStats = 3;                                // HULL, SHIELD (always listed), ACTIONS
   const headerH = pad + 12 + 20 * nStats + 12;
   const facesTop = y + headerH;
   const cols = 2, R = 26, labelBlock = 26, rowGap = 8;
@@ -6098,11 +6157,14 @@ function drawCombatPanel() {
   ctx.fillStyle = "#7fe3f5";
   ctx.fillText("COMBAT · TURN " + combat.turn + (combat.phase === "enemy" ? " · enemy…" : ""), x + pad, y + pad + 12);
   ctx.font = "12px Consolas, monospace";
+  // SHIELD is always listed — dimmed "down" when inactive — so raising it reads as a
+  // visible change and the ship's defence is never a mystery (Steve, v0.4)
   const stats = [
     ["HULL",    Math.max(0, p.hp) + "/" + p.maxhp,                    "#8affc0"],
+    ["SHIELD",  L.shieldOn ? "−" + Math.round(p.shieldPct * 100) + "% dmg" : "down",
+                L.shieldOn ? "#8ad8ff" : "rgba(150,200,220,0.45)"],
     ["ACTIONS", combat.actionsLeft + "/" + ACTIONS_PER_TURN,          "#9cd2ff"],
   ];
-  if (L.shieldOn) stats.push(["SHIELD", Math.round(p.shieldPct * 100) + "%", "#8ad8ff"]);
   stats.forEach((s, i) => {
     const yy = y + pad + 12 + 20 * (i + 1);
     ctx.fillStyle = "#6fa6ba"; ctx.textAlign = "left";  ctx.fillText(s[0], x + pad, yy);
@@ -6247,6 +6309,23 @@ function drawCombat() {
       ctx.restore();
     }
     drawShip(cs.x, cs.y - 18 * scale + bob, e.facing, null, isEnemy ? enemyShipSet(e) : null, scale);
+    // Kael's shield, visibly ON the ship: a pulsing iso bubble in the shield-stat
+    // blue, so "shield up" is readable from the arena and not just the panel
+    if (ent.player && p.shieldPct > 0) {
+      const puls = 0.55 + 0.35 * Math.sin(gTime * 0.006);
+      const bx = cs.x, by = cs.y - 14 + bob;
+      ctx.save();
+      const halo = ctx.createRadialGradient(bx, by, 6, bx, by, 48);
+      halo.addColorStop(0, `rgba(138,216,255,${0.16 * puls})`);
+      halo.addColorStop(1, "rgba(138,216,255,0)");
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.ellipse(bx, by, 46, 32, 0, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = `rgba(200,240,255,${0.20 * puls})`; ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.ellipse(bx, by, 38, 25, 0, 0, 6.283); ctx.stroke();
+      ctx.strokeStyle = `rgba(138,216,255,${0.5 + 0.35 * puls})`; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(bx, by, 38, 25, 0, 0, 6.283); ctx.stroke();
+      ctx.restore();
+    }
     drawHpBar(cs.x, cs.y - 42 * scale, e.hp, e.maxhp, isEnemy ? "#ff6b6b" : "#7ee787");
     // Kael's Scan reveals exact HP + shield above the enemy
     if (isEnemy && isScanned(ent.e)) {
@@ -6394,10 +6473,10 @@ function combatGuidanceText() {
   if (combat.targeting) return targetPrompt(combat.targeting);
   if (combat.actionPick) {
     const ap = combat.actionPick, nm = CREW[ap.ci].name.toUpperCase(), m = ap.mode;
-    if (m === "changeSlot") return nm + " — pick which slot to change   ·   Esc cancels";
-    if (m === "changeAbility") return nm + " — pick the ability to assign (uses the turn)   ·   Esc cancels";
-    if (ap.borrower != null) return CREW[ap.borrower].name.toUpperCase() + " as " + nm + " — choose an action   ·   Esc cancels";
-    return nm + " — use their action, or change it   ·   Esc cancels";
+    if (m === "changeSlot") return nm + " — pick which slot to change   ·   Q cancels";
+    if (m === "changeAbility") return nm + " — pick the ability to assign (uses the turn)   ·   Q cancels";
+    if (ap.borrower != null) return CREW[ap.borrower].name.toUpperCase() + " as " + nm + " — choose an action   ·   Q cancels";
+    return nm + " — use their action, or change it   ·   Q cancels";
   }
   if (combat.actionsLeft <= 0) return "No actions left — click End Turn";
   if (combat.boss) return bossObjectiveText(combat.boss);   // each boss states its own phase objective
@@ -6502,6 +6581,14 @@ let crewSlotSel = 0;                       // highlighted action slot in the cha
 let dbSel = 0;                             // highlighted Ship Database cell
 let dbOpen = 0;                            // DEX_ENTRIES index of the open ship profile
 let scfgSel = 0;                           // Ship Config: selected module inventory row
+let scfgScroll = 0;                        // first visible inventory row (list scrolls, rows never shrink)
+let _scfgMaxRows = 6;                      // visible rows, measured by the draw (panel height dependent)
+// arrow-key navigation pulls the selection into view; free wheel-scrolling doesn't fight it
+function scfgFollowSel() {
+  if (scfgSel < 0) return;
+  if (scfgSel < scfgScroll) scfgScroll = scfgSel;
+  else if (scfgSel >= scfgScroll + _scfgMaxRows) scfgScroll = scfgSel - _scfgMaxRows + 1;
+}
 let scfgPlacing = null;                    // { id, rot } module being placed (position from scfgCursor)
 let scfgCursor = { cx: 0, cy: 0 };         // grid cell the ghost piece sits at
 let achSel = 0;                            // highlighted Achievements row
@@ -6753,12 +6840,14 @@ try {
     const rawK = localStorage.getItem(STOCK_KEY);
     if (rawK) { const k = JSON.parse(rawK) || {}; stationStock = k.s || {}; stockTouched = k.t || {}; }
     const rawM = localStorage.getItem(INTEL_KEY); if (rawM) marketIntel = JSON.parse(rawM) || {};
+    const rawQ = localStorage.getItem(CREWEQ_KEY); if (rawQ) applyCrewEquip(JSON.parse(rawQ));
   } else {
     localStorage.removeItem(ECON_KEY); localStorage.removeItem(BROKEN_KEY);
     localStorage.removeItem(OWNED_KEY); localStorage.removeItem(BOUNTY_KEY);
     localStorage.removeItem(POI_KEY);   localStorage.removeItem(SIDES_KEY);
     localStorage.removeItem(STOCK_KEY);          // fresh game = every market at baseline
     localStorage.removeItem(INTEL_KEY);          // ...and you've seen none of their prices
+    localStorage.removeItem(CREWEQ_KEY);         // ...and crew actions back to defaults
     // Seed capital. Starting on 0 coin put the commodity market out of reach until you'd
     // fought and sold scrap, so most of a first session never saw the trade loop at all.
     // ~2 lots of ore: enough to learn the system, not enough to skip earning it.
@@ -6789,7 +6878,8 @@ function readStoryProgress() {
 }
 function saveSnapshot() {
   return {
-    v: 3, at: Date.now(),                // v3 added econ.basis (rides inside econ) + intel
+    v: 4, at: Date.now(),                // v3 added econ.basis (rides inside econ) + intel; v4 crew swaps
+    creweq: (() => { const m = {}; for (const c of CREW) m[c.name] = c.slot0.equipped; return m; })(),
     ax: world.worldOriginX + CENTER, ay: world.worldOriginY + CENTER,
     facing: world.shipFacing,
     econ, broken: [...shipBroken], owned: [...shipOwned], loadout: shipLoadout,
@@ -6899,9 +6989,13 @@ function loadFromSlot(i) {
   world.moving = false; world.lateral = null; world.bufferedMove = DIR.NONE;
   world.cameraOffsetX = world.cameraOffsetY = 0;
   regenerateGrid();
+  // crew action swaps: reset to defaults, then apply what the save carries
+  // (pre-v4 saves have none — defaults are correct for those)
+  for (const c of CREW) c.slot0.equipped = 0;
+  applyCrewEquip(s.creweq);
   // rebuild everything derived, then re-persist so the live keys agree with the slot
   if (shipLoadout.length) recomputePower(); else autoPlaceDefault();
-  saveEcon(); saveBroken(); saveOwned(); saveLoadout(); saveBounties(); saveEp0(); saveAch(); saveFog(); savePoi();
+  saveEcon(); saveBroken(); saveOwned(); saveLoadout(); saveBounties(); saveEp0(); saveAch(); saveFog(); savePoi(); saveCrewEquip();
   try { localStorage.setItem(DEX_KEY, JSON.stringify([...shipDex])); } catch (e) {}
   syncBountyCounters();
   bountyDeclined = true;                  // don't instantly re-trigger a bounty you saved on top of
@@ -6950,7 +7044,7 @@ function activateMenu(i) {
   switch (MENU_ITEMS[i].label) {
     case "Ship Status": showStub("SHIP STATUS", "Hull integrity, shields and system readouts — coming soon."); break;
     // one SHIP screen, tabbed: CONFIGURATION (the fit-grid) and CARGO (the hold)
-    case "Ship": menuView = "shipConfig"; shipTab = 0; scfgSel = 0; scfgPlacing = null;
+    case "Ship": menuView = "shipConfig"; shipTab = 0; scfgSel = -1; scfgScroll = 0; scfgPlacing = null;   // -1: nothing inspected yet, so a first click can never instant-grab
             showTutorial("modules"); break;
     case "Save / Load": menuView = "saveload"; saveSel = 0; saveMsg = ""; break;
     case "Crew": menuView = "crew"; crewSel = 0; break;
@@ -6999,7 +7093,7 @@ function scfgModuleIdxAtCell(cx, cy) {
 }
 function handleMenuKey(e) {
   const k = e.key;
-  if (k === "Escape" || k === "m" || k === "M") {
+  if (k === "Escape" || k === "q" || k === "Q" || k === "m" || k === "M") {
     // in Ship Config, Esc first drops a held ghost (uninstalling it) before backing out
     if (menuView === "shipConfig" && scfgPlacing) { scfgPlacing = null; e.preventDefault(); return; }
     // the dock screen isn't part of the pause-menu tree — leaving it means undocking
@@ -7032,10 +7126,10 @@ function handleMenuKey(e) {
     if (k === "Enter") { cycleCrewSlot(CREW[crewOpen], crewSlotSel); e.preventDefault(); }
   } else if (menuView === "station") {
     const rows = stationRows(), n = Math.max(1, rows.length);
-    if (left)  { stationTab = (stationTab + STATION_TABS.length - 1) % STATION_TABS.length; stationSel = 0; stationMsg = ""; e.preventDefault(); }
-    if (right) { stationTab = (stationTab + 1) % STATION_TABS.length; stationSel = 0; stationMsg = ""; e.preventDefault(); }
-    if (up)    { stationSel = (stationSel + n - 1) % n; e.preventDefault(); }
-    if (down)  { stationSel = (stationSel + 1) % n; e.preventDefault(); }
+    if (left)  { stationTab = (stationTab + STATION_TABS.length - 1) % STATION_TABS.length; stationSel = 0; stationMsg = ""; stationConfirm = null; e.preventDefault(); }
+    if (right) { stationTab = (stationTab + 1) % STATION_TABS.length; stationSel = 0; stationMsg = ""; stationConfirm = null; e.preventDefault(); }
+    if (up)    { stationSel = (stationSel + n - 1) % n; stationConfirm = null; e.preventDefault(); }
+    if (down)  { stationSel = (stationSel + 1) % n; stationConfirm = null; e.preventDefault(); }
     if (k === "Enter") { const row = rows[stationSel]; if (row && row.act && row.ok) stationAction(row.act); e.preventDefault(); }
   } else if (menuView === "saveload") {
     if (up)   { saveSel = (saveSel + SAVE_SLOTS - 1) % SAVE_SLOTS; e.preventDefault(); }
@@ -7077,8 +7171,9 @@ function handleMenuKey(e) {
       if (k === "Enter" || k === " ") { scfgTryPlace(); e.preventDefault(); }
     } else {                                             // browsing the module inventory
       const list = scfgList(), n = Math.max(1, list.length);
-      if (up)   { scfgSel = (scfgSel + n - 1) % n; e.preventDefault(); }
-      if (down) { scfgSel = (scfgSel + 1) % n; e.preventDefault(); }
+      // scfgSel starts at -1 (nothing inspected) — the first arrow press lands on an end row
+      if (up)   { scfgSel = scfgSel < 0 ? n - 1 : (scfgSel + n - 1) % n; scfgFollowSel(); e.preventDefault(); }
+      if (down) { scfgSel = scfgSel < 0 ? 0 : (scfgSel + 1) % n; scfgFollowSel(); e.preventDefault(); }
       if (k === "Enter" && list[scfgSel]) { scfgStartPlacing(list[scfgSel].id); e.preventDefault(); }
     }
   } else if (menuView === "missions") {
@@ -7166,19 +7261,32 @@ function handleMenuClick(mx, my) {
     if (_menuHit.back && ptIn(_menuHit.back, mx, my)) menuView = "database";
   } else if (menuView === "shipConfig") {
     for (const t of (_menuHit.shipTabs || [])) if (ptIn(t, mx, my)) { shipTab = t.idx; scfgPlacing = null; return; }
-    for (const row of (_menuHit.scfg || [])) if (ptIn(row, mx, my)) { const l = scfgList(); scfgSel = row.idx; if (l[row.idx]) scfgStartPlacing(l[row.idx].id); return; }
+    // click selects (inspect); clicking the already-selected module picks it up —
+    // same idiom as the station rows, so an inspecting click can't unfit the ship
+    for (const row of (_menuHit.scfg || [])) if (ptIn(row, mx, my)) {
+      const l = scfgList(), m = l[row.idx]; if (!m) return;
+      if (scfgPlacing && scfgPlacing.id === m.id) return;      // already holding this one
+      if (scfgSel === row.idx) scfgStartPlacing(m.id);
+      else { scfgSel = row.idx; sfx("ui_select"); }
+      return;
+    }
     const cellPt = shipTab === 0 ? scfgCellAt(mx, my) : null;   // grid only lives on the CONFIGURATION tab
     if (cellPt) {
       if (scfgPlacing) { scfgCursor = cellPt; scfgClampCursor(); scfgTryPlace(); return; }
       const mi = scfgModuleIdxAtCell(cellPt.cx, cellPt.cy);
-      if (mi >= 0) { scfgSel = Math.max(0, scfgList().findIndex(m => m.id === shipLoadout[mi].id)); scfgStartPlacing(shipLoadout[mi].id); return; }
+      if (mi >= 0) {                                           // grid parts: inspect first, grab on the second click
+        const idx = scfgList().findIndex(m => m.id === shipLoadout[mi].id);
+        if (idx >= 0 && idx === scfgSel) scfgStartPlacing(shipLoadout[mi].id);
+        else { scfgSel = Math.max(0, idx); sfx("ui_select"); }
+        return;
+      }
     }
     if (_menuHit.back && ptIn(_menuHit.back, mx, my)) { scfgPlacing = null; menuView = "root"; }
   } else if (menuView === "station") {
-    for (const t of (_menuHit.stationTabs || [])) if (ptIn(t, mx, my)) { stationTab = t.idx; stationSel = 0; stationMsg = ""; return; }
+    for (const t of (_menuHit.stationTabs || [])) if (ptIn(t, mx, my)) { stationTab = t.idx; stationSel = 0; stationMsg = ""; stationConfirm = null; return; }
     for (const row of (_menuHit.station || [])) if (ptIn(row, mx, my)) {
       if (stationSel === row.idx && row.act && row.ok) stationAction(row.act);   // click again to confirm
-      else stationSel = row.idx;
+      else { stationSel = row.idx; stationConfirm = null; }
       return;
     }
     if (_menuHit.back && ptIn(_menuHit.back, mx, my)) requestUndock();
@@ -7438,7 +7546,7 @@ function drawMenu() {
   y += 12;
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
   ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
-  ctx.fillText("↑↓ move · Enter select · Esc close", x + 2, y);
+  ctx.fillText("↑↓ move · Enter select · Q close", x + 2, y);
   drawBackButton("✕ CLOSE");
   ctx.restore();
 }
@@ -7632,7 +7740,7 @@ function drawMissionsView(r) {
   wrapText(sel.text, dx, descTop, innerW, lh, maxLines);
 
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace"; ctx.textAlign = "center";
-  ctx.fillText("↑ / ↓ select   ·   M / Esc back", r.width / 2, top + totalH + 6);
+  ctx.fillText("↑ / ↓ select   ·   M / Q back", r.width / 2, top + totalH + 6);
   drawBackButton("◀ BACK");
 }
 
@@ -7698,7 +7806,7 @@ function drawOptionsView(r) {
             testingMode, "testing");
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-  ctx.fillText("M / Esc — back", r.width / 2, y + h - 18);
+  ctx.fillText("M / Q — back", r.width / 2, y + h - 18);
   drawBackButton("◀ BACK");
 }
 
@@ -7747,7 +7855,7 @@ const MANUAL = [
       "Each station is cheap in what its region produces and dear in what it lacks, so there's a real route to find. Every commodity row carries two hints: what's on the shelf here, and whether this is a good place to buy or to sell.",
       "Stock is finite and prices move with it. Buy a station out and the price climbs; dump a full hold and the local price collapses. A route pays best on its first run and recovers slowly, so no two-station loop prints coin forever.",
       { h: "LEAVING" },
-      "Esc, the UNDOCK tab or the back button all leave — each one gives the keeper their send-off first. Press again during it to go straight away.",
+      "Q, the UNDOCK tab or the back button all leave — each one gives the keeper their send-off first. Press again during it to go straight away.",
     ] },
   { title: "CARGO, SCRAP & COIN", sub: "What you're carrying and what it's worth",
     lines: [
@@ -7794,7 +7902,7 @@ const MANUAL = [
       "Battles are turn-based. You get " + ACTIONS_PER_TURN + " actions per turn, spent across the whole crew however you like — three actions from one crew member is legal, and sometimes right.",
       { h: "TAKING A TURN" },
       { k: "click  /  1 – 6", t: "select a crew member" },
-      { k: "Esc", t: "back out of an action before it's spent" },
+      { k: "Q", t: "back out of an action before it's spent (Esc also works — but in fullscreen the browser takes Esc to leave fullscreen, so prefer Q)" },
       { k: "Enter", t: "end the turn" },
       "Choose the crew member, then their action. Hover any action to see exactly what it does before you commit.",
       { h: "THE ACTION MENU" },
@@ -7871,7 +7979,7 @@ function drawManualView(r) {
   });
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
-  ctx.fillText("↑↓ select · Enter open · M / Esc back", r.width / 2, y + h - 14);
+  ctx.fillText("↑↓ select · Enter open · M / Q back", r.width / 2, y + h - 14);
   drawBackButton("◀ BACK");
 }
 
@@ -7956,7 +8064,7 @@ function drawManualPageView(r) {
   }
   ctx.textAlign = "center";
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
-  ctx.fillText((maxScroll > 0 ? "↑↓ scroll · " : "") + "← → chapter · M / Esc back",
+  ctx.fillText((maxScroll > 0 ? "↑↓ scroll · " : "") + "← → chapter · M / Q back",
                r.width / 2, y + h - 14);
   drawBackButton("◀ BACK");
 }
@@ -8016,7 +8124,7 @@ function drawAchievementsView(r) {
   });
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-  ctx.fillText("↑↓ move · ← → tabs · M / Esc — back", r.width / 2, y + h - 16);
+  ctx.fillText("↑↓ move · ← → tabs · M / Q — back", r.width / 2, y + h - 16);
   drawBackButton("◀ BACK");
 }
 
@@ -8045,6 +8153,10 @@ function stationRowTextW(row, pw) {
   return pw - 56 - rightW - (hasImg ? ROW_MUG + 14 : 0);
 }
 let stationTab = 0, stationSel = 0, stationMsg = "";
+// Handing back a job/bounty must be asked for twice: the act string is parked here on
+// the first activation and only executes if the second matches. Any tab switch or
+// selection change clears it — a stray click can't abandon work (Brett, v0.4).
+let stationConfirm = null;
 
 // rows for the current tab: { label, sub, cost, act, ok } — `ok` false = greyed out
 function stationRows() {
@@ -8179,6 +8291,10 @@ function moduleBlurb(m) {
 function stationAction(act) {
   if (!act) return;
   sfx("ui_select");
+  // was this same row just activated? (hand-back confirmation). Any OTHER action
+  // clears a pending confirm, so the guard can't be satisfied by unrelated clicks.
+  const confirmed = stationConfirm === act;
+  stationConfirm = null;
   const [kind, arg] = act.split(":");
   if (kind === "sell") {
     const r = sellAllScrap();
@@ -8231,9 +8347,19 @@ function stationAction(act) {
     const m = SIDE_BY_ID[arg];
     stationMsg = "Job accepted: " + m.title + ". First step: " + m.steps[0].text + ".";
   } else if (kind === "dropside") {
+    if (!confirmed) {
+      stationConfirm = act;
+      stationMsg = "Hand back \"" + (SIDE_BY_ID[arg] ? SIDE_BY_ID[arg].title : arg) + "\"? Progress is lost — activate again to confirm.";
+      return;
+    }
     handBackSide(arg);
     stationMsg = "Job handed back.";
   } else if (kind === "abandon") {
+    if (!confirmed) {
+      stationConfirm = act;
+      stationMsg = "Hand back the contract on " + (BOUNTY_BY_ID[arg] ? BOUNTY_BY_ID[arg].title : arg) + "? Activate again to confirm.";
+      return;
+    }
     handBackBounty(arg);
     stationMsg = "Contract handed back.";
   } else if (kind === "undock") {
@@ -8454,14 +8580,16 @@ function drawStationView(r) {
   }
   if (rows.length > maxRows) {
     ctx.textAlign = "right"; ctx.fillStyle = "rgba(150,200,220,0.5)"; ctx.font = "10px Consolas, monospace";
-    ctx.fillText((first + 1) + "–" + Math.min(rows.length, first + maxRows) + " of " + rows.length, px + pw - 20, top + bodyH - 30);
+    ctx.fillText((first + 1) + "–" + Math.min(rows.length, first + maxRows) + " of " + rows.length, px + pw - 20, top + bodyH - 32);
   }
-  // ---- footer: last action's result + controls ----
+  // ---- footer, two lines: the last action's result gets its OWN row above the key
+  // hints — sharing one line meant a long message ("Job accepted: …", the hand-back
+  // confirm) printed straight through the hint text (Brett's overlap defect)
   ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
   ctx.fillStyle = "#8dffb0"; ctx.font = "12px Consolas, monospace";
-  ctx.fillText(fitText(stationMsg, pw - 260), px + 24, top + bodyH - 14);
-  ctx.textAlign = "right"; ctx.fillStyle = "rgba(150,200,220,0.6)";
-  ctx.fillText("←→ tab · ↑↓ select · Enter confirm · Esc undock", px + pw - 20, top + bodyH - 14);
+  ctx.fillText(fitText(stationMsg, rows.length > maxRows ? pw - 160 : pw - 48), px + 24, top + bodyH - 32);   // share the row with the pager only when it's drawn
+  ctx.textAlign = "right"; ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
+  ctx.fillText("←→ tab · ↑↓ select · Enter confirm · Q undock", px + pw - 20, top + bodyH - 14);
   drawKeeperSay(r, visH, kp);            // over the panels, so a line is never buried
   drawBackButton("◀ UNDOCK");
 }
@@ -8566,7 +8694,7 @@ function drawCargoView(r) {
   ctx.fillText(String(econ.coin), bx + bw, ry + 6);
 
   ctx.textAlign = "center"; ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
-  ctx.fillText("← → tabs · Esc — back", r.width / 2, y + h - 16);
+  ctx.fillText("← → tabs · Q — back", r.width / 2, y + h - 16);
   drawBackButton("◀ BACK");
 }
 
@@ -8611,7 +8739,7 @@ function drawSaveLoadView(r) {
   ctx.fillStyle = "#8dffb0"; ctx.font = "12px Consolas, monospace";
   ctx.fillText(saveMsg, r.width / 2, y + h - 38);
   ctx.fillStyle = "rgba(150,200,220,0.6)";
-  ctx.fillText("↑↓ slot · Enter save · L load · Del clear · M / Esc back", r.width / 2, y + h - 16);
+  ctx.fillText("↑↓ slot · Enter save · L load · Del clear · M / Q back", r.width / 2, y + h - 16);
   drawBackButton("◀ BACK");
 }
 
@@ -8625,7 +8753,7 @@ function drawStubView(r) {
   ctx.fillStyle = "#cfe9f1"; ctx.font = "14px Consolas, monospace"; ctx.textAlign = "left";
   wrapText(stubMsg, x + 30, y + 92, w - 60, 20);
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace"; ctx.textAlign = "center";
-  ctx.fillText("Enter / M / Esc — back", r.width / 2, y + h - 18);
+  ctx.fillText("Enter / M / Q — back", r.width / 2, y + h - 18);
   drawBackButton("◀ BACK");
 }
 
@@ -8754,7 +8882,7 @@ function drawCrewView(r) {
   }
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-  ctx.fillText("←→ / hover select · Enter open · M/Esc back", r.width / 2, gridTop + ch + hintH - 6);
+  ctx.fillText("←→ / hover select · Enter open · M/Q back", r.width / 2, gridTop + ch + hintH - 6);
   drawBackButton("◀ BACK");
 }
 // how much wider the expanded (hovered) panel grows, sized off the base column.
@@ -8844,8 +8972,8 @@ function drawCrewCharView(r) {
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
   const hint = c.slot0.options.length > 1
-    ? "↑↓ slot · Enter swap action · M/Esc back"
-    : "↑↓ slot · M/Esc back";
+    ? "↑↓ slot · Enter swap action · M/Q back"
+    : "↑↓ slot · M/Q back";
   ctx.fillText(hint, r.width / 2, y + panelH + 22);
   drawBackButton("◀ CREW");
 }
@@ -8894,7 +9022,7 @@ function drawDatabaseView(r) {
   ctx.fillStyle = "#8dffb0"; ctx.font = "12px Consolas, monospace";
   ctx.fillText("◆ Scan enemy ships in battle (Kael's Scan) to reveal their full profile.", r.width / 2, hy);
   ctx.fillStyle = "rgba(150,200,220,0.6)";
-  ctx.fillText("Discovered " + foundCount + " / " + n + "   ·   ← → ↑ ↓ select · Enter open · M / Esc back", r.width / 2, hy + 18);
+  ctx.fillText("Discovered " + foundCount + " / " + n + "   ·   ← → ↑ ↓ select · Enter open · M / Q back", r.width / 2, hy + 18);
   drawBackButton("◀ BACK");
 }
 
@@ -8988,7 +9116,7 @@ function drawDbShipView(r) {
 
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-  ctx.fillText("M / Esc — back to database", r.width / 2, y + panelH + 22);
+  ctx.fillText("M / Q — back to database", r.width / 2, y + panelH + 22);
   drawBackButton("◀ DATABASE");
 }
 
@@ -9055,9 +9183,15 @@ function drawShipConfigView(r) {
   ctx.strokeStyle = "rgba(120,200,220,0.3)"; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(listX + 16, py0 + 36); ctx.lineTo(listX + listW - 16, py0 + 36); ctx.stroke();
   const list = scfgList();               // only modules you actually own
-  const rowsTop = py0 + 44, rowH = Math.min(48, (panelH - 56) / Math.max(1, list.length));
-  list.forEach((m, i) => {
-    const ry = rowsTop + i * rowH, mid = ry + (rowH - 6) / 2;
+  // Fixed-height rows that SCROLL — they used to shrink to cram the whole inventory
+  // in, so every module you bought made the list harder to read (Steve, v0.4).
+  const rowsTop = py0 + 44, rowH = 48;
+  const maxRows = Math.max(1, Math.floor((panelH - 68) / rowH));
+  _scfgMaxRows = maxRows;                // the key handler scrolls the selection into view with this
+  scfgScroll = Math.max(0, Math.min(scfgScroll, Math.max(0, list.length - maxRows)));
+  list.slice(scfgScroll, scfgScroll + maxRows).forEach((m, vi) => {
+    const i = scfgScroll + vi;
+    const ry = rowsTop + vi * rowH, mid = ry + (rowH - 6) / 2;
     const placed = shipLoadout.some(p => p.id === m.id), powered = shipPowered.has(m.id);
     const held = scfgPlacing && scfgPlacing.id === m.id, active = i === scfgSel;
     techPanel(listX + 10, ry, listW - 20, rowH - 6, 8, active, active ? m.color : "#2b5563");
@@ -9075,6 +9209,11 @@ function drawShipConfigView(r) {
     ctx.fillText(st[0], listX + listW - 22, mid);
     _menuHit.scfg.push({ x: listX + 10, y: ry, w: listW - 20, h: rowH - 6, idx: i });
   });
+  if (list.length > maxRows) {           // same pager idiom as the station rows
+    ctx.textAlign = "right"; ctx.fillStyle = "rgba(150,200,220,0.5)"; ctx.font = "10px Consolas, monospace";
+    ctx.fillText((scfgScroll + 1) + "–" + Math.min(list.length, scfgScroll + maxRows) + " of " + list.length + " · ↑↓ / wheel",
+                 listX + listW - 16, py0 + panelH - 12);
+  }
 
   // ---- right: blueprint grid ----
   techPanel(gpX, py0, gpW, panelH, 14, true, "#7fe3f5");
@@ -9108,6 +9247,32 @@ function drawShipConfigView(r) {
     scfgFillCells(cells, ox, oy, cell, ok ? "#7ee787" : "#ff5a5a", "#ffffff", 0.55);
   }
 
+  // ---- inspect readout: the selected module's card along the grid's bottom edge.
+  // First click selects a module (this card); the second click picks it up — hidden
+  // while a ghost is held so the bottom rows stay visible for placing. ----
+  if (!scfgPlacing && scfgSel >= 0 && list[scfgSel]) {
+    const m = list[scfgSel];
+    const placed = shipLoadout.some(p => p.id === m.id), powered = shipPowered.has(m.id);
+    const st = !placed ? ["NOT FITTED", "rgba(150,200,220,0.7)"]
+             : moduleBroken(m.id) ? ["✖ BROKEN", "#ff5a5a"] : powered ? ["● ON", "#7ee787"] : ["⚠ OFF", "#ff9e6b"];
+    const blurb = m.desc
+      || (m.action ? m.crew + "'s " + m.action + " — " + (ABILITY_DESC[m.action] || "")
+                   : "The reactor. Every module must trace a connection back here to be powered.");
+    const ch = 52, cy0 = oy + gridH - ch;
+    ctx.fillStyle = "rgba(4,10,16,0.88)"; ctx.fillRect(ox, cy0, gridW, ch);
+    ctx.strokeStyle = m.color; ctx.lineWidth = 1; ctx.strokeRect(ox + 0.5, cy0 + 0.5, gridW - 1, ch - 1);
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillStyle = m.color; ctx.font = "bold 13px Consolas, monospace";
+    ctx.fillText(m.name, ox + 12, cy0 + 13);
+    ctx.fillStyle = st[1]; ctx.font = "bold 11px Consolas, monospace";
+    ctx.fillText(st[0], ox + 12 + ctx.measureText(m.name).width + 26, cy0 + 13);
+    ctx.textAlign = "right"; ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "11px Consolas, monospace";
+    ctx.fillText("click again to pick up", ox + gridW - 12, cy0 + 13);
+    ctx.textAlign = "left"; ctx.fillStyle = "#dbeef5"; ctx.font = "11px Consolas, monospace";
+    wrapText(blurb, ox + 12, cy0 + 30, gridW - 24, 13, 2);
+    ctx.textBaseline = "alphabetic";
+  }
+
   // ---- footer ----
   const fy = py0 + panelH + 22;
   ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
@@ -9116,8 +9281,8 @@ function drawShipConfigView(r) {
   ctx.fillText(onCount + " / 6 crew actions powered" + (shipPowered.has("core") ? "" : "   ·   ⚠ REACTOR CORE OFFLINE"), r.width / 2, fy);
   ctx.fillStyle = "rgba(150,200,220,0.6)"; ctx.font = "12px Consolas, monospace";
   ctx.fillText(scfgPlacing
-      ? "move: mouse / arrows · R or right-click: rotate · click / Enter: place · Esc: uninstall"
-      : "click a module or a grid part to pick it up, then place it · ← →: tabs · M / Esc: back",
+      ? "move: mouse / arrows · R or right-click: rotate · click / Enter: place · Q: uninstall"
+      : "click a module or grid part to inspect it · click it again to pick it up · ← →: tabs · M / Q: back",
     r.width / 2, fy + 18);
   drawBackButton("◀ BACK");
 }
@@ -9307,7 +9472,7 @@ function drawMapView() {
     ctx.fillStyle = "#ff8a8a"; ctx.font = "bold 12px Consolas, monospace";
     ctx.fillText("⚠ " + contacts + " hostile contact" + (contacts > 1 ? "s" : "") + " in charted space", cx, ly); ly += 20;
   }
-  const closeHint = mapFromMenu ? "Esc / M — back to menu" : "Esc / M to close";
+  const closeHint = mapFromMenu ? "Q / M — back to menu" : "Q / M to close";
   if (storyTarget && !objectiveReached) {
     ctx.fillStyle = "#bfffce"; ctx.font = "bold 13px Consolas, monospace";
     ctx.fillText("◆ FLY TO: " + storyTarget.label, cx, ly); ly += 18;
@@ -9467,6 +9632,8 @@ canvas.addEventListener("mousemove", (e) => {
 // the Field Manual's chapter pages are the only scrollable screen so far
 canvas.addEventListener("wheel", (e) => {
   if (menuOpen && menuView === "manualPage") { manScroll = Math.max(0, manScroll + e.deltaY); e.preventDefault(); }
+  // Ship Config module inventory scrolls a row per notch (clamped in the draw)
+  else if (menuOpen && menuView === "shipConfig" && shipTab === 0) { scfgScroll += e.deltaY > 0 ? 1 : -1; e.preventDefault(); }
 }, { passive: false });
 // right-click cancels an in-progress action pick / target
 canvas.addEventListener("contextmenu", (e) => {
@@ -9500,28 +9667,28 @@ window.addEventListener("keydown", (e) => {
   if (menuOpen) { handleMenuKey(e); return; }   // pause menu owns input while open
   if (objectivePrompt) {                          // "progress the story?" — Y/N
     if (e.key === "y" || e.key === "Y" || e.key === "Enter") { proceedObjective(); e.preventDefault(); }
-    else if (e.key === "n" || e.key === "N" || e.key === "Escape") { declineObjective(); e.preventDefault(); }
+    else if (e.key === "n" || e.key === "N" || e.key === "q" || e.key === "Q" || e.key === "Escape") { declineObjective(); e.preventDefault(); }
     return;
   }
   if (dockPrompt) {                               // "request docking?" — Y/N (E also docks)
     if (e.key === "y" || e.key === "Y" || e.key === "Enter" || e.key === "e" || e.key === "E") { acceptDock(); e.preventDefault(); }
-    else if (e.key === "n" || e.key === "N" || e.key === "Escape") { declineDock(); e.preventDefault(); }
+    else if (e.key === "n" || e.key === "N" || e.key === "q" || e.key === "Q" || e.key === "Escape") { declineDock(); e.preventDefault(); }
     return;
   }
   if (mapOpen) {                                 // sector map is up — any of these close it
-    if (e.key === "Escape" || e.key === "m" || e.key === "M" || e.key === "Enter") {
+    if (e.key === "Escape" || e.key === "q" || e.key === "Q" || e.key === "m" || e.key === "M" || e.key === "Enter") {
       exitMap(); e.preventDefault();
     }
     return;
   }
   if (!combat && (e.key === "m" || e.key === "M")) { openMenu(); e.preventDefault(); return; }  // M → menu (not in combat)
   if (bossIntro) {                               // encounter splash — any of these skip it
-    if (e.key === " " || e.key === "Enter" || e.key === "Escape") { skipBossIntro(); e.preventDefault(); }
+    if (e.key === " " || e.key === "Enter" || e.key === "q" || e.key === "Q" || e.key === "Escape") { skipBossIntro(); e.preventDefault(); }
     return;                                      // and nothing reaches the arena underneath
   }
   if (combat) {                                  // combat is mouse-driven; keys assist
     if (combat.phase !== "player" || combat.player.walk || combat.pending) return;   // ignore input mid-glide / shot
-    if (e.key === "Escape" && (combat.targeting || combat.actionPick)) { cancelTargeting(); e.preventDefault(); return; }
+    if ((e.key === "Escape" || e.key === "q" || e.key === "Q") && (combat.targeting || combat.actionPick)) { cancelTargeting(); e.preventDefault(); return; }
     switch (e.key) {
       // number keys 1–6 pick the matching crew member; Enter ends the turn
       case "1": case "2": case "3": case "4": case "5": case "6":
@@ -9578,13 +9745,26 @@ function bgm(track) {                         // crossfade to a named loop
              .catch(() => { BGM.current = null; });   // blocked → retry on next gesture
 }
 function bgmStop() { if (BGM.current) _bgmFade(BGM.current, 0, 500); BGM.current = null; }
+// the track the moment should be playing — combat wins, then dockside, then explore
+function bgmWanted() {
+  return combat ? "combat" : (dockedAt && menuOpen && menuView === "station") ? "station" : "explore";
+}
 function startBgm() {                         // unlock + start the right track (once)
   if (BGM.started) return;
   BGM.started = true;
-  bgm(combat ? "combat" : "explore");
+  bgm(bgmWanted());
 }
-window.addEventListener("pointerdown", startBgm);
-window.addEventListener("keydown", startBgm);
+// Every gesture RE-ASSERTS the music rather than only unlocking it once. A rejected
+// play() (autoplay policy, mid-decode reload) nulls BGM.current, and the old one-shot
+// listeners never retried — inside the episode that meant a whole mission could run
+// silent after its iframe reload (Brett's LOC02 dropout). Now any click or key brings
+// the right track back.
+function bgmKick() {
+  if (!BGM.started) return startBgm();
+  if (!BGM.current) bgm(bgmWanted());
+}
+window.addEventListener("pointerdown", bgmKick);
+window.addEventListener("keydown", bgmKick);
 
 // ============================================================
 // SOUND EFFECTS
@@ -9692,7 +9872,7 @@ const TIPS = {
        <div class="row"><b>Sell scrap</b> — turn everything in the hold into coin, at this station's rate.</div>
        <div class="row"><b>Trade goods</b> — buy cheap here, sell dear elsewhere. The price hint next to each commodity tells you whether this station is a good place to buy or to sell.</div>
        <div class="row"><b>Modules</b> — buy new ship systems, or repair the ones a battle broke.</div>
-       <div class="row"><span class="k">Esc</span> or <b>UNDOCK</b> puts you back in the sector.</div>`
+       <div class="row"><span class="k">Q</span> or <b>UNDOCK</b> puts you back in the sector.</div>`
   },
   cargo: {
     title: "◆  THE HOLD IS FULL",
@@ -9704,7 +9884,7 @@ const TIPS = {
   modules: {
     title: "◆  SHIP MODULES",
     body:
-      `<div class="row">Modules are fitted onto the <b>configuration grid</b>. Each one has a shape — rotate it with <span class="k">R</span> and drop it where it fits.</div>
+      `<div class="row">Modules are fitted onto the <b>configuration grid</b>. Click one to <b>inspect</b> it; click it <b>again</b> to pick it up. Each has a shape — rotate it with <span class="k">R</span> and drop it where it fits.</div>
        <div class="row">A module only comes <b>online</b> if it touches the powered chain running from the reactor. Anything left floating on its own stays dark.</div>
        <div class="row">Powered modules are what give the crew their abilities — an unpowered system takes its crew member's action <span class="hot">offline</span> in battle.</div>
        <div class="row"><span class="hot">Battle damage</span> breaks modules. Repair them at any station.</div>`
@@ -9743,7 +9923,7 @@ const TIPS = {
     title: "◆  TAKING AIM",
     body:
       `<div class="row">Weapons fire into the arc the ship is <b>facing</b>, and only out to their range — the highlighted cells are what you can actually hit.</div>
-       <div class="row">Turning to face a target is itself a move. <span class="k">Esc</span> backs out of an action before it's spent.</div>`
+       <div class="row">Turning to face a target is itself a move. <span class="k">Q</span> backs out of an action before it's spent.</div>`
   },
   combatOut: {
     title: "◆  END OF TURN",
@@ -9767,7 +9947,9 @@ function showTutorial(key, onClose) {
   const c = TIPS[key];
   // tips switched off, unknown key, or already dismissed once → straight through
   if (!tipsOn || !c || tipSeen(key)) { if (onClose) onClose(); return; }
-  if (tutorialOpen) { _tutQueue.push(key); if (onClose) onClose(); return; }
+  // a tip never opens on top of another tip OR a Y/N prompt — it queues and update()
+  // drains it once the screen is clear (two popups at once read as a glitch)
+  if (tutorialOpen || objectivePrompt || dockPrompt) { _tutQueue.push(key); if (onClose) onClose(); return; }
   _tutKey = "stargear_tut_" + key + "_v3";
   tutEl.querySelector(".tutTitle").textContent = c.title;
   tutEl.querySelector(".tutBody").innerHTML = c.body;
@@ -9786,7 +9968,7 @@ function closeTutorial() {
   tutEl.classList.remove("show");
   try { if (_tutKey) localStorage.setItem(_tutKey, "1"); } catch (e) {}   // mark seen only once actually dismissed
   _tutKey = null;
-  startBgm();                                 // the dismiss gesture unlocks audio
+  bgmKick();                                  // the dismiss gesture unlocks / re-asserts audio
   const cb = _tutOnClose; _tutOnClose = null;
   if (cb) cb();
   while (_tutQueue.length && !tutorialOpen) showTutorial(_tutQueue.shift());   // next queued tip
@@ -9841,6 +10023,12 @@ if (HAS_LOAD && !loadFromSlot(LOAD_SLOT))
 if (MISSION_MODE) startCombat(enemies.find(e => e.hostile));   // scripted battles begin immediately (no roaming first)
 else if (HAS_LOAD) { /* a loaded game skips the first-flight tutorial */ }
 else showTutorial("explore");      // free-roam beat → first-time flight controls pop-up
+// Kick the music off at boot rather than waiting for the first in-page gesture.
+// Standalone first loads are blocked by autoplay policy (play() rejects, harmless —
+// the gesture listeners above recover), but inside the episode the iframe inherits
+// the parent page's activation, so each segment reload gets its music back straight
+// away instead of cutting to silence until the player happens to click (LOC02 fix).
+startBgm();
 try { window.focus(); } catch (e) {}   // grab keyboard focus so movement works without a click
 requestAnimationFrame(frame);
 </script>
