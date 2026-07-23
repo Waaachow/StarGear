@@ -3918,6 +3918,19 @@ function inBounds(gx, gy) { return gx >= 0 && gx < GRID_SIZE && gy >= 0 && gy < 
 const ENEMY_FOOT = { dx: 0, dy: 0 };
 const ENEMY_SCALE = 1.1;                 // enemy hull drawn just slightly bigger than the player
 function enemyCells(e) {
+  // A boss core with an openFoot spans several tiles once its weak point is exposed
+  // (all plates down), so a finishing hit can land anywhere the hull sits — Steve's
+  // Tithe ask. Damage stays one-per-ship (fireCrewWeapon loops enemies, not cells),
+  // and the wider target is INERT while shielded, so it never clashes with targeting
+  // the rotating plates that share those tiles.
+  if (e.openFoot && e.part === "core" && combat && combat.boss && !combat.boss.shielded) {
+    // Follow the hull's on-screen long axis: the sprite draws along "/" (the gy axis)
+    // when facing fore/aft, and flips to "\" (the gx axis) facing left/right — so the
+    // lit/hittable tiles always lie under the ship however it's turned to face you.
+    const flip = e.facing === DIR.LEFT || e.facing === DIR.RIGHT;
+    const off = flip ? [[0, 0], [1, 0], [-1, 0]] : [[0, 0], [0, -1], [0, 1]];
+    return off.map(([dx, dy]) => ({ gx: e.gx + dx, gy: e.gy + dy })).filter(c => inBounds(c.gx, c.gy));
+  }
   const cells = [{ gx: e.gx, gy: e.gy }];
   if (ENEMY_FOOT.dx !== 0 || ENEMY_FOOT.dy !== 0)
     cells.push({ gx: e.gx + ENEMY_FOOT.dx, gy: e.gy + ENEMY_FOOT.dy });
@@ -5408,7 +5421,10 @@ registerBoss({
 // A slab of a ship whose weak point is covered by three armour plates that ROTATE
 // around it every turn — and grow back. You can't grind it: strip all three inside
 // one window, and stay out of the ram lane it telegraphs down your row.
-const SIEGEHAULER = { coreHp: 24, plateHp: 5, plateRegen: 3, ramDmg: 9, gunDmg: 2 };
+// plateRegen = enemy turns a downed plate takes to rebuild. Was 3, which rebuilt the
+// first plate before you could strip all three and punish the weak point (Steve's v0.5
+// playtest: "too difficult, respawn too frequently"); 6 gives a real open window.
+const SIEGEHAULER = { coreHp: 24, plateHp: 5, plateRegen: 6, ramDmg: 9, gunDmg: 2 };
 registerBoss({
   id: "siegehauler", name: "Harkin Dross", subtitle: "The Tollman · siege barge Tithe",
   hull: "Tithe", shipName: "Tithe",
@@ -5450,6 +5466,12 @@ registerBoss({
   },
   setup() {
     const core = bossPart("core", CENTER, 2, SIEGEHAULER.coreHp, bossHull(this.hull));
+    // Once the plates are stripped the exposed hull is a big target — you can land a
+    // finishing hit on any of the three tiles the barge lies across, not just its
+    // centre (Steve, v0.5). The tiles follow the hull's on-screen long axis, which
+    // depends on facing (see enemyCells): "/" (gy) when facing fore/aft, "\" (gx)
+    // when flipped left/right. Inert while shielded, and damage is still one-per-ship.
+    core.openFoot = true;
     const cells = this._plateCells(core, 0);
     const parts = [core, ...cells.map(c => bossPart("node", c.gx, c.gy, SIEGEHAULER.plateHp))];
     return { parts, meta: { phase: 1, shielded: true, telegraph: null, spin: 0, regen: [] } };
@@ -6264,8 +6286,13 @@ function drawCombat() {
       const isCore = e.part === "core", shielded = isCore && combat.boss.shielded;
       const puls = 0.5 + 0.5 * Math.sin(gTime * 0.006 + e.bob * 3);
       const rgb = shielded ? "120,180,255" : (isCore ? "255,150,60" : "120,210,255");
-      fillCell(e.gx, e.gy, `rgba(${rgb},${0.10 + 0.12 * puls})`);
-      outlineCell(e.gx, e.gy, `rgba(${rgb},${0.55 + 0.35 * puls})`);
+      // light every tile the part occupies, so the open core lights all three tiles
+      // of its widened hull the same as the centre (Steve, v0.5) — matches enemyCells,
+      // so what's lit is exactly what's hittable.
+      for (const c of enemyCells(e)) {
+        fillCell(c.gx, c.gy, `rgba(${rgb},${0.10 + 0.12 * puls})`);
+        outlineCell(c.gx, c.gy, `rgba(${rgb},${0.55 + 0.35 * puls})`);
+      }
     }
   }
   drawTargetFills();                    // move/hop/aim highlights (aim's green "will-hit" draws over the markers)
@@ -6689,10 +6716,14 @@ const DEX_ENTRIES = ENEMY_SHIPS.map(s => ({
 // hold). Every other boss is filed under the SHIP it flies, so scanning the flagship
 // credits "Blood Crown" — the same id its escorts' hull scan would use.
 function bossDexId() {
-  const id = bossIdNow();
-  if (id === "nexus") return "Nexus";
-  const spec = BOSS_SPECS[id];
-  return (spec && (spec.shipName || spec.hull)) || id;
+  // Read the LIVE combat boss spec first. In a bounty fight pendingBossId is cleared
+  // the instant startCombat returns (see the acceptedBounties loop) and BOSS_ID is only
+  // set by the mission #boss= hash, so bossIdNow() is null mid-bounty — which made
+  // scanning a Tithe plate resolve to null and never file the codex card (Steve, v0.5).
+  // The spec is cached on combat.boss.spec, so use it; fall back to the hash lookup.
+  const spec = (combat && combat.boss && combat.boss.spec) || BOSS_SPECS[bossIdNow()];
+  if (spec) return spec.id === "nexus" ? "Nexus" : (spec.shipName || spec.hull || spec.id);
+  return bossIdNow() === "nexus" ? "Nexus" : bossIdNow();
 }
 const DEX_COLS = 4;                         // codex grid columns
 // set of discovered codex ids, persisted so scans carry across battles/segments
@@ -6958,8 +6989,17 @@ function loadFromSlot(i) {
   shipOwned  = new Set(s.owned  || []);
   shipLoadout = s.loadout || [];
   shipDex = migrateDex(s.dex);               // pre-hull-id saves carry contract ids
+  // A save is a snapshot in time, so loading restores the achievement/progress state
+  // EXACTLY as it was when saved — loading a pre-completion save shows The Ghost Signal
+  // locked again (Steve, v0.5: a ratchet left it incorrectly unlocked after loading an
+  // older save). The episode-complete handshake flag is time-travel too: re-sync it to
+  // the loaded save so a later iso boot doesn't re-assert completion the save didn't have.
   achUnlocked = new Set(s.ach || []);
   ep0 = Object.assign({ complete: false, bountiesDone: 0, bountiesTotal: 0, sidesDone: 0, sidesTotal: 0 }, s.ep0 || {});
+  try {
+    if (ep0.complete) localStorage.setItem(EP0_DONE_KEY, "1");
+    else localStorage.removeItem(EP0_DONE_KEY);
+  } catch (e) {}
   bounties = Object.assign({ state: {}, active: null }, s.bounties || {});
   normalizeBounties();
   poiFound = new Set(s.poi || []);
@@ -6998,6 +7038,7 @@ function loadFromSlot(i) {
   saveEcon(); saveBroken(); saveOwned(); saveLoadout(); saveBounties(); saveEp0(); saveAch(); saveFog(); savePoi(); saveCrewEquip();
   try { localStorage.setItem(DEX_KEY, JSON.stringify([...shipDex])); } catch (e) {}
   syncBountyCounters();
+  checkAchievements();                    // fire anything the restored state now satisfies
   bountyDeclined = true;                  // don't instantly re-trigger a bounty you saved on top of
   return true;
 }
@@ -9180,8 +9221,6 @@ function drawShipConfigView(r) {
   ctx.textAlign = "left"; ctx.textBaseline = "middle";
   ctx.fillStyle = "#ffffff"; ctx.font = "bold 15px Consolas, monospace";
   ctx.fillText("MODULES", listX + 18, py0 + 22);
-  ctx.strokeStyle = "rgba(120,200,220,0.3)"; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(listX + 16, py0 + 36); ctx.lineTo(listX + listW - 16, py0 + 36); ctx.stroke();
   const list = scfgList();               // only modules you actually own
   // Fixed-height rows that SCROLL — they used to shrink to cram the whole inventory
   // in, so every module you bought made the list harder to read (Steve, v0.4).
@@ -9189,12 +9228,26 @@ function drawShipConfigView(r) {
   const maxRows = Math.max(1, Math.floor((panelH - 68) / rowH));
   _scfgMaxRows = maxRows;                // the key handler scrolls the selection into view with this
   scfgScroll = Math.max(0, Math.min(scfgScroll, Math.max(0, list.length - maxRows)));
+  // Scroll affordances: players weren't realising modules were hidden off-screen
+  // (Steve, v0.5). Show a live count, a scrollbar with a proportional thumb, and
+  // pulsing ▲/▼ chevrons whenever there's more to see in that direction.
+  const more = list.length > maxRows;
+  const hiddenAbove = more && scfgScroll > 0;
+  const hiddenBelow = more && scfgScroll + maxRows < list.length;
+  const sbW = more ? 14 : 0;             // reserve a right gutter for the scrollbar
+  const rowW = listW - 20 - sbW;
+  // count in the header, so the total is visible before you even scroll
+  ctx.textAlign = "right"; ctx.fillStyle = "rgba(160,205,220,0.8)"; ctx.font = "11px Consolas, monospace";
+  ctx.fillText(list.length + (list.length === 1 ? " module" : " modules"), listX + listW - 18, py0 + 22);
+  ctx.textAlign = "left";
+  ctx.strokeStyle = "rgba(120,200,220,0.3)"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(listX + 16, py0 + 36); ctx.lineTo(listX + listW - 16, py0 + 36); ctx.stroke();
   list.slice(scfgScroll, scfgScroll + maxRows).forEach((m, vi) => {
     const i = scfgScroll + vi;
     const ry = rowsTop + vi * rowH, mid = ry + (rowH - 6) / 2;
     const placed = shipLoadout.some(p => p.id === m.id), powered = shipPowered.has(m.id);
     const held = scfgPlacing && scfgPlacing.id === m.id, active = i === scfgSel;
-    techPanel(listX + 10, ry, listW - 20, rowH - 6, 8, active, active ? m.color : "#2b5563");
+    techPanel(listX + 10, ry, rowW, rowH - 6, 8, active, active ? m.color : "#2b5563");
     scfgFillCells(rotCells(m.cells, 0), listX + 22, ry + 7, 6, m.color, null, powered || !placed ? 1 : 0.45);
     ctx.textAlign = "left"; ctx.textBaseline = "middle";
     ctx.fillStyle = active ? "#ffffff" : "#dbeef5"; ctx.font = "bold 13px Consolas, monospace";
@@ -9206,13 +9259,47 @@ function drawShipConfigView(r) {
     const st = held ? ["HELD", "#ffd479"] : !placed ? ["INSTALL", "rgba(150,200,220,0.7)"]
              : moduleBroken(m.id) ? ["✖ BROKEN", "#ff5a5a"] : powered ? ["● ON", "#7ee787"] : ["⚠ OFF", "#ff9e6b"];
     ctx.textAlign = "right"; ctx.fillStyle = st[1]; ctx.font = "bold 11px Consolas, monospace";
-    ctx.fillText(st[0], listX + listW - 22, mid);
-    _menuHit.scfg.push({ x: listX + 10, y: ry, w: listW - 20, h: rowH - 6, idx: i });
+    ctx.fillText(st[0], listX + 10 + rowW - 12, mid);
+    _menuHit.scfg.push({ x: listX + 10, y: ry, w: rowW, h: rowH - 6, idx: i });
   });
-  if (list.length > maxRows) {           // same pager idiom as the station rows
-    ctx.textAlign = "right"; ctx.fillStyle = "rgba(150,200,220,0.5)"; ctx.font = "10px Consolas, monospace";
-    ctx.fillText((scfgScroll + 1) + "–" + Math.min(list.length, scfgScroll + maxRows) + " of " + list.length + " · ↑↓ / wheel",
-                 listX + listW - 16, py0 + panelH - 12);
+  if (more) {
+    const rowsBottom = rowsTop + maxRows * rowH - 6;
+    // Scroll SHADOWS: fade the rows out at any edge that has more content, so it
+    // reads as rows sliding under the frame. Roomless (overlays the rows), unlike a
+    // text cue crammed into the header gap (Steve, v0.5: "▲ scroll up" was squashed).
+    if (hiddenAbove) {
+      const g = ctx.createLinearGradient(0, rowsTop, 0, rowsTop + 26);
+      g.addColorStop(0, "rgba(6,18,29,0.95)"); g.addColorStop(1, "rgba(6,18,29,0)");
+      ctx.fillStyle = g; ctx.fillRect(listX + 10, rowsTop, rowW, 26);
+    }
+    if (hiddenBelow) {
+      const g = ctx.createLinearGradient(0, rowsBottom - 26, 0, rowsBottom);
+      g.addColorStop(0, "rgba(6,18,29,0)"); g.addColorStop(1, "rgba(6,18,29,0.95)");
+      ctx.fillStyle = g; ctx.fillRect(listX + 10, rowsBottom - 26, rowW, 26);
+    }
+    // scrollbar: track + proportional thumb, with a lit chevron at each roomy end
+    const trackX = listX + listW - 11, trackW = 5;
+    const trackTop = rowsTop + 12, trackH = maxRows * rowH - 30;
+    ctx.fillStyle = "rgba(120,200,220,0.16)"; ctx.fillRect(trackX, trackTop, trackW, trackH);
+    const thumbH = Math.max(26, trackH * maxRows / list.length);
+    const thumbY = trackTop + (trackH - thumbH) * (scfgScroll / Math.max(1, list.length - maxRows));
+    ctx.fillStyle = "rgba(127,227,245,0.9)"; ctx.fillRect(trackX, thumbY, trackW, thumbH);
+    const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 300), glow = (0.45 + 0.55 * pulse).toFixed(2);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "bold 10px Consolas, monospace";
+    ctx.fillStyle = hiddenAbove ? "rgba(127,227,245," + glow + ")" : "rgba(127,227,245,0.2)";
+    ctx.fillText("▲", trackX + trackW / 2, rowsTop + 4);
+    ctx.fillStyle = hiddenBelow ? "rgba(127,227,245," + glow + ")" : "rgba(127,227,245,0.2)";
+    ctx.fillText("▼", trackX + trackW / 2, rowsBottom - 4);
+    // bottom line: an explicit hidden-count when there's more below, else the range
+    const below = list.length - (scfgScroll + maxRows);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if (hiddenBelow) {
+      ctx.fillStyle = "rgba(127,227,245," + glow + ")"; ctx.font = "bold 11px Consolas, monospace";
+      ctx.fillText("▼ " + below + " more below  ·  scroll", listX + 10 + rowW / 2, py0 + panelH - 12);
+    } else {
+      ctx.fillStyle = "rgba(165,210,230,0.7)"; ctx.font = "10px Consolas, monospace";
+      ctx.fillText((scfgScroll + 1) + "–" + list.length + " of " + list.length + "  ·  ↑↓ / wheel", listX + 10 + rowW / 2, py0 + panelH - 12);
+    }
   }
 
   // ---- right: blueprint grid ----

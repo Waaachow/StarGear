@@ -77,8 +77,25 @@
   the fight opens and re-face only on the enemy phase — turning is something they
   do on *their* turn, like every other ship.
 
+- **The Tithe's weak point is easier to hit** (2026-07-23) — with the plates
+  stripped, the exposed core now counts across the whole width of the barge, so a
+  finishing shot lands anywhere on the hull instead of only its centre tile. All
+  three tiles under the hull light up together so the open target is unmistakable.
+  It's still one hit per shot, and only opens up once the plates are down.
+- **The Tollman gives you a fighting chance** (2026-07-23) — Harkin Dross's siege
+  barge rebuilt its blast plates so quickly that the first one was back in place
+  before you could strip all three and reach the weak point behind them, making
+  the fight feel unwinnable rather than hard. Plates now take twice as long to be
+  winched back, so stripping all three opens a real window to commit on the core.
+
 ## 🧭 Quality of life & fixes
 
+- **Achievements match the save you load** (2026-07-23) — loading a save now
+  restores the exact achievement and story-completion state from the moment it was
+  taken, so a save made before the finale correctly shows "The Ghost Signal" still
+  to earn, and a save made after shows it unlocked. (The episode-complete handshake
+  is re-synced to the loaded save too, so nothing re-asserts a completion a snapshot
+  didn't have.) Completing the story unlocks the achievement as it always should.
 - **The story log survives the credits** (2026-07-23) — in free play (after finishing
   the episode, or loading any post-story save) the Missions menu's STORY tab was
   completely empty. It now shows the full episode as a completed log — every
@@ -87,8 +104,10 @@
 - **The module list scrolls instead of shrinking** (2026-07-23) — Ship Config's
   inventory used to compress its rows to cram in everything you owned, so buying
   modules made the list steadily harder to read. Rows are now a fixed, readable
-  height and the list scrolls — mouse wheel or arrow keys — with an "n–m of N"
-  pager, matching the station board.
+  height and the list scrolls — mouse wheel or arrow keys. It's now unmistakable
+  there's more to see: a module count in the header, a scrollbar with up/down
+  arrows, an explicit "▼ N more below" counter, and the rows softly fade out at any
+  edge that has more beyond it — so nothing stays hidden off-screen by surprise.
 - **A full bridge no longer shrinks the crew** (2026-07-23) — with five or six crew
   on screen in story scenes, everyone used to scale down to fit side by side. Now
   characters stay full size and overlap shoulders instead, with whoever's speaking

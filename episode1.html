@@ -407,7 +407,7 @@
          content (bounties, side missions) instead of returning to the title. The
          button is hidden on the DEFEAT screen — see #endOverlay.defeat rules. -->
     <button id="freePlayBtn" class="menuBtn">◀ RETURN TO THE SECTOR</button>
-    <div class="hint">Press <kbd>Space</kbd> or click the backdrop to return to the title</div>
+    <div class="hint">Click the backdrop to return to the title</div>
   </div>
   <div id="fadeBlack"></div>
 
@@ -1616,8 +1616,12 @@ document.addEventListener("keydown",(e)=>{
   }
   // free play has no story left to advance — Q / Esc is the way out, back to the title
   if(freePlay){ if(e.code==="Escape" || e.code==="KeyQ"){ e.preventDefault(); toStartMenu(); } return; }
-  if(!endOverlay.classList.contains("hidden")){           // "To Be Continued" — advance → title
-    if(advanceKey || e.code==="KeyR"){ e.preventDefault(); toStartMenu(); }
+  if(!endOverlay.classList.contains("hidden")){           // thanks-for-playing / "To Be Continued"
+    // No keyboard dismissal — the screen is returned from by clicking the backdrop
+    // only, so a reflexive Space (from advancing dialogue) can't skip past it. Keys
+    // are still swallowed here so Space doesn't fall through and call advance() on a
+    // finished episode.
+    e.preventDefault();
     return;
   }
   if(e.code==="KeyA" && started && gameplay.classList.contains("hidden")){
