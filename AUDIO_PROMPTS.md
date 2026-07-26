@@ -109,6 +109,101 @@ For Suno / Udio — instrumental, no vocals:
 
 ---
 
+# v0.6 third-ability SFX (A15–A20) — ✅ **DELIVERED 2026-07-25**
+
+Six cues, one per crew member's new third combat ability (see `DEVLOG-v0.6.md` → "Ship parts II").
+Registered in `SFX_VOL` and called from each ability's apply handler, so **dropping the file at the
+path was the whole integration** — no code change.
+
+> **All six delivered 2026-07-25 and every one landed inside its spec length** (0.88 / 0.80 / 0.68 /
+> 0.48 / 0.48 / 0.88s) — the first audio batch here that needed no regeneration and no `SFX_MAXMS`
+> trim. Verified loading + decoding in-game over `http://localhost:8123`: HTTP 200, `readyState 4`,
+> `SFX._missing` empty, `pageerror` clean, all 17 SFX distinct by MD5. Prompts kept below for
+> regeneration.
+>
+> ⚠️ **`disruptor` arrived misspelled as `distruptor.mp3`** and was renamed. The loader builds its
+> path from the cue key (`"audio/SFX/" + name + ".mp3"`), so a typo is a **silent** miss — the cue
+> never plays and nothing logs it. Match `SFX_VOL`'s spelling exactly.
+
+Same house style as above: clean sci-fi, dry, short. Three extra constraints specific to this batch:
+
+1. **They must not be confusable with `laser` / `missile` / `hit`.** These are the *special* moves —
+   each should announce itself as something the ordinary weapons can't do.
+2. **A crew VO bark fires over the top** (~1 in 3 uses, `audio/Combat/`). Keep energy out of the
+   vocal band (~300 Hz–3 kHz) where you can — lean low/thump or high/sparkle — so the line stays
+   intelligible underneath.
+3. **These fire once per use, never in bursts** (unlike laser/scrap), so there's no `SFX_POOL` and no
+   `SFX_MAXMS` cap on any of them. A modest tail is fine; anything past ~1s will outlast the
+   animation.
+
+| # | Cue | Crew · ability | Path | `SFX_VOL` | Target |
+|---|-----|----------------|------|-----------|--------|
+| A15 | `railgun`   | Rex · Railgun (piercing full-line, 8 dmg) | `audio/SFX/railgun.mp3`   | 0.75 | 0.7–1.0s |
+| A16 | `vent`      | Tessa · Vent Plasma (all 8 adjacent squares) | `audio/SFX/vent.mp3` | 0.70 | 0.6–0.9s |
+| A17 | `disruptor` | Kael · Disruptor Pulse (enemy skips its turn) | `audio/SFX/disruptor.mp3` | 0.60 | 0.5–0.8s |
+| A18 | `evade`     | Astra · Evasive Roll (50% incoming miss chance) | `audio/SFX/evade.mp3` | 0.50 | 0.35–0.5s |
+| A19 | `focus`     | Voss · Focus Fire (marks a target, +50% dmg) | `audio/SFX/focus.mp3`  | 0.50 | 0.4–0.6s |
+| A20 | `triage`    | Selyra · Triage (revives all downed crew) | `audio/SFX/triage.mp3` | 0.55 | 0.7–1.0s |
+
+## A15 — Railgun → `audio/SFX/railgun.mp3`  **P1**
+> Heavy electromagnetic railgun firing from a warship. Short rising capacitor whine charging up,
+> then a violent low-end CRACK as the slug launches, with a metallic ringing snap and a brief
+> tearing air rip trailing behind it. Dry, powerful, no music, no reverb wash. 0.9 seconds.
+
+- The heaviest cue in the crew set — it's an 8-damage shot that pierces a whole line, and it should
+  sound like the most expensive thing on the ship. Give it **more low-end weight than `missile`**.
+- The charge-then-crack shape is the point: a flat bang reads as just a louder laser.
+- Keep the charge **under ~0.3s**. The animation doesn't wait for it.
+
+## A16 — Vent Plasma → `audio/SFX/vent.mp3`  **P1**
+> Superheated plasma venting outward from a spacecraft hull in all directions. Pressurised hiss
+> release building into a deep whoomph of igniting gas, roiling fire body, fast decay.
+> Enveloping and omnidirectional, not a directional shot. Dry. 0.8 seconds.
+
+- Must read as **an area burst around the ship, not a shot leaving it** — that's the mechanical
+  difference the player has to learn (it hits all 8 surrounding squares). Broad and diffuse where the
+  railgun is a point.
+- No metallic transient at the front; the hiss-into-whoomph swell is what distinguishes it.
+
+## A17 — Disruptor Pulse → `audio/SFX/disruptor.mp3`  **P1**
+> Electronic overload pulse frying a target's systems. Sharp electrical zap into a stuttering
+> glitching buzz, digital circuitry crackling and destabilising, pitch collapsing downward as the
+> power drops out. Cold and synthetic, no explosion, no fire. 0.7 seconds.
+
+- The **downward power-loss collapse at the end is the meaning** — the enemy loses its next turn, and
+  the sound should say "that thing just went dark", not "that thing took damage".
+- Deliberately *electronic*, the opposite of A16's fire. No impact crunch — the target isn't hurt.
+
+## A18 — Evasive Roll → `audio/SFX/evade.mp3`  **P1**
+> Spacecraft manoeuvring thrusters firing a sharp evasive burst. Crisp compressed-gas whoosh with a
+> quick banking doppler swing, tight and athletic, clean fade. No engine roar, no impact. 0.4 seconds.
+
+- The shortest and lightest of the six. It's a **defensive buff on Astra's own ship** — quick and
+  agile, never heavy. If it sounds powerful, it's wrong.
+- Should sit comfortably under a bark; this one's the most likely to collide with dialogue.
+
+## A19 — Focus Fire → `audio/SFX/focus.mp3`  **P1**
+> Targeting computer locking on. Two-tone electronic acquisition tone with a tight bright confirm
+> blip and a faint reticle sweep behind it. Clean, military, informational, not aggressive. 0.5 seconds.
+
+- This is **information, not force** — Voss marks a target for the rest of the crew. Closest relative
+  in the existing set is `scan` (technical, calm), but **shorter, harder and more decisive**; scan is
+  a question, this is an answer.
+- Keep it clearly apart from `ui_select` — it must not read as a menu click.
+
+## A20 — Triage → `audio/SFX/triage.mp3`  **P1**
+> Medical revival system engaging aboard a spacecraft. Soft defibrillator-style charge into a warm
+> rising three-note chime, gentle life-support hum swelling underneath, hopeful and reassuring
+> resolution. Clean sci-fi medical, no alarm, no urgency. 0.9 seconds.
+
+- The only **warm, tonal, rising** cue in the batch — everything else is a weapon or a system.
+  Selyra pulling the whole crew back up is the biggest relief moment in a fight; let it resolve
+  upward rather than cutting off.
+- Richer than `coin` (the other rewarding chime) and unmistakably distinct from it — this one is
+  relief, not payday.
+
+---
+
 ## Notes
 
 - Normalise SFX to roughly the same perceived loudness (≈ -16 LUFS) before dropping them in, or
@@ -134,6 +229,9 @@ repeats don't cut themselves off, with per-cue levels in **`SFX_VOL`**. Hook poi
 | `coin` | selling scrap, buying/selling trade goods |
 | `dock` | docking (also crossfades BGM to the new `station` track) |
 | `ui_select` | confirming a station action |
+| `railgun` / `vent` | `fireCrewWeapon` — one cue per weapon pattern (Rex's Railgun, Tessa's Vent Plasma) |
+| `evade` / `triage` | `applySelfAction` (Astra's Evasive Roll; Selyra's Triage, only when someone is actually revived) |
+| `disruptor` / `focus` | `applyEnemyTarget` (Kael's Disruptor Pulse, Voss's Focus Fire) |
 
 ### Length check against spec
 
@@ -143,10 +241,19 @@ repeats don't cut themselves off, with per-cue levels in **`SFX_VOL`**. Hook poi
 | `explode.mp3` | 1.2–2.0s | ~5s → **~1.4s** | ✅ regenerated, now in spec |
 | `ui_select.mp3` | 0.15s | ~0.9s | ⚠ still long for a menu blip — trimmed in code |
 | `scrap.mp3` | 0.2–0.3s | ~0.5s | ⚠ fires in bursts — trimmed in code |
+| `railgun.mp3` | 0.7–1.0s | 0.88s | ✅ in spec (2026-07-25) |
+| `vent.mp3` | 0.6–0.9s | 0.80s | ✅ in spec |
+| `disruptor.mp3` | 0.5–0.8s | 0.68s | ✅ in spec |
+| `evade.mp3` | 0.35–0.5s | 0.48s | ✅ in spec |
+| `focus.mp3` | 0.4–0.6s | 0.48s | ✅ in spec |
+| `triage.mp3` | 0.7–1.0s | 0.88s | ✅ in spec |
 
 **`SFX_MAXMS`** caps playback per cue with a ~90ms fade (so the trim isn't a click). After the
 regeneration it's a safety net rather than an active trim: laser's cap now sits above the file
 length and explode's was removed entirely. Only `ui_select` and `scrap` are still actually being
 cut. Delete an entry to hear that cue in full.
 
-All 11 SFX files verified distinct (MD5) — no accidental copies from regeneration.
+All **17** SFX files verified distinct (MD5) — no accidental copies from regeneration. (Note their
+file *sizes* collide in groups, e.g. `railgun.mp3` and `ui_select.mp3` are both 22509 bytes: the
+generator exports at a fixed ~205–212 kbps, so equal-duration clips land on identical sizes. Size is
+not a usable duplicate check here — hash them.)

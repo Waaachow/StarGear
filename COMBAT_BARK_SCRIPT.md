@@ -112,3 +112,42 @@ behind!" (04) is the hardest line — conviction, not volume. "Hold together. Ab
 3. Do as I do. Now.
 4. We do not leave people behind!
 5. Hold together. Absorb it and answer.
+
+---
+
+# v0.6 additions — the third-ability barks (NOT yet recorded)
+
+Three lines per crew, one bark set per new unlockable ability. **Numbering continues each
+character's existing run** so the clip names don't collide (`audio/Combat/<name>_NN.mp3`). Same
+per-character direction as above. Wired in `CREW_BARKS`; the game subtitles them and stays silent
+until these are cut.
+
+## Astra · Evasive Roll (`astra-evade`)
+9. Evasive pattern — try to hit that.
+10. Juking hard — their aim's a guess now.
+11. Too slippery for you.
+
+## Rex · Railgun (`rex-railgun`)
+10. Railgun's charged — punching straight through!
+11. One shot, one very long hole.
+12. Full spike — right down the line!
+
+## Kael · Disruptor Pulse (`kael-disruptor`)
+11. Disruptor pulse — their systems are seizing.
+12. Overloaded them. They'll skip a beat.
+13. Frying their circuits — hold there.
+
+## Voss · Focus Fire (`voss-focus`)
+6. Focus fire — everyone, that one.
+7. Mark's on the target. Hit it together.
+8. Concentrate on my mark.
+
+## Tessa · Vent Plasma (`tessa-vent`)
+10. Venting plasma — clear the deck!
+11. Reactor overflow, right in their faces.
+12. Hot exhaust coming through!
+
+## Selyra · Triage (`selyra-triage`)
+8. Triage — everyone's back on their feet.
+9. All hands, up! I've got you.
+10. No one stays down on my watch.

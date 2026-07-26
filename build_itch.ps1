@@ -9,7 +9,7 @@ $root  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $build = Join-Path $root "dist\build"
 $A     = Join-Path $build "Assets"
 $index = Join-Path $build "index.html"
-$zip   = Join-Path $root "StarGear - Episode 0 - The Ghost Signal - v0.5.zip"
+$zip   = Join-Path $root "StarGear - Episode 0 - The Ghost Signal - v0.6.zip"
 
 # ---------- 1. stage a clean tree ----------
 if (Test-Path $build) { Remove-Item $build -Recurse -Force }
@@ -21,7 +21,10 @@ Copy-Item (Join-Path $root "audio")  (Join-Path $build "audio")  -Recurse
 # loose root sprites the iso game loads by bare filename (player StarGear hull)
 foreach ($n in @("north east.png","south west.png")) { Copy-Item (Join-Path $root $n) $build }
 # drop dev leftovers from the staged copy
-Get-ChildItem $A -Recurse -File | Where-Object { $_.Name -like "*-old*" } | ForEach-Object { [System.IO.File]::Delete($_.FullName) }
+# v0.6: _v2/_v1 and --orig are hand-cleaned-art backups (e.g. Astra's Alert_v2.png, the
+# Tithe sw--orig.png residual-artefact backup) — found shipping dead weight in the v0.5 zip
+# (~7.7 MB) that the *-old* pattern alone didn't catch. Don't narrow this back to *-old* only.
+Get-ChildItem $A -Recurse -File | Where-Object { $_.Name -match '-old|_v[12]\.png$|--orig' } | ForEach-Object { [System.IO.File]::Delete($_.FullName) }
 Get-ChildItem (Join-Path $build "audio") -File | Where-Object { $_.Name -like "line_*.mp3" } | ForEach-Object { [System.IO.File]::Delete($_.FullName) }
 # v0.5: backup masters and the pre-trim VO originals must never ship (dead weight, and
 # they'd confuse a future rebuild). Speech_v3.mp3 is the live intro cinematic — kept.

@@ -52,8 +52,9 @@ per-hull attack visuals · SFX layer · save/load · **title-screen Load Game** 
    `lines` (start/hp50/hp25/defeat, fired at HP thresholds), `cg` (encounter splash), `portrait`
    (board + codex mugshot, with an optional `portraitCrop`), `banner`, `bio`, `vo` (clip prefix),
    and `BOSS_SHIPS` for unique hulls with a per-hull draw `scale`.
-4. **Mix playtest** — `SFX_VOL` levels were set before the audio existed. `ui_select` (~0.9s vs a
-   0.15s spec) and `scrap` (~0.5s) are still trimmed in code and would be better regenerated short.
+4. ✅ **Mix playtest — ACCEPTED AS-IS by Steve (2026-07-24).** `SFX_VOL` levels + the code-side
+   length caps (`SFX_MAXMS`; `ui_select` ~0.9s, `scrap` ~0.5s, `laser` ~3s, `explode` ~5s) are kept as
+   the final v0.6 audio mix — no re-balance, no regenerating shorter clips. Closed.
 5. ✅ **Packaged 2026-07-22** — `StarGear - Episode 0 - The Ghost Signal - v0.4.zip` built
    (~407 files, ~137 MB; up from 74.6 mostly on clean char art + new VO + station art).
    ⚠️ **The four dock interiors stay PNG, not JPEG** — the iso builds their path dynamically
@@ -378,7 +379,9 @@ so change both together or the sim will be validating a market the game doesn't 
 ## Ship
 - ◐ **Config grid** — RoF-style module fit-grid in `iso_grid_prototype.html`. Now also shows
   **BROKEN** parts (red slash, slot still occupied).
-- ☐ **Ship parts** — more modules for the same grid (varying shapes/sizes), incl. bought ones.
+- ✅ **Ship parts — DONE v0.6 (2026-07-24).** 6 new modules giving all 6 crew grid presence: 4 free
+  gate modules (Voss Tactics/Transmission, Tessa Overclock, Selyra Adrenaline) + 2 bought enhancers
+  (Repair Bay, Med Bay — `boosts` Repair/Heal). See `DEVLOG-v0.6.md`.
 - ✅ **Capacity to hold scrap** — `CARGO_BASE` 40 + a fitted **Cargo Hold** module (+30). At
   capacity pickups stop.
 
@@ -409,7 +412,8 @@ cannibalised warship hull. The procedural ring-station survives as a per-station
   from *installed*: Ship Config now only lists what you own, and the shop sells what you don't.
   Starting stock: **Cargo Pod** (+15 cargo, 220), **Expanded Hold** (+45, 480), **Armour Plating**
   (+6 max hull, 320 — wired through the new `playerMaxHp()`).
-- ✅ **Sell ship modules** — same tab, half price; uninstalls and clears the grid space.
+- ❌ **Sell ship modules** — REMOVED 2026-07-26 at Steve's request (see the playtest session below).
+  `sellbackValue`/`stationSoldMods` and the "Sell <module>" row are gone; buying and fitting stand.
 - ✅ **Buy/sell resources for trade** — MARKET tab. Four commodities (Raw Ore 12 · Machine Parts 30 ·
   Medical Supplies 55 · Nebula Relics 90) with **per-station price multipliers** (`STATION_PRICES`), so
   each station is cheap in what its region produces and dear in what it lacks — ore is 7 at the mining
@@ -524,5 +528,26 @@ cannibalised warship hull. The procedural ring-station survives as a per-station
 
 ---
 
-## Assets needed from Steve
-Tracked in `ASSETS_NEEDED.md`.
+## Playtest — Steve, 2026-07-26
+
+Fourteen items from a human playthrough, all fixed and Playwright-verified (`pageerror`
+clean on both files). Not yet re-played by Steve.
+
+| # | Fix | Where |
+|---|-----|-------|
+| 1 | **Kael's "not a distress call" VO cut out.** Two short clips (`kael_02.mp3` + `kael_03.mp3`) played back to back for one sentence, with an audible gap between them. Re-cut as one continuous take from the `Kael_2.mp3` keeper master (1.93–3.62s) into `kael_02_03.mp3`, and merged the two script lines into one. | `episode1.html` EP1 beat 0 |
+| 2 | **Objective arrival needed circling to trigger.** `ARRIVE_DIST` was **1** tile — tighter than every other arrival radius in the game (dock 4.5, bounty 2, waypoint 1.5). Now **2**. | `ARRIVE_DIST` |
+| 3 | **Bounties auto-started on arrival, no confirm.** Added `bountyPrompt`/`drawBountyPrompt`/`engageBounty`/`declineBounty`, modelled exactly on `dockPrompt`/`hangarPrompt` — Y/N panel, re-arms on leaving the mark. | `iso_grid_prototype.html` |
+| 4 | **Crew screen showed Kael "1/3" actions with only 2 available.** The ⇄ SWAP counter divided by `c.slot0.options.length` (3 — Scan/Shield/Disruptor Pulse), not by what's actually unlocked (Disruptor Pulse needs the Disruptor Array module). Now counts against `crewAvailableIdxs(c)`. | `drawCrewCharView` |
+| 5 | **Added an explicit ACCEPT button** to BOUNTIES/JOBS station rows instead of the implicit "click the row again to confirm" idiom — taking a contract is a one-way commitment and wanted a deliberate button. | `stationRows`/`_menuHit.stationAccept` |
+| 6 | **Salvage Rights auto-completed on accept.** It's posted *and* turned in at the same station (Salvage Reach), so accepting it while already docked there with 40+ scrap already in the hold passed both steps in the same breath. Delivery-style steps now carry `requiresFreshDock` and need an actual dock **event** after the step goes live, not just already sitting in the right place — `dockSession` counters on `dockAt()`. | `tickSides`, `SIDE_MISSIONS` |
+| 7 | **"The Ghost Signal" achievement never visibly popped.** It only unlocked if the player separately returned to free-roam after the ending — anyone who just watched the end screen got nothing. `endEpisode()` now unlocks it directly (writes `stargear_ach_v1`) and shows its own toast on the ending screen. | `episode1.html` |
+| 8 | **Removed selling ship modules** entirely — the MODULES tab, `stationAction`'s `sellmod` case, `sellbackValue`, and the now-dead `stationSoldMods` re-buy mechanic (save format too). | `iso_grid_prototype.html` |
+| 9 | **Voss's Tactics let you reassign another crew member's loadout.** Borrowing a crew's role for the turn still offered "Switch Action", which permanently changed *their* equipped ability via Voss's action point. The switch row is now hidden whenever `ap.borrower` is set — Tactics uses their current action as-is. | `actionPickRows` |
+| 10 | **Primary objective banner ellipsized hard** ("Deliver to quarry s…") at a flat 220px. Width now sizes to the label (220–340px clamp). | `drawPrimaryObjective` |
+| 11 | **Star Map station hover now shows unaccepted work** — "N job(s) posted here" (station-specific) and "N bounties open" (galaxy-wide board), above the existing keeper/market lines. | `stationTip`/`stationJobCounts` |
+| 12 | **Added hit-number and MISS floaters**, matching the existing "+N SCRAP" style — every damage source (base weapon, crew weapons, Crimson's attack, enemy fire, all four bosses' `bossHitPlayer`) now pops a `-N` or `MISS` above the target. | `spawnFloater` call sites |
+| 13 | **Crimson's hangar now appears on the Star Map** once you've actually met him (`crimsonMet`), using the same starburst glyph as his Mercenary menu entry. Hidden before that — he's still just a rumour at the Hub. | `drawMapView` |
+| 14 | **Crew face ability label could run to the panel edge** — "Disruptor Pulse" (Kael's) is the longest ability name in the game and had no width guard, unlike every other dynamic label in the file. Clamped with `fitText`. | combat side panel crew-face loop |
+
+

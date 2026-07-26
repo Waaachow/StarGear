@@ -125,3 +125,136 @@ so these assets re-skin a finished encounter rather than blocking one.
 |---|-------|-------|-----|
 | C1 | Cleaned-up avatars | "Clean up avatars" on the to-do list — needs Steve to say which ones are wrong before anything is generated. | P1 |
 | C2 | ✅ Station keepers — **4 portraits** | **Delivered and wired 2026-07-21**, all four, from the prompts in `IMAGE_PROMPTS.md` §"Station keepers (C2)". Waist-up cutouts at `Assets/char/keepers/<id>.png`, all correctly transparent (corner alpha 0, figure filling 96–98% of frame). Delivered ~648–817 × 768 rather than the specced 896×1200 — harmless, the draw sizes from the image's own aspect. Each keeper also has **welcome and send-off dialogue** (`KEEPERS`). | P1 |
+
+## Audio — v0.6 third-ability combat lines + SFX — ✅ COMPLETE (VO 2026-07-24, SFX 2026-07-25)
+
+Each crew's unlockable **third ability** (see `DEVLOG-v0.6.md`) has combat dialog + SFX hooks wired.
+**Both halves are now delivered** — 18 VO barks and 6 SFX cues. Nothing in this section is outstanding.
+
+**✅ VO barks — DELIVERED 2026-07-24.** Steve recorded the 18 lines into six `_E2.mp3` masters
+(`audio/Combat/<Name>_E2.mp3`); `cut_combat_e2.py` transcribed/aligned/cut them into the numbered
+clips (all six masters matched the script at **ratio 1.000**). Clips written and in-game:
+
+| Ability | Trigger key | New clips |
+|---|---|---|
+| Astra · Evasive Roll | `astra-evade` | astra_09–11 ✅ |
+| Rex · Railgun | `rex-railgun` | rex_10–12 ✅ |
+| Kael · Disruptor Pulse | `kael-disruptor` | kael_11–13 ✅ |
+| Voss · Focus Fire | `voss-focus` | voss_06–08 ✅ |
+| Tessa · Vent Plasma | `tessa-vent` | tessa_10–12 ✅ |
+| Selyra · Triage | `selyra-triage` | selyra_08–10 ✅ |
+
+**✅ SFX — DELIVERED 2026-07-25. All six audio gaps for v0.6 are now closed.** One cue each at
+`audio/SFX/<name>.mp3`, already registered in `SFX_VOL` and called from each ability, so dropping the
+files in was the whole integration — no code change. Prompts kept for regeneration in
+`AUDIO_PROMPTS.md` § "v0.6 third-ability SFX (A15–A20)".
+
+| # | Cue | File | `SFX_VOL` | Spec | Delivered | Reads as |
+|---|-----|------|-----------|------|-----------|----------|
+| A15 | `railgun`   | `audio/SFX/railgun.mp3`   | 0.75 | 0.7–1.0s | ✅ 0.88s | capacitor whine → heavy low CRACK; the heaviest cue in the set |
+| A16 | `vent`      | `audio/SFX/vent.mp3`      | 0.70 | 0.6–0.9s | ✅ 0.80s | pressurised hiss → plasma whoomph, broad/omnidirectional not a shot |
+| A17 | `disruptor` | `audio/SFX/disruptor.mp3` | 0.60 | 0.5–0.8s | ✅ 0.68s | electrical zap → glitching buzz collapsing downward (systems going dark) |
+| A18 | `evade`     | `audio/SFX/evade.mp3`     | 0.50 | 0.35–0.5s | ✅ 0.48s | crisp thruster whoosh with a banking doppler; lightest of the six |
+| A19 | `focus`     | `audio/SFX/focus.mp3`     | 0.50 | 0.4–0.6s | ✅ 0.48s | targeting lock-on tone — informational, like `scan` but shorter and decisive |
+| A20 | `triage`    | `audio/SFX/triage.mp3`    | 0.55 | 0.7–1.0s | ✅ 0.88s | warm rising medical chime; the only tonal, hopeful cue in the batch |
+
+**Every one landed inside its spec length** — the first audio batch in the project that needed no
+regeneration or `SFX_MAXMS` trim. All 17 SFX verified distinct (MD5), and all six verified loading +
+decoding in the real game over `http://localhost:8123` (HTTP 200, `readyState 4`, `SFX._missing`
+empty, `pageerror` clean).
+
+⚠️ **The `disruptor` file arrived misspelled as `distruptor.mp3`** and was renamed on arrival. The
+lookup is `"audio/SFX/" + name + ".mp3"` off the cue key in `SFX_VOL`, so a typo'd filename is a
+**silent** failure — the cue just never plays and nothing logs. Check the exact spelling of these six
+against `SFX_VOL` on any regeneration.
+
+Three constraints baked into the prompts, worth keeping on a regeneration: they must not be
+confusable with `laser`/`missile`/`hit`; they should keep energy out of the vocal band because a crew
+bark plays over them; and they fire once per use (no `SFX_POOL`, no `SFX_MAXMS` cap on any of them),
+so a modest tail is fine but anything past ~1s outlasts the animation.
+
+---
+
+## Crimson Nova encounter (v0.6, 2026-07-25) — code done, art pending
+
+The rumour + hangar + VN scene are all wired and verified; these assets make it look finished. All
+degrade gracefully (labelled placeholders / silence), so nothing here blocks.
+
+**✅ Hangar map sprite — DONE.** `Assets/space/Crimson.png` (the mercenary base; wired to `OBJ.HANGAR`).
+
+**Crimson portraits → `Assets/char/Mercenaries/CRIMSON/<Pose>.png`.** No folder move needed — the
+resolver reads this sub-folder (`CHAR_DIR` override in `charFile`). Names use underscores; `enorm()`
+ignores them, so the script's "Heroic Smile" resolves to `Heroic_Smile.png`.
+
+The script names **21 poses** (incl. Neutral). **13 done, 8 to draw.** Each missing one shows the
+labelled "C" placeholder until it lands:
+
+| Pose (filename) | Status | Used for (script cues) |
+|---|---|---|
+| `Neutral.png`             | ✅ have | fallback / default |
+| `Heroic_Smile.png`        | ✅ have | Heroic Smile |
+| `Finger_Point.png`        | ✅ have | Finger Point |
+| `Heroic_Pose.png`         | ✅ have | Heroic Pose |
+| `Sparkling_Confidence.png`| ✅ have | Champion of hope! |
+| `Proud.png`               | ✅ have | Seven. |
+| `Finger_Up.png`           | ✅ have | Finger Up |
+| `Dramatic_Shock.png`      | ✅ have | Oh! |
+| `Heroic_Concern.png`      | ✅ have | You're the serious one. |
+| `Laughing.png`            | ✅ have | Laughing |
+| `Serious.png`             | ✅ have | Serious |
+| `Wink.png`                | ✅ have | Wink |
+| `Salute.png`              | ✅ have | Salute |
+| `Eyes_Closed_Smile.png`   | ❌ draw — now shows **Heroic_Smile** | ...I usually get applause by now. |
+| `Confident.png`           | ❌ draw — now shows **Sparkling_Confidence** | Good. / I fight until the battle's won. |
+| `Humble_Smile.png`        | ❌ draw — now shows **Heroic_Concern** | (silent beat before "Someone has to.") |
+| `Soft_Smile.png`          | ❌ draw — now shows **Heroic_Concern** | Someone has to. |
+| `Grinning.png`            | ❌ draw — now shows **Laughing** | Anyway! |
+| `Smile.png`               | ❌ draw — now shows **Heroic_Smile** | Neither are smoke bombs / No piracy. |
+| `Professional.png`        | ❌ draw — now shows **Serious** | Pay me before departure. |
+| `Heroic.png`              | ❌ draw — now shows **Heroic_Pose** | No civilian casualties. |
+
+The 8 undrawn poses are aliased to the nearest existing Crimson avatar (via `EXPR_ALIAS`), so the
+scene shows a real portrait on every line — no placeholders. **As each is drawn, add its name back to
+`CHAR_ART.CRIMSON`** so the exact pose takes over from the fallback.
+
+**✅ Scene background — DONE.** `Assets/Crimson_Hanger.png` (id `BG_CRIMSON`, wired in `BG_OVERRIDE`).
+
+**✅ Kael "Deadpan" pose — DONE.** `Assets/char/KAEL/Deadpan.png` (added to `CHAR_ART.KAEL`, so
+Kael's "I object." line now uses a dedicated pose instead of the Neutral fallback).
+
+**✅ VO — DONE (2026-07-25, greet lines landed 2026-07-26).** Steve recorded all seven speakers into
+`audio/Rumours/*.mp3` masters; `cut_rumours.py` (whisper align + cut, same route as `cut_combat.py`)
+split them into per-line clips `audio/Rumours/vo/<char>_NN.mp3` and emitted the `SCENE_VO` map (keyed
+`who|text`, consulted by `showLine` after `VO_MAP`). **All 52 scene lines are voiced** (the 2 silent
+"..." beats don't need audio). `Rex_Astra.mp3` is Rex's take (confirmed by transcription). The
+`crimson_greet` lines landed as a separate master (`audio/Rumours/Crimson_greet.mp3`) and were cut with
+a standalone script, `cut_crimson_greet.py` (same align/cut logic, merges into the existing
+`scene_vo.json` instead of regenerating it) → `crimson_greet_01/02.mp3`.
+
+---
+
+## Crimson Nova as a hireable combat ally (2026-07-26) — code + VO done
+
+The hire mechanic (`DEVLOG-v0.6.md` → "Crimson Nova joins as a hireable combat ally") is code-complete
+and Playwright-verified.
+
+**✅ Space idle chatter — DONE (2026-07-26).** `audio/Explore/crimson_idle_01–05.mp3`, cut from
+`audio/Explore/Crimson_Explore.mp3` by a standalone script, `cut_crimson_explore.py` (same
+align/cut logic as `cut_explore.py`, just not folded into that script's fixed six-name list).
+`CHATTER.crimsonIdle` in `iso_grid_prototype.html` plays them on his own idle timer while hired.
+
+**✅ Combat barks — DONE (2026-07-26).** `audio/Combat/crimson_<trigger>_NN.mp3`, 13 clips cut from
+`audio/Combat/Crimson_Combat.mp3` by `cut_crimson_combat.py` (0.980 whisper match, all 13 lines
+found) — reuses the `CREW_BARK_VO` channel:
+
+| Trigger | Clips | Fires |
+|---|---|---|
+| `join` | crimson_join_01–02 | first Guest turn of a fight |
+| `attack` | crimson_attack_01–03 | Spotlight Shot (≤2 enemies) |
+| `supernova` | crimson_super_01–02 | Supernova Strike (3+ enemies) |
+| `heavyHit` | crimson_hit_01–02 | he takes ≥34% of his max HP in one hit |
+| `knockedOut` | crimson_ko_01–02 | knocked out — retreats and leaves the team |
+| `noShow` | crimson_noshow_01–02 | couldn't afford the fee, sits the fight out |
+
+Crimson Nova is now fully voiced end to end: the hangar hire scene, the revisit greeting, free-roam
+idle chatter, and every combat bark trigger.

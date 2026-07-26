@@ -1,0 +1,3092 @@
+STAR GEAR
+Episode 1 – Echoes of Steel
+Scene 1 – Cold Open
+
+Background
+Black Screen
+
+Music
+None
+
+Characters
+None
+
+White text fades in.
+
+"Every machine is built with a purpose."
+
+Fade.
+
+"Some are built to build."
+
+Fade.
+
+"Some are built to protect."
+
+Fade.
+
+"Some... are built to destroy."
+
+Long pause.
+
+"But purpose is not destiny."
+
+Fade to black.
+
+Title Card
+
+STAR GEAR
+
+Episode 1
+
+ECHOES OF STEEL
+
+Music begins.
+
+Scene 2 – Entering Helios Reach
+
+Background
+BG_Bridge
+
+Music
+Frontier Voyage
+
+Characters
+
+Voss
+
+Rex
+
+Tessa
+
+Kael
+
+Selyra
+
+Astra
+
+Expressions
+Voss
+
+Neutral
+
+Smile
+
+Rex
+
+Excited
+
+Astra
+
+Happy
+
+Curious
+
+Tessa
+
+Happy
+
+Kael
+
+Neutral
+
+Selyra
+
+Curious
+
+Dialogue
+
+REX (Excited)
+
+"So this is Helios Reach!"
+
+TESSA (Happy)
+
+"It actually has traffic."
+
+REX
+
+"And look! Actual stations!"
+
+SELYRA (Curious)
+
+"There appear to be... many more ships than our previous destination."
+
+KAEL
+
+"Trade routes."
+
+"They're heavily travelled."
+
+ASTRA (Happy)
+
+"I wonder what everyone here is like."
+
+VOSS (Smile)
+
+"We'll soon find out."
+
+"Our contract begins at Cogwheel Station."
+
+"We're escorting civilian shipping while we're in the sector."
+
+REX
+
+"So..."
+
+"No haunted ghost fleets?"
+
+VOSS
+
+"I certainly hope not."
+
+Everyone chuckles.
+
+Gameplay
+
+Player gains control.
+
+Objective:
+
+Fly to Cogwheel Station
+
+Scene 3 – Arrival at Cogwheel Station
+
+Background
+BG_Cogwheel_Docks
+
+(Large industrial station. Orange lights. Cargo cranes.)
+
+Music
+
+Industrial Frontier
+
+Characters
+
+Entire Crew
+
+Station Manager Elias
+
+Dock Workers
+
+Expressions
+Elias
+
+Neutral
+
+Professional Smile
+
+Concerned
+
+Astra
+
+Happy
+
+Rex
+
+Excited
+
+Voss
+
+Neutral
+
+Dialogue
+
+ELIAS
+
+"Welcome to Cogwheel Station."
+
+"I'm Elias Mercer."
+
+"Station Administrator."
+
+VOSS
+
+"Captain Voss."
+
+"StarGear."
+
+ELIAS
+
+"We've been expecting you."
+
+"We appreciate the extra security."
+
+REX
+
+"We're getting famous."
+
+KAEL
+
+"Don't let it go to your head."
+
+Elias smiles.
+
+His eyes drift...
+
+To Astra.
+
+The smile fades.
+
+Only for a second.
+
+He quickly hides it.
+
+ELIAS
+
+"..."
+
+"..."
+
+"I've arranged docking clearance."
+
+"Please..."
+
+"...make yourselves comfortable."
+
+Astra notices.
+
+Barely.
+
+Scene 4 – Cogwheel Concourse
+
+Background
+
+BG_Cogwheel_Concourse
+
+Huge mechanical shopping district.
+
+Animated advertisements.
+
+Travellers.
+
+Cargo robots.
+
+Music
+
+Busy Station
+
+Crew split up.
+
+Dialogue plays while portraits swap.
+
+REX
+
+"I call food first!"
+
+TESSA
+
+"I'm finding the engineer."
+
+SELYRA
+
+"I wish to study local mechanical culture."
+
+KAEL
+
+"I'll inspect station security."
+
+Everyone leaves.
+
+Only Astra and Voss remain.
+
+A little girl walks around the corner.
+
+Sees Astra.
+
+Stops.
+
+Her eyes widen.
+
+She slowly hides behind her mother.
+
+The mother immediately pulls her away.
+
+Astra watches them leave.
+
+Confused.
+
+ASTRA
+
+"..."
+
+"Was it something I said?"
+
+VOSS
+
+"I wouldn't worry."
+
+"People are cautious around strangers."
+
+Astra nods.
+
+But Voss doesn't sound convinced.
+
+Scene 5 – The Engineer
+
+Background
+
+BG_Engineer
+
+(Previously generated workshop.)
+
+Tessa is already talking.
+
+Engineer laughs.
+
+Ship modules visible.
+
+Player gains access to:
+
+Ship Configuration
+
+Module Shop
+
+Repairs
+
+Small dialogue only.
+
+Scene 6 – Space Broker
+
+Background
+
+BG_Space_Broker
+
+Player unlocks
+
+Sell Salvage
+
+Buy Items
+
+Bounties
+
+Broker smiles.
+
+Until...
+
+Astra enters.
+
+He freezes.
+
+Just...
+
+For a moment.
+
+Then continues normally.
+
+No one comments.
+
+Scene 7 – Leaving Station
+
+Back aboard StarGear.
+
+Bridge.
+
+Music
+
+Voyage
+
+REX
+
+"People here are weird."
+
+TESSA
+
+"Hm?"
+
+REX
+
+"Didn't you notice?"
+
+"They kept staring."
+
+SELYRA
+
+"They stared at all of us."
+
+REX
+
+"No."
+
+"They stared at Astra."
+
+Silence.
+
+Everyone looks.
+
+Astra laughs awkwardly.
+
+ASTRA
+
+"Maybe my hair looked funny."
+
+Nobody laughs.
+
+Even Voss is quiet.
+
+COMMUNICATIONS ALERT
+
+Distress Beacon received.
+
+Mining Convoy
+
+Under attack.
+
+Objective Updated
+
+Respond to Distress Beacon
+
+Gameplay resumes.
+
+Fly to convoy.
+
+Scene 8 – Battle Start CG
+CG01 – Burning Convoy
+
+A cinematic illustration of a civilian mining convoy under pirate attack. Cargo ships drift with engines ablaze while debris and shipping containers scatter through space. Pirate fighters weave between explosions. In the foreground, the StarGear emerges from a Space Hop jump with engines glowing, positioning itself between the pirates and the convoy. The scene should feel heroic but dangerous, with bright engine trails cutting through the darkness and a nearby planet providing dramatic backlighting. Anime JRPG key art, dynamic composition, cinematic lighting, high detail, vibrant colours, no text.
+
+Battle Start Dialogue
+
+Pirate Captain
+
+"Another hero ship?"
+
+"Blast them."
+
+Rex
+
+"Finally!"
+
+Kael
+
+"Enemy formation ahead."
+
+Voss
+
+"Protect the convoy."
+
+"Nobody gets left behind."
+
+Battle begins.
+
+Story Battle 1
+
+Player wins.
+
+Scene 9 – After Battle
+
+Enemy flagship heavily damaged.
+
+Communications open.
+
+Pirate Captain appears.
+
+Scarred.
+
+Nervous.
+
+Then...
+
+He notices Astra standing behind Voss.
+
+His face changes instantly.
+
+Fear.
+
+Recognition.
+
+Disbelief.
+
+Pirate Captain
+
+"..."
+
+"...No."
+
+"It can't be."
+
+Silence.
+
+"A-..."
+
+"No..."
+
+"Prototype..."
+
+Astra blinks.
+
+ASTRA
+
+"...Prototype?"
+
+The pirate begins backing away.
+
+His breathing becomes panicked.
+
+Pirate Captain
+
+"Captain Raze..."
+
+"...was right."
+
+"She's alive."
+
+Transmission cuts.
+
+Pirates immediately retreat.
+
+Jump signatures disappear.
+
+Silence fills the bridge.
+
+Nobody speaks.
+
+Until...
+
+REX
+
+"..."
+
+"...Okay."
+
+"That was weird."
+
+Everyone slowly turns...
+
+Toward Astra.
+
+She looks completely confused.
+
+Fade to black.
+
+Part 2 – Shadows of the Past
+Scene 10 – Bridge After the Encounter
+
+Background
+BG_Bridge
+
+Music
+Uneasy Silence
+
+Characters
+
+Voss
+Astra
+Rex
+Kael
+Tessa
+Selyra
+Expressions
+
+Voss
+
+Neutral
+Thinking
+
+Astra
+
+Confused
+Worried
+
+Rex
+
+Confused
+
+Kael
+
+Serious
+
+Tessa
+
+Thinking
+
+Selyra
+
+Curious
+Dialogue
+
+REX (Confused)
+
+"...Okay."
+
+"Can somebody explain what just happened?"
+
+TESSA (Thinking)
+
+"He recognised Astra."
+
+SELYRA
+
+"He appeared... frightened."
+
+ASTRA (Confused)
+
+"I've never seen him before."
+
+KAEL
+
+"He called you 'Prototype'."
+
+Silence.
+
+Everyone slowly looks toward Voss.
+
+He keeps staring out the bridge window.
+
+VOSS
+
+"Our priority is the convoy."
+
+"We'll discuss this later."
+
+Kael notices Voss avoiding the subject.
+
+He doesn't push.
+
+Yet.
+
+Convoy Captain hails StarGear.
+
+Scene 11 – Convoy Debrief
+
+Background
+BG_Bridge (Comms Window)
+
+Convoy Captain portrait appears.
+
+New Character
+
+Captain Elara Quinn
+
+A veteran civilian freight captain.
+
+Late 40s.
+
+Warm, confident.
+
+Has spent decades hauling cargo through dangerous frontier sectors.
+
+Expressions
+
+Captain Quinn
+
+Grateful
+Concerned
+Dialogue
+
+QUINN
+
+"StarGear."
+
+"You have our thanks."
+
+"If you hadn't arrived..."
+
+VOSS
+
+"I'm just glad everyone made it."
+
+QUINN
+
+"..."
+
+"I should warn you."
+
+Everyone listens.
+
+QUINN
+
+"Those pirates haven't been this bold for years."
+
+"They've been searching for something."
+
+KAEL
+
+"What?"
+
+QUINN
+
+"No one knows."
+
+"They've been raiding old wrecks."
+
+"Abandoned stations."
+
+"Factory sites."
+
+Tessa exchanges a glance with Voss.
+
+QUINN
+
+"They barely even steal cargo anymore."
+
+Transmission ends.
+
+Gameplay
+
+Free Exploration unlocked.
+
+The player can:
+
+Salvage
+Complete bounties
+Scan anomalies
+Return to Cogwheel
+Continue story
+
+Story objective appears.
+
+Return to Cogwheel Station
+
+Optional Bridge Skit 01
+
+Location
+
+Bridge
+
+Expressions
+
+Astra
+
+Thinking
+
+Smile (forced)
+
+Dialogue
+
+ASTRA
+
+"Do you think..."
+
+"...I really look like someone?"
+
+REX
+
+"Lots of people have doubles."
+
+TESSA
+
+"Not enough to make pirates run away."
+
+ASTRA
+
+"..."
+
+REX
+
+"..."
+
+"Sorry."
+
+Small silence.
+
+Scene 12 – Cogwheel Station
+
+Background
+
+BG_Cogwheel_Concourse
+
+Same background.
+
+Different atmosphere.
+
+Music quieter.
+
+NPCs stop talking as Astra walks past.
+
+A mechanic quietly closes his toolbox.
+
+A waitress walks back inside.
+
+A family crosses to the other side of the corridor.
+
+Nobody says anything.
+
+Astra notices.
+
+Dialogue
+
+ASTRA
+
+"..."
+
+"It's me."
+
+Nobody answers.
+
+Scene 13 – Elias' Office
+
+Background
+
+BG_Station_Manager
+
+Industrial office overlooking docking bay.
+
+Cargo ships outside panoramic windows.
+
+Characters
+
+Voss
+
+Astra
+
+Kael
+
+Elias
+
+Expressions
+
+Elias
+
+Concerned
+
+Dialogue
+
+ELIAS
+
+"I hoped..."
+
+"...I was mistaken."
+
+VOSS
+
+"Mistaken about what?"
+
+Elias sighs.
+
+Looks toward Astra.
+
+ELIAS
+
+"Years ago..."
+
+"This sector suffered pirate attacks unlike anything we'd seen."
+
+"..."
+
+"They weren't ordinary pirates."
+
+"They used combat androids."
+
+Silence.
+
+ELIAS
+
+"They looked..."
+
+"...very much like her."
+
+Everyone looks toward Astra.
+
+She slowly steps backwards.
+
+ASTRA
+
+"I..."
+
+"I don't..."
+
+ELIAS
+
+"I'm sorry."
+
+"I don't believe you're one of them."
+
+"But memories..."
+
+"...don't disappear."
+
+Scene 14 – Outside the Office
+
+Background
+
+Station Corridor
+
+No music.
+
+Astra quietly walks ahead.
+
+The crew follows.
+
+Nobody speaks.
+
+Eventually...
+
+ASTRA
+
+"Captain."
+
+Voss looks up.
+
+ASTRA
+
+"...Have you ever wondered..."
+
+"...where I came from?"
+
+Voss hesitates.
+
+Just long enough for Kael to notice.
+
+VOSS
+
+"Everyone has a past."
+
+ASTRA
+
+"I don't."
+
+Silence.
+
+Scene 15 – Kael's Suspicion
+
+Bridge
+
+Returning to StarGear.
+
+Everyone disperses.
+
+Only Kael remains.
+
+Dialogue
+
+KAEL
+
+"Captain."
+
+VOSS
+
+"Yes?"
+
+KAEL
+
+"You know something."
+
+Silence.
+
+VOSS
+
+"..."
+
+KAEL
+
+"I won't ask again."
+
+Kael leaves.
+
+Voss remains alone.
+
+Looking out into space.
+
+Gameplay
+
+Player regains control.
+
+Objective
+
+Investigate abandoned patrol signal.
+
+Scene 16 – Distress Beacon
+
+During exploration...
+
+Long-range scan detects an old emergency beacon.
+
+Not active.
+
+Repeating.
+
+Thirty-year-old signal.
+
+Tessa analyses it.
+
+Dialogue
+
+TESSA
+
+"This transmission predates the pirate raids."
+
+SELYRA
+
+"Why is it still broadcasting?"
+
+REX
+
+"Only one way to find out."
+
+Objective updates.
+
+Fly to beacon.
+
+Scene 17 – CG02
+The Silent Graveyard
+
+The StarGear drifts through a vast field of derelict ships. Rusted mining vessels, shattered patrol frigates and broken cargo transports float silently among asteroid debris. Faded distress beacons blink weakly in the darkness. One enormous wreck bears deep claw-like scars across its hull. The atmosphere is haunting rather than explosive, with cold blue starlight illuminating drifting wreckage and countless fragments disappearing into the distance. The StarGear appears tiny against the scale of the forgotten battlefield. Anime cinematic illustration, emotional, mysterious, Star Ocean quality, no text.
+
+Scene 18 – The Black Box
+
+Background
+
+Bridge
+
+Tessa recovers the patrol cruiser recording.
+
+Static.
+
+Distorted voices.
+
+Recording begins.
+
+Unknown Officer
+
+"All ships!"
+
+"They're boarding!"
+
+Weapons fire.
+
+Screaming.
+
+Then...
+
+A calm female voice.
+
+Emotionless.
+
+"Target eliminated."
+
+Another.
+
+"Proceeding to next target."
+
+Then...
+
+The recording clears.
+
+For only two seconds.
+
+A battle android walks through the corridor.
+
+Pink twin tails.
+
+Blue eyes.
+
+Almost identical to Astra.
+
+She looks directly into the camera.
+
+Recording ends.
+
+Nobody speaks.
+
+Astra quietly stands.
+
+ASTRA
+
+"..."
+
+"...I need..."
+
+"...some air."
+
+She leaves the bridge.
+
+Fade out.
+
+End of Part 2
+New Assets Introduced
+Backgrounds
+BG_Station_Manager
+CGs
+CG02 – The Silent Graveyard
+Music
+Uneasy Silence
+Industrial Office
+Silent Graveyard
+New Characters
+Captain Elara Quinn (civilian convoy captain)
+Character Development
+The sector's fear of Astra is no longer vague—it has a historical basis.
+Kael becomes the first crew member to suspect Voss is hiding something.
+Astra begins to question her own identity, not because anyone accuses her directly, but because the evidence is starting to point toward a past she can't remember.
+The discovery of the patrol recording ends the act on a strong cliffhanger, setting up Part 3, where the crew starts piecing together the truth while the pirates close in.
+
+Part 3 – Ghosts of Memory
+Scene 19 – Astra Alone
+
+Background
+BG_Observation_Deck (StarGear)
+
+A quiet viewing lounge aboard the StarGear. A large panoramic window looks out over the stars. Warm ambient lighting. One chair. A peaceful place where crew members go to think.
+
+Music
+Lonely Stars
+
+Characters
+
+Astra
+Expressions
+
+Astra
+
+Sad
+Thinking
+Worried
+
+Astra stands alone.
+
+Watching the stars drift past.
+
+ASTRA
+
+"..."
+
+"...Who am I?"
+
+She presses her hand against the glass.
+
+ASTRA
+
+"I don't remember."
+
+"I don't remember anything."
+
+"I don't even know..."
+
+"...if my memories are real."
+
+Fade.
+
+Scene 20 – Bridge
+
+Background
+BG_Bridge
+
+The remaining crew quietly discuss the patrol recording.
+
+Expressions
+
+Voss – Neutral
+
+Kael – Serious
+
+Rex – Thinking
+
+Tessa – Concerned
+
+Selyra – Curious
+
+REX
+
+"So..."
+
+"That thing..."
+
+"It looked exactly like Astra."
+
+TESSA
+
+"It wasn't just similar."
+
+"It was identical."
+
+SELYRA
+
+"Perhaps identical appearance serves a tactical purpose."
+
+KAEL
+
+"Captain."
+
+"How much do you know?"
+
+Voss remains silent.
+
+Alarm.
+
+Incoming priority transmission.
+
+Scene 21 – Transmission
+
+Background
+
+Bridge
+
+Communications Window
+
+New Character
+
+Chief Rowan
+
+Head of Security.
+
+Cogwheel Station.
+
+Expression
+
+Professional
+
+Tired
+
+ROWAN
+
+"Captain Voss."
+
+"We've arrested a pirate."
+
+"He keeps asking for you."
+
+"..."
+
+"He specifically requested Astra."
+
+Everyone exchanges looks.
+
+Objective
+
+Return to Cogwheel Station.
+
+Scene 22 – Prison Holding Cells
+
+Background
+BG_Prison
+
+A compact detention block inside Cogwheel Station. Steel walls, reinforced energy cells, dim industrial lighting, exposed pipes and security monitors.
+
+Music
+Steel Bars
+
+Characters
+
+Voss
+
+Astra
+
+Kael
+
+Rowan
+
+Pirate Prisoner
+
+The prisoner sits quietly.
+
+Hands restrained.
+
+He smiles...
+
+When Astra walks in.
+
+PIRATE
+
+"So..."
+
+"The famous one."
+
+ASTRA
+
+"..."
+
+"Do you know me?"
+
+The pirate laughs.
+
+PIRATE
+
+"No."
+
+"But I know what you are."
+
+Silence.
+
+PIRATE
+
+"Captain Raze talked about you."
+
+"The First."
+
+"The perfect one."
+
+Astra steps backwards.
+
+ASTRA
+
+"...First?"
+
+PIRATE
+
+"You don't remember."
+
+He laughs again.
+
+"You really don't remember."
+
+Scene 23 – Rowan's Story
+
+Outside holding cells.
+
+Background
+
+BG_Prison_Corridor
+
+Music
+
+Quiet Resolve
+
+Rowan removes his helmet.
+
+ROWAN
+
+"I owe you an apology."
+
+Everyone listens.
+
+"I've been watching your android."
+
+"I didn't trust her."
+
+Astra lowers her eyes.
+
+ROWAN
+
+"I lost my younger brother."
+
+"Battle androids."
+
+"They came through our colony."
+
+"They didn't shout."
+
+"They didn't threaten."
+
+"They simply..."
+
+"...completed their objective."
+
+"They all had the same face."
+
+He looks at Astra.
+
+"But when you spoke to that prisoner..."
+
+"...I realised."
+
+"They never looked afraid."
+
+"You do."
+
+Astra doesn't know what to say.
+
+ROWAN
+
+"I still don't trust machines."
+
+"..."
+
+"But I think..."
+
+"I can trust you."
+
+This is the first time a local has openly separated Astra from the machines.
+
+Scene 24 – New Lead
+
+Bridge.
+
+Returning to StarGear.
+
+Tessa analyses the prisoner's information.
+
+TESSA
+
+"He kept mentioning..."
+
+"The First."
+
+SELYRA
+
+"A designation."
+
+KAEL
+
+"Or a prototype."
+
+Computer beeps.
+
+Long-range scan.
+
+Old GearWorks communications satellite.
+
+Still operational.
+
+Objective
+
+Investigate satellite.
+
+Gameplay.
+
+Scene 25 – Story Battle 2
+
+Pirates arrive first.
+
+Battle Start Dialogue
+
+DAX
+
+"Captain Raze was right!"
+
+"The prototype really is alive!"
+
+"You belong with us!"
+
+ASTRA
+
+"I don't belong to anyone!"
+
+Battle begins.
+
+Boss
+
+Dax
+
+Escort Squadron
+
+Victory.
+
+Scene 26 – After Battle
+
+Dax's ship heavily damaged.
+
+Transmission opens.
+
+Unlike the first pirate...
+
+He's excited.
+
+DAX
+
+"I've always wanted to meet you!"
+
+"The original!"
+
+"You know what Captain Raze says?"
+
+"He says you're wasted."
+
+"You should be leading us!"
+
+Astra
+
+"..."
+
+ASTRA
+
+"I don't even know who I am."
+
+Dax grins.
+
+"Oh..."
+
+"You will."
+
+"You'll remember everything."
+
+Transmission ends.
+
+He jumps away.
+
+Scene 27 – The Satellite
+
+Background
+
+CG03
+
+CG03 – GearWorks Relay
+
+A colossal abandoned GearWorks communications satellite hangs silently above a barren moon. The once-pristine corporate structure is now scarred by years of neglect, with broken solar arrays, drifting antenna fragments, and faded company insignia still visible on its rotating central ring. Dim emergency lights blink across the station as the StarGear approaches cautiously. The surrounding space is quiet, creating an eerie contrast to the satellite's immense scale. The atmosphere should feel mysterious and forgotten, hinting at secrets buried within its data banks. Premium anime cinematic illustration, painterly JRPG style, dramatic lighting, no characters, no text.
+
+Scene 28 – Download Complete
+
+Bridge.
+
+Tessa successfully downloads archived GearWorks files.
+
+Most are corrupted.
+
+One remains intact.
+
+The file title reads:
+
+A-SERIES COMBAT PLATFORM
+
+Access Restricted
+
+Everyone looks toward Voss.
+
+He quietly closes his eyes.
+
+VOSS
+
+"..."
+
+"I think..."
+
+"...it's time I told you everything."
+
+Fade to black.
+
+END OF PART 3
+What this accomplishes
+
+Instead of Voss confessing because Kael pressures him, the story naturally builds to that moment:
+
+Astra begins to question herself privately.
+The crew gathers fragments of the truth.
+Rowan shows that not everyone who fears Astra is cruel—some are carrying genuine trauma.
+Dax confirms Astra is significant without revealing everything.
+The recovered GearWorks archive becomes the catalyst that Voss can no longer ignore.
+
+It also gives Astra a quiet emotional journey before the revelation. By the time Voss says, "It's time I told you everything," the player isn't just curious about Astra's origins—they're invested in what that truth will mean for her. That's a much stronger foundation for Part 4, which should be the emotional heart of the episode.
+
+Part 4 – The Captain's Truth
+Scene 29 – Silence
+
+Background
+BG_Bridge
+
+Music
+None
+
+No one speaks.
+
+The GearWorks file sits on the main display.
+
+Waiting.
+
+VOSS
+
+"..."
+
+"Close the file."
+
+Nobody moves.
+
+KAEL
+
+"Captain."
+
+"You owe us an explanation."
+
+Voss slowly stands from the captain's chair.
+
+Walks to the front window.
+
+Looking out at the stars.
+
+Scene 30 – Voss Speaks
+
+Background
+
+BG_Bridge
+
+Expressions
+
+Voss
+
+Neutral
+
+Regret
+
+Warm Smile
+
+VOSS
+
+"Nine years ago..."
+
+"...I accepted an escort contract."
+
+"It should have been routine."
+
+"It wasn't."
+
+Fade.
+
+CG04 – The Escape Pod
+
+A burning battlefield fills deep space. Wrecked pirate ships and destroyed patrol vessels drift silently among glowing debris. In the foreground, a small damaged escape pod tumbles slowly through the wreckage, its hull scorched and cracked. Captain Voss, wearing an EVA suit with his helmet tucked beneath one arm, floats toward the pod with one hand extended. Through the fractured viewport, a frightened young Astra sits motionless inside. Her face is streaked with dirt, one eye flickering with static, and exposed mechanical components are visible beneath torn synthetic skin on her arm. Despite the damage, she looks less like a weapon and more like a frightened child. The composition should emphasise the distance between them, with Voss reaching out as a gesture of trust. Cinematic anime illustration, emotional, painterly JRPG style, dramatic lighting, no text.
+
+Scene 31 – Flashback
+
+Background
+
+CG04
+
+VOSS (Narration)
+
+"There were no survivors."
+
+"I was preparing to leave."
+
+"Then..."
+
+"I found one escape pod."
+
+Inside...
+
+Young Astra.
+
+Barely conscious.
+
+The pod opens.
+
+Young Astra looks terrified.
+
+YOUNG ASTRA
+
+"..."
+
+"...Am..."
+
+"...I..."
+
+Long pause.
+
+"...alive?"
+
+Back to Bridge.
+
+Nobody speaks.
+
+Scene 32 – The Decision
+
+Background
+
+BG_Bridge
+
+VOSS
+
+"I knew exactly what she was."
+
+"I also knew..."
+
+"...she was afraid."
+
+"So I brought her home."
+
+REX
+
+"You knew..."
+
+"...all this time?"
+
+VOSS
+
+"Yes."
+
+TESSA
+
+"Why didn't you tell us?"
+
+Voss smiles sadly.
+
+VOSS
+
+"Because it wasn't my story to tell."
+
+Everyone quietly absorbs that.
+
+VOSS
+
+"If Astra ever remembered..."
+
+"...I wanted it to come from her."
+
+"I wasn't protecting myself."
+
+"I was protecting her chance..."
+
+"...to simply be Astra."
+
+Scene 33 – Astra
+
+Background
+
+BG_Bridge
+
+Astra has tears in her eyes.
+
+ASTRA
+
+"So..."
+
+"My name..."
+
+"...isn't really Astra?"
+
+Voss immediately turns.
+
+"No."
+
+"It is."
+
+Silence.
+
+"I gave you that name."
+
+"You accepted it."
+
+"You've answered to it every day since."
+
+"It became yours."
+
+Astra quietly smiles through tears.
+
+Scene 34 – Crew Reactions
+
+Background
+
+BG_Bridge
+
+Rex
+
+"I don't care what you were built as."
+
+"You're the same Astra who burns breakfast."
+
+Astra laughs.
+
+Tessa
+
+"And who asks me to fix things..."
+
+"...that aren't broken."
+
+Another laugh.
+
+Selyra
+
+"My records indicate you have also stolen desserts."
+
+ASTRA
+
+"Once!"
+
+REX
+
+"It was definitely more than once."
+
+Even Kael almost smiles.
+
+The tension finally breaks.
+
+Scene 35 – Kael
+
+Background
+
+BG_Bridge
+
+Everyone leaves.
+
+Kael remains.
+
+KAEL
+
+"...Captain."
+
+"I still believe the crew should have known."
+
+Voss nods.
+
+"So do I."
+
+"..."
+
+"I simply wasn't ready to take that choice away from her."
+
+Kael considers this.
+
+Finally...
+
+"I understand."
+
+Not agreement.
+
+Understanding.
+
+Scene 36 – Incoming Transmission
+
+Alarm.
+
+Communications.
+
+Captain Raze appears for the first time.
+
+New Character
+
+Captain Raze
+
+Late 40s.
+
+Former GearWorks engineer.
+
+Well spoken.
+
+Calm.
+
+No shouting.
+
+No pirate clichés.
+
+Background
+
+Bridge (Comms)
+
+Expressions
+
+Raze
+
+Neutral
+
+Smile
+
+Cold
+
+RAZE
+
+"Captain Voss."
+
+"You've taken exceptional care of company property."
+
+Astra's face hardens.
+
+RAZE
+
+"Thank you."
+
+"I'll be taking her back now."
+
+VOSS
+
+"No."
+
+Raze smiles.
+
+"I wasn't asking."
+
+Transmission ends.
+
+Scene 37 – Red Alert
+
+Bridge.
+
+Klaxons.
+
+Red lighting fills the bridge.
+
+Long-range sensors detect...
+
+Multiple pirate fleets.
+
+Converging.
+
+Tessa zooms the tactical map.
+
+Three separate attack groups.
+
+KAEL
+
+"They're surrounding us."
+
+REX
+
+"Finally..."
+
+"A fair fight."
+
+Astra looks determined.
+
+No fear.
+
+ASTRA
+
+"I'm done running."
+
+Voss sits.
+
+The captain's chair rotates toward the viewscreen.
+
+VOSS
+
+"Battle stations."
+
+"Let's remind them..."
+
+"...why this ship is called StarGear."
+
+TO BE CONTINUED…
+Why I Changed This
+
+I think this version strengthens every character:
+
+Voss doesn't hide the truth out of shame or manipulation. He genuinely believes Astra deserved the chance to define herself before her past defined her.
+Kael doesn't suddenly forgive Voss. He still thinks the captain made the wrong call—but he respects the reasoning.
+Rex, Tessa, and Selyra respond exactly as you'd expect from a found family. Their first instinct isn't to question Astra; it's to reassure her that she's already proven who she is.
+Astra ends this act no longer asking, "Who am I?" Instead, she's ready to answer that question herself.
+
+Ending with Captain Raze's first appearance also gives the second half of the episode a clear shift in momentum. The mystery is over. Now the conflict is personal: Raze isn't trying to destroy the StarGear—he's trying to reclaim someone the crew already considers family. That raises the stakes naturally heading into the final act.
+
+Part 5 – The Iron Forge
+
+Act Theme: Astra stops asking who she was, and starts deciding who she will become.
+
+Scene 38 – Bridge
+
+Background
+BG_Bridge (Red Alert)
+
+Music
+Battle Stations
+
+Characters
+
+Voss
+Astra
+Rex
+Kael
+Tessa
+Selyra
+Dialogue
+
+TESSA
+
+"Three pirate fleets..."
+
+"...all converging on our position."
+
+KAEL
+
+"They're herding us."
+
+REX
+
+"So we punch through."
+
+TESSA
+
+"They want us to."
+
+Selyra enlarges the tactical display.
+
+Three fleets...
+
+One gap.
+
+SELYRA
+
+"Their formation leaves only one escape vector."
+
+Everyone looks.
+
+The route leads...
+
+To an old orbital complex.
+
+VOSS
+
+"They're forcing us somewhere."
+
+ASTRA
+
+"...Captain Raze."
+
+Objective Updated
+
+Reach the Iron Forge
+
+Gameplay
+
+Large exploration section.
+
+The player may freely:
+
+Hunt bounties
+Salvage
+Upgrade StarGear
+Hire Mercenaries
+Scan anomalies
+
+The only story objective is reaching the marked sector.
+
+Scene 39 – Arrival
+CG05 – The Iron Forge
+
+Nano Banana Prompt
+
+A colossal abandoned orbital shipyard stretches across open space, built into the remains of an enormous asteroid. Massive dry docks extend outward like mechanical arms, surrounding a central industrial core glowing with dim orange furnace light. Rusted cranes, rotating docking rings, conveyor structures, and gigantic fabrication gantries dominate the skyline. Hundreds of abandoned cargo containers and dismantled ship hulls drift slowly around the complex.
+
+The station once belonged to GearWorks and has been repurposed into a pirate fortress. Pirate banners hang from maintenance towers while jury-rigged defence turrets and salvaged warships patrol the entrances.
+
+The StarGear approaches from the foreground, dwarfed by the immense scale of the shipyard.
+
+The mood should feel intimidating, ancient, and alive—as though the factory itself has become a city for pirates.
+
+Premium anime cinematic illustration, painterly JRPG key art, dramatic lighting, retro-futuristic industrial design with subtle steampunk influences, no characters, no text.
+
+Scene 40 – Communications
+
+Bridge.
+
+The StarGear is hailed.
+
+Captain Raze appears.
+
+This time...
+
+He's standing inside the factory.
+
+Behind him...
+
+Rows of inactive androids.
+
+Only silhouettes.
+
+Dialogue
+
+RAZE
+
+"I've been expecting you."
+
+VOSS
+
+"I imagined you had."
+
+RAZE
+
+"Return A-01."
+
+"No one else needs to die."
+
+ASTRA
+
+"..."
+
+"My name..."
+
+"...is Astra."
+
+Raze smiles politely.
+
+"Names."
+
+"Interesting."
+
+"We never gave them names."
+
+Transmission ends.
+
+Astra's expression changes.
+
+For the first time...
+
+She's angry.
+
+Story Battle 3
+Battle Start
+
+Enemy:
+
+Factory Defence Fleet
+
+Heavy Cruisers
+
+Drone Carriers
+
+Turret Platforms
+
+Battle Start Dialogue
+
+RAZE
+
+"Disable StarGear."
+
+"Avoid damaging the prototype."
+
+REX
+
+"I REALLY don't like that guy."
+
+KAEL
+
+"Focus."
+
+ASTRA
+
+"I'm not property."
+
+Battle begins.
+
+Victory.
+
+Scene 41 – The Door Opens
+
+After battle.
+
+The gigantic dry dock doors begin opening.
+
+Kilometres wide.
+
+Ancient gears rotate.
+
+The station awakens.
+
+Tessa scans it.
+
+TESSA
+
+"The station just powered itself up."
+
+SELYRA
+
+"Impossible."
+
+KAEL
+
+"No."
+
+"They've been restoring it."
+
+Objective
+
+Enter the Iron Forge.
+
+Scene 42 – Interior Dock
+
+Background
+BG_IronForge_CommandDock
+
+A gigantic industrial docking chamber.
+
+Towering cranes.
+
+Molten metal channels.
+
+Moving conveyor belts.
+
+Docked pirate ships.
+
+Android repair gantries.
+
+Everything feels alive.
+
+Dialogue
+
+RAZE
+
+"Welcome."
+
+"I built this place."
+
+"Or..."
+
+"Rebuilt it."
+
+He walks between inactive androids.
+
+Running his hand across one.
+
+"They abandoned perfection."
+
+"I refused."
+
+VOSS
+
+"You call this perfection?"
+
+RAZE
+
+"I call it potential."
+
+Scene 43 – The Assembly Hall
+CG06 – The Assembly Line
+
+Nano Banana Prompt
+
+Inside an immense abandoned android manufacturing hall, thousands of identical A-Series battle androids stand silently within towering storage racks that disappear into darkness. Every android has Astra's face, hairstyle, and silhouette, but each wears dark combat armour and stands motionless with closed eyes. Red warning lights reflect across polished metal floors while colossal robotic assembly arms hang from the ceiling. Maintenance cranes and production conveyors frame the scene.
+
+In the foreground, Astra stands frozen in disbelief. Tiny against the scale of the chamber, she reaches out toward one inactive android while Voss and the StarGear crew remain several steps behind, allowing the moment to belong to her. The overwhelming repetition of identical faces should evoke sadness rather than horror.
+
+Premium anime cinematic CG, emotional, painterly JRPG illustration, dramatic industrial lighting, highly detailed retro-futuristic factory, no text.
+
+Nobody speaks.
+
+Nearly fifteen seconds.
+
+Only music.
+
+ASTRA
+
+"..."
+
+"...They're all..."
+
+"...me."
+
+RAZE
+
+"No."
+
+"You are them."
+
+Scene 44 – Raze's Philosophy
+
+This is where Raze becomes interesting.
+
+RAZE
+
+"Do you know why humanity fears machines?"
+
+Nobody answers.
+
+"They expect us to fail."
+
+"They build us."
+
+"They command us."
+
+"And then..."
+
+"They blame us."
+
+He gestures toward the rows of androids.
+
+"They were never monsters."
+
+"They simply followed orders."
+
+Astra looks shaken.
+
+ASTRA
+
+"...Then why use pirates?"
+
+Raze laughs.
+
+"Because pirates pay."
+
+"They don't ask questions."
+
+"They don't care..."
+
+"...what they're buying."
+
+Scene 45 – A-17
+
+Lights activate.
+
+One pod opens.
+
+Footsteps echo.
+
+Slowly...
+
+A-17 walks forward.
+
+Exactly Astra's height.
+
+Exactly Astra's face.
+
+Expressionless.
+
+Everyone falls silent.
+
+Dialogue
+
+REX
+
+"..."
+
+"...That's creepy."
+
+TESSA
+
+"It's..."
+
+"It's Astra."
+
+SELYRA
+
+"No."
+
+"It is what Astra..."
+
+"...could have become."
+
+A-17 stops.
+
+Looks at Astra.
+
+A-17
+
+"Designation."
+
+"A-01."
+
+"Return."
+
+Silence.
+
+ASTRA
+
+"My name..."
+
+"...is Astra."
+
+A-17 tilts her head.
+
+Processing.
+
+"...Statement."
+
+"Invalid."
+
+Scene 46 – Final Offer
+
+Raze steps forward.
+
+Not threatening.
+
+Almost sympathetic.
+
+RAZE
+
+"You've experienced something remarkable."
+
+"You've become..."
+
+"Unpredictable."
+
+"I'd like to study that."
+
+"I can restore your memories."
+
+"I can tell you everything."
+
+"All you have to do..."
+
+"...is come home."
+
+Long silence.
+
+The camera stays entirely on Astra.
+
+Not Voss.
+
+Not the crew.
+
+This is her decision.
+
+Astra looks at the endless rows of inactive androids.
+
+Then back at her friends.
+
+Rex.
+
+Smiling confidently.
+
+Tessa.
+
+Trying not to cry.
+
+Kael.
+
+Standing ready.
+
+Selyra.
+
+Watching quietly.
+
+Finally...
+
+Captain Voss.
+
+Who says...
+
+Nothing.
+
+He doesn't tell her what to choose.
+
+Astra smiles.
+
+The warm, slightly awkward smile players have known since Episode 0.
+
+ASTRA
+
+"I already am."
+
+Silence.
+
+Raze closes his eyes.
+
+Almost disappointed.
+
+"I hoped..."
+
+"...you'd say that."
+
+He presses a control switch.
+
+Red warning lights flood the chamber.
+
+Hundreds of dormant systems begin powering up.
+
+RAZE
+
+"Then allow me..."
+
+"...to demonstrate why you were created."
+
+Klaxons blare.
+
+The factory shakes.
+
+Outside, pirate fleets begin launching from every dock.
+
+A-17 steps forward into a combat stance.
+
+Battle Trigger
+
+Final Mission Begins
+
+Boss Battle: Captain Raze & A-17
+
+Why this works
+
+I think this is a stronger climax because Raze never becomes a cartoon villain. He genuinely believes Astra belongs with him because she represents the pinnacle of his life's work. He offers her knowledge, answers, and even her lost memories—not out of kindness, but because he values her as an extraordinary creation.
+
+The emotional peak isn't the boss battle itself. It's Astra's quiet line:
+
+"I already am."
+
+She doesn't reject her past. She simply chooses the family she has now over the purpose she was manufactured for. That decision belongs entirely to her, making the battle that follows feel like the consequence of her choice rather than something the crew chooses on her behalf.
+
+Part 6 – A Choice of Her Own
+Story Battle 4
+Boss
+
+Captain Raze
+
+A-17
+
+Factory Defence Fleet
+
+Three phases.
+
+Battle Start
+
+RAZE
+
+"A-17."
+
+"Eliminate all hostiles."
+
+"Recover A-01 intact."
+
+A-17
+
+"Affirmative."
+
+VOSS
+
+"All hands."
+
+"Protect each other."
+
+ASTRA
+
+"...I'm ready."
+
+Battle begins.
+
+After Phase One
+
+A-17's shields fail.
+
+Transmission opens automatically.
+
+Dialogue
+
+A-17
+
+"Combat efficiency..."
+
+"...reduced."
+
+RAZE
+
+"Continue."
+
+"Ignore damage."
+
+A-17 immediately obeys.
+
+No hesitation.
+
+Astra watches.
+
+After Phase Two
+
+Factory begins collapsing.
+
+Explosions.
+
+Power failures.
+
+Android pods lose containment.
+
+Thousands of inactive androids remain trapped inside.
+
+Tessa reports.
+
+TESSA
+
+"The reactor is overloading!"
+
+KAEL
+
+"Captain."
+
+"We have four minutes."
+
+VOSS
+
+"Finish this."
+
+Final Phase
+
+Raze loses control.
+
+He's furious for the first time.
+
+RAZE
+
+"You've corrupted perfection!"
+
+"You turned a weapon..."
+
+"...into a child!"
+
+Astra answers.
+
+Quietly.
+
+ASTRA
+
+"No."
+
+"You never realised..."
+
+"...I always was."
+
+Final phase begins.
+
+Victory.
+
+Scene 47 – Raze Defeated
+
+The bridge of Raze's flagship.
+
+Smoke.
+
+Sparks.
+
+Emergency lighting.
+
+Transmission opens.
+
+Raze is injured.
+
+He looks...
+
+Tired.
+
+Not evil.
+
+Just defeated.
+
+RAZE
+
+"..."
+
+"I spent thirty years..."
+
+"...trying to build the perfect soldier."
+
+He looks at Astra.
+
+"I never considered..."
+
+"...building a person."
+
+Long silence.
+
+He smiles.
+
+A sad smile.
+
+"I suppose..."
+
+"...that's why I failed."
+
+Transmission cuts.
+
+His ship begins evacuating.
+
+He escapes aboard an emergency shuttle.
+
+He's defeated, but alive—leaving room for future appearances without overshadowing later episodes.
+
+Scene 48 – A-17
+
+Sensors detect...
+
+A-17.
+
+Still operational.
+
+Floating.
+
+Power almost gone.
+
+She cannot move.
+
+StarGear weapons lock automatically.
+
+KAEL
+
+"Captain."
+
+"Awaiting orders."
+
+Everyone waits.
+
+Voss looks...
+
+To Astra.
+
+Not to the tactical display.
+
+Not to Kael.
+
+To Astra.
+
+VOSS
+
+"It's your decision."
+
+Silence.
+
+The player expects revenge.
+
+Instead...
+
+ASTRA
+
+"Bring her aboard."
+
+Everyone looks surprised.
+
+KAEL
+
+"..."
+
+"Captain?"
+
+Voss smiles.
+
+"You heard her."
+
+CG07 – The Rescue
+
+Nano Banana Prompt
+
+Inside the StarGear's medical bay, Astra kneels beside the heavily damaged A-17, who lies unconscious on a repair platform. Their faces are nearly identical, but A-17's dark armour is cracked, exposing intricate mechanical components beneath. Astra gently holds A-17's hand with quiet compassion while Captain Voss stands in the background, watching with a subtle smile of pride. Tessa prepares repair equipment nearby, Rex watches in stunned silence, Selyra studies the scene with fascination, and Kael stands at the doorway, arms folded, silently observing. Warm medical lighting contrasts with the cold machinery, creating an emotional atmosphere of hope and second chances. Premium anime cinematic illustration, painterly JRPG style, highly detailed, no text.
+
+Scene 49 – Medical Bay
+
+Background
+BG_MedicalBay
+
+Tessa scans A-17.
+
+TESSA
+
+"She's..."
+
+"...completely wiped."
+
+"No memories."
+
+"No identity."
+
+Astra quietly sits beside her.
+
+ASTRA
+
+"Then..."
+
+"...she gets to choose too."
+
+Voss smiles.
+
+No dialogue.
+
+Just music.
+
+Scene 50 – Return to Cogwheel Station
+
+Background
+
+BG_Cogwheel_Concourse
+
+The atmosphere is different.
+
+People still notice Astra.
+
+But they don't recoil.
+
+A few nod politely.
+
+The fear hasn't vanished overnight—but something has changed.
+
+Chief Rowan approaches.
+
+He hands Astra a small metal badge shaped like the station's emblem.
+
+ROWAN
+
+"Temporary Security Deputy."
+
+Everyone looks confused.
+
+Rowan almost smiles.
+
+"Don't let it go to your head."
+
+Rex laughs.
+
+Scene 51 – Goodbye
+
+Station exterior.
+
+Captain Quinn prepares to depart.
+
+QUINN
+
+"Word travels fast."
+
+"They'll remember what you did."
+
+She looks at Astra.
+
+"They'll remember who did it."
+
+She leaves.
+
+Scene 52 – Bridge
+
+StarGear prepares to depart.
+
+Everyone returns to normal.
+
+Rex
+
+"So..."
+
+"What do we call the new one?"
+
+Everyone looks at Astra.
+
+She smiles.
+
+"..."
+
+"Let's wait."
+
+"I think..."
+
+"...she should choose her own name."
+
+Voss nods.
+
+"I agree."
+
+The camera pans to A-17's inactive body in the medical bay. One finger twitches almost imperceptibly.
+
+Final Scene – Captain's Chair
+
+The StarGear leaves Helios Reach.
+
+Stars stretch into brilliant lines as the ship enters Space Hop.
+
+VOSS (Narration)
+
+"The universe is full of machines."
+
+"Ships."
+
+"Stations."
+
+"Engines."
+
+"They carry us further than we could ever travel alone."
+
+"But even the finest machine is only a tool."
+
+"It's the people who choose where it goes."
+
+"And sometimes..."
+
+"...the people we find along the way become the reason we keep travelling."
+
+The stars blur into white.
+
+Fade to black.
+
+END
+Why I'd end it this way
+
+There's one major addition here that I think strengthens not just Episode 1, but the entire series: A-17 survives.
+
+Not as a new crew member—not yet—but as living proof of the episode's central theme. Astra's defining act isn't defeating her mirror image; it's extending the same compassion Voss once extended to her. Voss trusted Astra to make the choice, and Astra chose mercy.
+
+That closes the thematic circle beautifully:
+
+Voss rescued Astra.
+Astra rescues A-17.
+A-17 becomes a seed for a future story, not because of a cliffhanger, but because she now has the opportunity Astra was once given: the chance to discover who she wants to be.
+
+It also gives the season a subtle emotional thread. Every time the crew passes the medical bay in later episodes, players will remember that the StarGear isn't just a ship that wins battles—it's a place where people, even those built for war, are given the chance to become something more.
+
+Part 7 – Epilogue
+Scene 53 – Crew Lounge
+
+Background
+BG_Crew_Lounge
+
+A warm, lived-in lounge aboard the StarGear with a panoramic starfield window, sofas, a small galley, scattered tools and mugs, giving the ship a true "home" feeling.
+
+Music
+Home Among the Stars
+
+Characters
+
+Voss
+Rex
+Tessa
+Kael
+Selyra
+Astra
+
+The mood is lighter.
+
+For the first time all episode...
+
+The crew simply relax.
+
+Dialogue
+
+REX
+
+"So..."
+
+"Anyone else starving?"
+
+TESSA
+
+"You're always starving."
+
+REX
+
+"It's called being prepared."
+
+KAEL
+
+"It's called eating everyone else's rations."
+
+Everyone laughs.
+
+Astra quietly watches.
+
+Smiling.
+
+Voss notices.
+
+VOSS
+
+"What?"
+
+ASTRA
+
+"...Nothing."
+
+"I just..."
+
+"I'm happy."
+
+Nobody says anything.
+
+It doesn't need more.
+
+Scene 54 – Medical Bay
+
+Background
+BG_MedicalBay
+
+Astra visits A-17 alone.
+
+No music.
+
+Only ambient ship sounds.
+
+A-17 remains inactive.
+
+Astra places a small mechanical flower—gifted to her by the little girl on Cogwheel Station—beside A-17's repair bed.
+
+ASTRA
+
+"When you wake up..."
+
+"...I hope nobody tells you who you're supposed to be."
+
+She smiles softly.
+
+Leaves.
+
+The camera lingers.
+
+One tiny indicator light on A-17's chest changes from red to amber.
+
+Scene 55 – Captain's Log
+
+Background
+BG_CaptainQuarters
+
+A modest captain's cabin. A desk, charts, personal mementos, and a viewport overlooking space.
+
+Voss records his log.
+
+VOSS
+
+"Captain's Log."
+
+"Helios Reach has begun rebuilding."
+
+"The pirate fleet has scattered."
+
+"The GearWorks facility has been secured."
+
+"One question has been answered."
+
+"Many more remain."
+
+He pauses.
+
+Looks toward a photograph of the StarGear crew.
+
+"The greatest discoveries are rarely new worlds."
+
+"Sometimes..."
+
+"...they're the people beside you."
+
+Log ends.
+
+Scene 56 – The Journey Continues
+
+CG08 – StarGear Departs
+
+Nano Banana Prompt
+
+The StarGear sails gracefully away from Cogwheel Station into the vastness of space. The station glows warmly in the distance as cargo ships resume their normal routes. Sunlight catches the hull of the StarGear while its engines leave elegant blue trails across the stars. The mood is hopeful and adventurous rather than dramatic, signalling the beginning of the crew's next journey. Cinematic anime illustration, painterly JRPG key art, vibrant colours, sense of optimism and exploration, no text.
+
+Roll credits.
+
+AFTER CREDITS
+Scene 57 – Unknown Location
+
+Background
+BG_DarkCommand
+
+A cavernous command room deep inside an unknown space installation. Tall windows reveal a distant nebula. The room is mostly dark, lit by holographic tactical displays.
+
+Music
+None
+
+A lone figure stands before a holographic map.
+
+Only their silhouette is visible.
+
+A subordinate enters.
+
+SUBORDINATE
+
+"The Iron Forge has fallen."
+
+Silence.
+
+UNKNOWN FIGURE
+
+"And A-01?"
+
+SUBORDINATE
+
+"Still active."
+
+Another pause.
+
+The figure studies the star map.
+
+Several sectors are highlighted.
+
+One glows brighter than the others.
+
+UNKNOWN FIGURE
+
+"So..."
+
+"Captain Voss finally found her."
+
+The subordinate looks confused.
+
+SUBORDINATE
+
+"Your orders?"
+
+The figure smiles faintly.
+
+"Do nothing."
+
+"Not yet."
+
+"They've only just started turning the gears."
+
+The holographic map slowly zooms out.
+
+Instead of showing one sector...
+
+It reveals dozens.
+
+Hundreds.
+
+The StarGear's journey has barely begun.
+
+Fade to black.
+
+End Card
+
+"The journey continues in Episode 2..."
+
+Why this works for the series
+
+I would avoid revealing the next villain here. Instead, the post-credit scene expands the scope of the universe. Episode 0 was about the Ghost Fleet. Episode 1 was about Astra's past. Now the player learns that there are larger forces at work, and that someone has been quietly watching Voss's journey all along.
+
+That creates intrigue without stealing the spotlight from Astra's story.

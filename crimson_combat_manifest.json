@@ -1,0 +1,80 @@
+[
+ {
+  "file": "crimson_join_01.mp3",
+  "start": 0.0,
+  "end": 3.36,
+  "text": "Crimson Nova, reporting for a proper show."
+ },
+ {
+  "file": "crimson_join_02.mp3",
+  "start": 3.9,
+  "end": 6.92,
+  "text": "Try to keep up, Captain \u2014 I intend to be memorable."
+ },
+ {
+  "file": "crimson_attack_01.mp3",
+  "start": 7.1,
+  "end": 10.72,
+  "text": "Watch closely \u2014 this is my favorite part."
+ },
+ {
+  "file": "crimson_attack_02.mp3",
+  "start": 11.04,
+  "end": 13.02,
+  "text": "Center stage, if you please!"
+ },
+ {
+  "file": "crimson_attack_03.mp3",
+  "start": 13.3,
+  "end": 15.0,
+  "text": "Nova Comet does it again."
+ },
+ {
+  "file": "crimson_super_01.mp3",
+  "start": 15.34,
+  "end": 18.64,
+  "text": "For the whole audience \u2014 Supernova Strike!"
+ },
+ {
+  "file": "crimson_super_02.mp3",
+  "start": 18.86,
+  "end": 22.46,
+  "text": "One for everyone! That's how you play a full house."
+ },
+ {
+  "file": "crimson_hit_01.mp3",
+  "start": 22.92,
+  "end": 25.34,
+  "text": "Ha! Barely felt that. Barely."
+ },
+ {
+  "file": "crimson_hit_02.mp3",
+  "start": 26.54,
+  "end": 28.44,
+  "text": "Alright, that one earned some respect."
+ },
+ {
+  "file": "crimson_ko_01.mp3",
+  "start": 29.04,
+  "end": 32.32,
+  "text": "Curtain call for me \u2014 regroup without me, Captain!"
+ },
+ {
+  "file": "crimson_ko_02.mp3",
+  "start": 33.1,
+  "end": 35.54,
+  "text": "That's the show, folks \u2014 I'm out!"
+ },
+ {
+  "file": "crimson_noshow_01.mp3",
+  "start": 35.76,
+  "end": 40.74,
+  "text": "Can't run the show for free, Captain \u2014 find me back at the hangar once you're paid up."
+ },
+ {
+  "file": "crimson_noshow_02.mp3",
+  "start": 41.0,
+  "end": 43.7,
+  "text": "No coin, no Comet. I'll be at the hangar."
+ }
+]

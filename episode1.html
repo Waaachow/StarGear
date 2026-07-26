@@ -46,6 +46,13 @@
      speaker pops to the front (z-index above). rebuildCast stamps data-n. */
   #cast[data-n="5"] .char{margin:0 -1.2vw;}
   #cast[data-n="6"] .char{margin:0 -2.8vw;}
+  /* seven on stage (the six crew + a guest, e.g. Crimson Nova): tighter overlap + a
+     touch narrower so the whole line still fits the frame */
+  #cast[data-n="7"] .char{margin:0 -4.2vw; width:clamp(150px,18vw,250px);}
+  /* "duo" staging (Crimson Nova scene): the crew flow from the left, the guest is pinned
+     to the right edge — so the stage is at most [speaker, last-speaker] on the left + guest. */
+  #cast.duo{justify-content:flex-start; gap:2.5vw;}
+  #cast.duo .char[data-who="Crimson"]{margin-left:auto;}
   .char::before{content:""; position:absolute; bottom:18%; left:50%; transform:translateX(-50%);
         width:78%; height:46%; opacity:0; filter:blur(28px); transition:opacity .4s ease; z-index:0;
         background:radial-gradient(ellipse at center, var(--c,#46c7ff) 0%, transparent 65%);}
@@ -122,6 +129,11 @@
        border-radius:8px; padding:.46rem .6rem;}
   #autoPlay:hover{border-color:var(--accent);}
   #autoPlay.on{background:#14507a; border-color:var(--accent); color:#eafcff;}
+  #skipVN{position:fixed; top:14px; right:152px; z-index:30; cursor:pointer; font-family:inherit;
+       font-size:.74rem; letter-spacing:.1em; line-height:1; color:#cfe3ff;
+       background:rgba(10,18,32,0.82); border:1px solid var(--panel-border);
+       border-radius:8px; padding:.46rem .6rem;}
+  #skipVN:hover{border-color:var(--accent); color:#eafcff;}
   #epTitle{font-size:.9rem; letter-spacing:.22em; color:#9fc0ff; text-transform:uppercase;}
   #epScene{font-size:.74rem; letter-spacing:.2em; color:rgba(255,255,255,0.5); margin-top:.25rem;}
   #beatBar{position:fixed; top:0; left:0; height:3px; z-index:22; width:0%;
@@ -316,6 +328,16 @@
   #endOverlay .hint{position:relative; z-index:1; text-shadow:0 2px 10px rgba(0,0,0,0.9);}
   #endOverlay #freePlayBtn{position:relative; z-index:2; margin-bottom:18px;}
   #endOverlay.defeat #freePlayBtn{display:none;}   /* dying doesn't earn free play */
+  /* Achievement banner on the ending screen itself — the iso's own toast only shows if
+     the player goes back into free roam, so completing the story needs its own,
+     immediate confirmation (Steve, 2026-07-26: "the story award didn't pop"). */
+  #endAchToast{position:relative; z-index:2; margin-bottom:14px; padding:10px 22px;
+       background:rgba(4,10,18,0.9); border:1.5px solid rgba(242,193,78,0.85);
+       text-align:center; opacity:0; transition:opacity .5s ease;}
+  #endAchToast.on{opacity:1;}
+  #endAchToast .cap{color:#f2c14e; font-size:11px; font-weight:bold; letter-spacing:.1em;}
+  #endAchToast .nm{color:#ffffff; font-size:16px; font-weight:bold; margin-top:4px;}
+  #endOverlay.defeat #endAchToast{display:none;}
 </style>
 </head>
 <body>
@@ -335,6 +357,7 @@
     <div id="epTitle">StarGear — Episode 0</div>
     <div id="epScene">The Ghost Signal</div>
   </div>
+  <button id="skipVN" title="Skip to the end of this scene" aria-label="Skip scene">Skip ▸</button>
   <button id="autoPlay" title="Auto-play off — click to play the story automatically" aria-label="Toggle auto-play">▶ AUTO</button>
   <button id="voMute" title="Mute / unmute voice" aria-label="Mute voice">🔊</button>
   <div id="beatBar"></div>
@@ -406,6 +429,7 @@
     <!-- After the story is beaten you can drop back into the sector for optional
          content (bounties, side missions) instead of returning to the title. The
          button is hidden on the DEFEAT screen — see #endOverlay.defeat rules. -->
+    <div id="endAchToast"><div class="cap">ACHIEVEMENT UNLOCKED</div><div class="nm">The Ghost Signal</div></div>
     <button id="freePlayBtn" class="menuBtn">◀ RETURN TO THE SECTOR</button>
     <div class="hint">Click the backdrop to return to the title</div>
   </div>
@@ -421,6 +445,7 @@ const BACKGROUNDS = {
   BG01:"Bridge — Normal", BG02:"Bridge — Red Alert", BG03:"Captain's Chair",
   BG04:"Holographic Tactical Display", BG05:"Deep Space Exterior",
   BG06:"Silent Armada Exterior", BG07:"Final Battlefield Exterior",
+  BG_CRIMSON:"Mercenary Hangar",
 };
 const CGS = {
   CG01:["The Ghost Signal","The bridge illuminated by the eerie transmission."],
@@ -437,6 +462,7 @@ const CHARS = {
   Rex:   {color:"#ffae42", i:"R"},
   Tessa: {color:"#5be38b", i:"T"},
   Astra: {color:"#b481ff", i:"A"},
+  Crimson:{color:"#ff5a4a", i:"C"},     // Crimson Nova — the frontier's self-appointed hero
   // voice-only transmissions (never staged)
   SIGNAL: {color:"#8dffb0", i:"?", voiceOnly:true, label:"Ghost Signal", style:"signal"},
   UNKNOWN:{color:"#ff5a5a", i:"?", voiceOnly:true, label:"Unknown", style:"unknown"},
@@ -450,6 +476,7 @@ const BG_OVERRIDE = {
   BG03: "Assets/Bg03.png",              // Captain's Chair
   BG04: "Assets/bg04.png",              // Holographic Tactical Display
   BG06: "Assets/bg06.png",              // Silent Armada Exterior
+  BG_CRIMSON: "Assets/Crimson_Hanger.png",       // the Crimson Comet parked in its hangar
 };
 const CG_OVERRIDE = {
   CG01:   "Assets/CG/CG01-Ghost Signal.png",    // The Ghost Signal — eerie transmission
@@ -467,11 +494,17 @@ const cgFile   = id => CG_OVERRIDE[id] || `Assets/cg/${id.toLowerCase()}.png`;
 // the nearest available pose and ultimately fall back to Neutral.
 const CHAR_ART = {
   ASTRA: ["Alert","Angry","Curious","Injured","Laughing","Neutral","Shocked","Smile","Stern","Thinking"],
-  KAEL:  ["Angry","Concerned","Curious","Determined","Embarrassed","Excited","Injured","Laughing","Neutral","Shocked","Thinking"],
+  KAEL:  ["Angry","Concerned","Curious","Deadpan","Determined","Embarrassed","Excited","Injured","Laughing","Neutral","Shocked","Thinking"],
   REX:   ["Angry","Battle","Injured","Laughing","Neutral","Serious","Shocked","Smirk","Thinking","Uneasy"],
   SELYRA:["Angry","Concerned","GentleSmile","Injured","Laughing","Neutral","Serious","Shocked","Smile","Thinking"],
   TESSA: ["Angry","Determined","Focused","Injured","Laughing","Neutral","Shocked","Smile","Smirk","Thinking"],
   VOSS:  ["Angry","Concerned","Injured","Laughing","Neutral","Shocked","Smirk","Stern","Thinking"],
+  // Crimson's DRAWN poses (Assets/char/Mercenaries/CRIMSON/, underscore names — enorm ignores
+  // underscores). Poses NOT listed here (the 8 still to draw) are routed by EXPR_ALIAS to his
+  // nearest existing pose instead of the placeholder; as each is drawn, add its name back here
+  // so it resolves exactly.
+  CRIMSON: ["Neutral","Heroic_Smile","Finger_Point","Heroic_Pose","Sparkling_Confidence","Proud",
+            "Finger_Up","Dramatic_Shock","Heroic_Concern","Laughing","Serious","Wink","Salute"],
 };
 // normalize for matching: "Shocked (4)"->"shocked", "Gentle Smile"->"gentlesmile"
 const enorm = s => (s||"").toLowerCase().replace(/\s*\(\d+\)\s*/g,"").replace(/[^a-z0-9]/g,"");
@@ -479,9 +512,9 @@ const enorm = s => (s||"").toLowerCase().replace(/\s*\(\d+\)\s*/g,"").replace(/[
 const EXPR_ALIAS = {
   analytical:["Curious","Stern","Thinking","Alert"],
   worried:   ["Concerned","Uneasy","Thinking","Shocked"],
-  confident: ["Smirk","Determined","Smile"],
+  confident: ["Sparkling_Confidence","Heroic_Smile","Smirk","Determined","Smile"],
   smallsmile:["Smile","GentleSmile","Smirk","Laughing"],
-  softsmile: ["Smile","GentleSmile","Smirk","Laughing"],
+  softsmile: ["Heroic_Concern","Smile","GentleSmile","Smirk","Laughing"],
   gentlesmile:["GentleSmile","Smile","Laughing"],
   focused:   ["Focused","Serious","Determined","Stern"],
   determined:["Determined","Serious","Stern"],
@@ -490,16 +523,35 @@ const EXPR_ALIAS = {
   curious:   ["Curious","Thinking","Alert"],
   excited:   ["Excited","Laughing","Smile"],
   smirk:     ["Smirk","Smile","Laughing"],
-  smile:     ["Smile","GentleSmile","Smirk"],
+  smile:     ["Smile","GentleSmile","Heroic_Smile","Smirk","Laughing"],
+  // Crimson-scene crew cues with no dedicated pose → nearest existing per crew
+  calmsmile: ["Smirk","Smile","Neutral"],
+  respectful:["Stern","Concerned","Neutral"],
+  confused:  ["Thinking","Concerned","Shocked"],
+  grinning:  ["Smirk","Laughing","Smile"],
+  embarrassed:["Embarrassed","Uneasy","Concerned","Shocked"],
+  annoyed:   ["Angry","Determined","Concerned"],
+  irritated: ["Angry","Concerned","Determined"],
+  deadpan:   ["Neutral","Concerned","Thinking"],
+  // Crimson poses not yet drawn → his nearest existing pose (only Crimson has these first
+  // candidates, so any crew use falls through to their own poses / Neutral unharmed)
+  eyesclosedsmile:["Heroic_Smile","Laughing","Neutral"],
+  humblesmile:    ["Heroic_Concern","Heroic_Smile","Neutral"],
+  professional:   ["Serious","Confident","Stern","Neutral"],
+  heroic:         ["Heroic_Pose","Heroic_Smile","Sparkling_Confidence","Neutral"],
 };
+// Art normally lives at Assets/char/<NAME>/, but a guest can keep a sub-folder — Crimson's
+// poses stay under Assets/char/Mercenaries/CRIMSON/ (so no file move is needed).
+const CHAR_DIR = { CRIMSON: "Mercenaries/CRIMSON" };
 function charFile(who, expr){
   const dir = (who||"").toUpperCase();
+  const path = CHAR_DIR[dir] || dir;
   const files = CHAR_ART[dir] || [];
   const byNorm = {}; files.forEach(f => { byNorm[enorm(f)] = f; });
   const cands = [expr||"Neutral", ...(EXPR_ALIAS[enorm(expr||"neutral")] || [])];
-  for(const c of cands){ const hit = byNorm[enorm(c)]; if(hit) return `Assets/char/${dir}/${hit}.png`; }
+  for(const c of cands){ const hit = byNorm[enorm(c)]; if(hit) return `Assets/char/${path}/${hit}.png`; }
   const nf = byNorm["neutral"] || files[0];
-  return `Assets/char/${dir}/${nf || "Neutral"}.png`;
+  return `Assets/char/${path}/${nf || "Neutral"}.png`;
 }
 
 // ============================================================
@@ -526,11 +578,10 @@ const EP1 = [
     {who:"SIGNAL", text:"Hold Position...",        transmit:"audio/Episode0/Ghost Signal/signal_02.mp3"},
     {who:"SIGNAL", text:"Await Reinforcements...", transmit:"audio/Episode0/Ghost Signal/signal_03.mp3"},
     {cg:null},
-    // Split back into two lines so it uses kael_02 + kael_03 from the original VO batch.
-    // The combined kael_02_03.mp3 was rendered in a later session from the other voice
-    // sample and was the audible mismatch in Steve's playthrough (P8).
-    {who:"Kael",  expr:"Determined", text:"That's not a distress call."},
-    {who:"Kael",  expr:"Determined", text:"It's an order."},
+    // Combined into one line (Steve, 2026-07-26 playtest): as two separate short clips
+    // the pause between them read as the audio cutting out. Re-cut as one continuous
+    // take from the Kael_2.mp3 keeper master (1.93-3.62s) into kael_02_03.mp3.
+    {who:"Kael",  expr:"Determined", text:"That's not a distress call, it's an order.", vo:"audio/Episode0/vo/kael_02_03.mp3"},
     {who:"Voss",  expr:"Stern",      text:"Helm."},
     {who:"Voss",  expr:"Neutral",    text:"Set course."},
   ]},
@@ -653,6 +704,134 @@ const EP1 = [
 ];
 
 // ============================================================
+// STANDALONE SCENES — VN scenes played ON DEMAND (not part of the linear EP1 index),
+// triggered by the flight game posting {type:"playScene", id}. Same step format as EP1.
+// The Crimson Nova encounter (Crimson_Script.txt) plays when the player enters his rim
+// hangar during free play, then hands control back to the iso via {type:"sceneDone"}.
+// ============================================================
+const SCENES = {
+  // `duo` staging: Crimson stays pinned right; only the current + previous crew speaker
+  // show on the left (see sceneStageDuo). Opens on Crimson alone for his entrance.
+  crimson_nova: { scene:"Crimson Nova · Mercenary Hangar", duo:true, steps:[
+    {bg:"BG_CRIMSON", clearCast:true, cast:["Crimson"], pause:900, quiet:true},
+    {who:"Voss",    expr:"Neutral",             text:"So... you're Crimson Nova."},
+    {who:"Crimson", expr:"Heroic Smile",        text:"The one and only!"},
+    {who:"Crimson", expr:"Finger Point",        text:"Protector of the frontier!"},
+    {who:"Crimson", expr:"Heroic Pose",         text:"Defender of justice!"},
+    {who:"Crimson", expr:"Sparkling Confidence",text:"Champion of hope!"},
+    {who:"Crimson", expr:"Heroic Pose",         text:"..."},
+    {who:"Crimson", expr:"Eyes Closed Smile",   text:"...I usually get applause by now."},
+    {who:"Tessa",   expr:"Confused",            text:"...Should... someone clap?"},
+    {who:"Selyra",  expr:"Curious",             text:"Is this some kind of human ritual?"},
+    {who:"Astra",   expr:"Excited",             text:"No! This is AWESOME!"},
+    {who:"Rex",     expr:"Excited",             text:"I've heard of him!"},
+    {who:"Rex",     expr:"Grinning",            text:"He destroyed six pirate cruisers by himself at Black Rift!"},
+    {who:"Astra",   expr:"Excited",             text:"And escaped before the navy arrived!"},
+    {who:"Crimson", expr:"Proud",               text:"Seven."},
+    {who:"Crimson", expr:"Finger Up",           text:"It was seven cruisers."},
+    {who:"Rex",     expr:"Embarrassed",         text:"Right... seven."},
+    {who:"Kael",    expr:"Annoyed",             text:"This is absurd."},
+    {who:"Kael",    expr:"Angry",               text:"We're wasting valuable time."},
+    {who:"Crimson", expr:"Dramatic Shock",      text:"Oh!"},
+    {who:"Crimson", expr:"Heroic Concern",      text:"You're the serious one."},
+    {who:"Kael",    expr:"Angry",               text:"I prefer competent."},
+    {who:"Crimson", expr:"Laughing",            text:"Hahaha!"},
+    {who:"Crimson", expr:"Confident",           text:"Good."},
+    {who:"Crimson", expr:"Heroic Smile",        text:"I'd hate to disappoint you."},
+    {who:"Kael",    expr:"Irritated",           text:"I somehow doubt that's possible."},
+    {who:"Voss",    expr:"Calm Smile",          text:"Despite the theatrics..."},
+    {who:"Voss",    expr:"Respectful",          text:"...your reputation precedes you."},
+    {who:"Voss",    expr:"Neutral",             text:"You've protected more civilian convoys than most patrol fleets."},
+    {who:"Crimson", expr:"Humble Smile",        text:"..."},
+    {who:"Crimson", expr:"Soft Smile",          text:"Someone has to."},
+    {narr:"The mood briefly becomes genuine."},
+    {who:"Crimson", expr:"Grinning",            text:"Anyway!"},
+    {who:"Crimson", expr:"Heroic Pose",         text:"I'm available for hire."},
+    {who:"Tessa",   expr:"Confused",            text:"...You charge?"},
+    {who:"Crimson", expr:"Serious",             text:"Fuel isn't free."},
+    {who:"Crimson", expr:"Smile",               text:"Neither are smoke bombs."},
+    {who:"Astra",   expr:"Laughing",            text:"You use smoke bombs in space?"},
+    {who:"Crimson", expr:"Finger Up",           text:"Only during the entrance."},
+    {who:"Tessa",   expr:"Confused",            text:"...How?"},
+    {who:"Crimson", expr:"Wink",                text:"Trade secret."},
+    {who:"Voss",    expr:"Smile",               text:"What are your terms?"},
+    {who:"Crimson", expr:"Professional",        text:"Pay me before departure."},
+    {who:"Crimson", expr:"Confident",           text:"I fight until the battle's won."},
+    {who:"Crimson", expr:"Heroic",              text:"No civilian casualties."},
+    {who:"Crimson", expr:"Smile",               text:"No piracy."},
+    {who:"Crimson", expr:"Finger Point",        text:"And absolutely no interrupting my entrance."},
+    {who:"Rex",     expr:"Laughing",            text:"Deal."},
+    {who:"Kael",    expr:"Deadpan",             text:"I object."},
+    {who:"Selyra",  expr:"Curious",             text:"I wish to witness another entrance."},
+    {who:"Astra",   expr:"Excited",             text:"Can we hire him right now?"},
+    {who:"Crimson", expr:"Heroic Pose",         text:"I knew I liked this crew."},
+    {who:"Voss",    expr:"Smile",               text:"Welcome aboard... temporarily."},
+    {who:"Crimson", expr:"Salute",              text:"Justice never clocks out, Captain."},
+  ]},
+  // Short greeting once you've already met him — a flourish, then back to flying.
+  crimson_greet: { scene:"Crimson Nova · Mercenary Hangar", steps:[
+    {bg:"BG_CRIMSON", clearCast:true, cast:["Crimson"], pause:700, quiet:true},
+    {who:"Crimson", expr:"Heroic Smile", text:"StarGear! Back for a dose of inspiration?"},
+    {who:"Crimson", expr:"Salute",       text:"Still keeping the void honest, I trust. The Nova is watching!"},
+  ]},
+};
+// Scene VO — cut from the audio/Rumours/*.mp3 masters by cut_rumours.py, keyed by
+// "who|exact line text" like VO_MAP. showLine consults it after VO_MAP. Missing lines
+// (the two greeting lines weren't recorded) just play silent with the subtitle.
+const SCENE_VO = {
+  "Voss|So... you're Crimson Nova.": "audio/Rumours/vo/voss_01.mp3",
+  "Voss|Despite the theatrics...": "audio/Rumours/vo/voss_02.mp3",
+  "Voss|...your reputation precedes you.": "audio/Rumours/vo/voss_03.mp3",
+  "Voss|You've protected more civilian convoys than most patrol fleets.": "audio/Rumours/vo/voss_04.mp3",
+  "Voss|What are your terms?": "audio/Rumours/vo/voss_05.mp3",
+  "Voss|Welcome aboard... temporarily.": "audio/Rumours/vo/voss_06.mp3",
+  "Kael|This is absurd.": "audio/Rumours/vo/kael_01.mp3",
+  "Kael|We're wasting valuable time.": "audio/Rumours/vo/kael_02.mp3",
+  "Kael|I prefer competent.": "audio/Rumours/vo/kael_03.mp3",
+  "Kael|I somehow doubt that's possible.": "audio/Rumours/vo/kael_04.mp3",
+  "Kael|I object.": "audio/Rumours/vo/kael_05.mp3",
+  "Rex|I've heard of him!": "audio/Rumours/vo/rex_01.mp3",
+  "Rex|He destroyed six pirate cruisers by himself at Black Rift!": "audio/Rumours/vo/rex_02.mp3",
+  "Rex|Right... seven.": "audio/Rumours/vo/rex_03.mp3",
+  "Rex|Deal.": "audio/Rumours/vo/rex_04.mp3",
+  "Astra|No! This is AWESOME!": "audio/Rumours/vo/astra_01.mp3",
+  "Astra|And escaped before the navy arrived!": "audio/Rumours/vo/astra_02.mp3",
+  "Astra|You use smoke bombs in space?": "audio/Rumours/vo/astra_03.mp3",
+  "Astra|Can we hire him right now?": "audio/Rumours/vo/astra_04.mp3",
+  "Selyra|Is this some kind of human ritual?": "audio/Rumours/vo/selyra_01.mp3",
+  "Selyra|I wish to witness another entrance.": "audio/Rumours/vo/selyra_02.mp3",
+  "Tessa|...Should... someone clap?": "audio/Rumours/vo/tessa_01.mp3",
+  "Tessa|...You charge?": "audio/Rumours/vo/tessa_02.mp3",
+  "Tessa|...How?": "audio/Rumours/vo/tessa_03.mp3",
+  "Crimson|The one and only!": "audio/Rumours/vo/crimson_01.mp3",
+  "Crimson|Protector of the frontier!": "audio/Rumours/vo/crimson_02.mp3",
+  "Crimson|Defender of justice!": "audio/Rumours/vo/crimson_03.mp3",
+  "Crimson|Champion of hope!": "audio/Rumours/vo/crimson_04.mp3",
+  "Crimson|...I usually get applause by now.": "audio/Rumours/vo/crimson_05.mp3",
+  "Crimson|Seven.": "audio/Rumours/vo/crimson_06.mp3",
+  "Crimson|It was seven cruisers.": "audio/Rumours/vo/crimson_07.mp3",
+  "Crimson|Oh!": "audio/Rumours/vo/crimson_08.mp3",
+  "Crimson|You're the serious one.": "audio/Rumours/vo/crimson_09.mp3",
+  "Crimson|Hahaha!": "audio/Rumours/vo/crimson_10.mp3",
+  "Crimson|Good.": "audio/Rumours/vo/crimson_11.mp3",
+  "Crimson|I'd hate to disappoint you.": "audio/Rumours/vo/crimson_12.mp3",
+  "Crimson|Someone has to.": "audio/Rumours/vo/crimson_13.mp3",
+  "Crimson|Anyway!": "audio/Rumours/vo/crimson_14.mp3",
+  "Crimson|I'm available for hire.": "audio/Rumours/vo/crimson_15.mp3",
+  "Crimson|Fuel isn't free.": "audio/Rumours/vo/crimson_16.mp3",
+  "Crimson|Neither are smoke bombs.": "audio/Rumours/vo/crimson_17.mp3",
+  "Crimson|Only during the entrance.": "audio/Rumours/vo/crimson_18.mp3",
+  "Crimson|Trade secret.": "audio/Rumours/vo/crimson_19.mp3",
+  "Crimson|Pay me before departure.": "audio/Rumours/vo/crimson_20.mp3",
+  "Crimson|I fight until the battle's won.": "audio/Rumours/vo/crimson_21.mp3",
+  "Crimson|No civilian casualties.": "audio/Rumours/vo/crimson_22.mp3",
+  "Crimson|No piracy.": "audio/Rumours/vo/crimson_23.mp3",
+  "Crimson|And absolutely no interrupting my entrance.": "audio/Rumours/vo/crimson_24.mp3",
+  "Crimson|I knew I liked this crew.": "audio/Rumours/vo/crimson_25.mp3",
+  "Crimson|Justice never clocks out, Captain.": "audio/Rumours/vo/crimson_26.mp3",
+};
+
+// ============================================================
 // ELEMENTS
 // ============================================================
 const $ = id => document.getElementById(id);
@@ -664,10 +843,16 @@ const epScene=$("epScene"), beatBar=$("beatBar");
 const gameplay=$("gameplay"), gpKind=$("gpKind"), gpTitle=$("gpTitle"), gpObj=$("gpObj"),
       gpFrame=$("gpFrame"), gpStatus=$("gpStatus"), gpSkip=$("gpSkip");
 const startOverlay=$("startOverlay"), endOverlay=$("endOverlay");
-const voMuteBtn=$("voMute"), autoBtn=$("autoPlay");
+const voMuteBtn=$("voMute"), autoBtn=$("autoPlay"), skipBtn=$("skipVN");
 const root=document.documentElement;
 
 let beatIdx=-1, stepIdx=-1, started=false;
+// A standalone scene (SCENES[...]) can drive the same sequencer without being part of
+// the linear EP1 index. While one runs, the step machinery reads from activeScene.steps
+// instead of EP1[beatIdx].steps, and finishing hands control back to the flight iframe.
+let sceneMode=false, activeScene=null;
+function curSteps(){ return sceneMode ? activeScene.steps : (EP1[beatIdx] ? EP1[beatIdx].steps : []); }
+function inVN(){ return sceneMode || (beatIdx>=0 && EP1[beatIdx] && EP1[beatIdx].type==="vn"); }
 let lastPos=null;   // carried-over sector position so each segment resumes where the last ended
 let typing=false, fullText="", typeTimer=null;
 // auto-play: advance VN dialogue on its own once the line's text + voice finish
@@ -898,14 +1083,14 @@ function waitOn(a){                       // mark this line's voice as the thing
 function armAuto(){ clearAuto(); if(autoPlay) autoTimer=setTimeout(autoTick, 200); }
 function autoTick(){
   autoTimer=null;
-  if(!autoPlay || !started || beatIdx<0 || EP1[beatIdx].type!=="vn") return;  // gameplay drives itself
+  if(!autoPlay || !inVN()) return;                                            // gameplay drives itself
   if(typing || !lineClipDone){ autoTimer=setTimeout(autoTick, 150); return; } // still speaking/typing
   const holdMs = lineHold!=null ? lineHold
                : lineClip ? Math.max(1200, Math.min(2600, 32*(fullText||"").length))
                           : Math.min(4600, 1400 + 55*(fullText||"").length);
   autoTimer=setTimeout(()=>{
     autoTimer=null;
-    if(autoPlay && started && beatIdx>=0 && EP1[beatIdx].type==="vn") nextStep();
+    if(autoPlay && inVN()) nextStep();
   }, holdMs);
 }
 function toggleAuto(){
@@ -938,7 +1123,8 @@ function showLine(s){
   bar.classList.add("speaking");
   if(c.style) textEl.classList.add(c.style);
   if(!c.voiceOnly){
-    ensurePresent(who);
+    if(sceneMode && activeScene && activeScene.duo) sceneStageDuo(who);   // guest right, 2 crew left
+    else ensurePresent(who);
     faceSpeaker(who, s.expr);     // speaker emotes; others go Neutral
     setActive(who);
   } else {
@@ -952,7 +1138,7 @@ function showLine(s){
   if(s.transmit){ playTransmit(s.transmit); if(s.hold==null) waitOn(cgVoice); }
   // voiced lines pace the typewriter to the clip; otherwise a steady default
   let speed = 20;
-  const src = s.vo || VO_MAP[s.who + "|" + s.text];
+  const src = s.vo || VO_MAP[s.who + "|" + s.text] || SCENE_VO[s.who + "|" + s.text];
   if(src){
     const a = playVO(src), dur = a.duration;
     if(dur && isFinite(dur) && dur>0 && s.text.length)
@@ -990,10 +1176,10 @@ function runBeat(i){
   }
 }
 function nextStep(){
-  const b=EP1[beatIdx];
+  const steps=curSteps();
   stepIdx++;
-  if(stepIdx>=b.steps.length){ runBeat(beatIdx+1); return; }
-  const s=b.steps[stepIdx];
+  if(stepIdx>=steps.length){ if(sceneMode){ endScene(); return; } runBeat(beatIdx+1); return; }
+  const s=steps[stepIdx];
   if(s.bg!==undefined) setBackground(s.bg);
   if(s.cg!==undefined) setCG(s.cg);
   if(s.clearCast){ present=[]; rebuildCast(); }
@@ -1022,6 +1208,17 @@ function clearPause(){
   pausing=false;
   if(pauseQuiet){ pauseQuiet=false; bar.classList.remove("hidden"); }
 }
+// Skip button: jump straight to the end of the CURRENT vn beat or standalone scene —
+// not just the current line (that's already what click/Space does). Reuses nextStep's
+// own end-of-section branch (endScene / runBeat(beatIdx+1)) by landing stepIdx one short
+// of it, rather than duplicating that logic here.
+function skipVNSection(){
+  if(!inVN()) return;
+  stopVO(); stopCGAudio(); stopSfx(); clearAuto(); clearPause();
+  if(typing) finishTyping();
+  stepIdx = curSteps().length - 1;
+  nextStep();
+}
 // every staged character switches to their Laughing sprite and brightens (all
 // active, nobody dimmed); the group-laugh clip plays and we hold until it ends.
 function doGroupLaugh(src){
@@ -1039,8 +1236,8 @@ function doGroupLaugh(src){
   pauseTimer=setTimeout(go, safety);
 }
 function advance(){
-  if(!started) return;
-  if(beatIdx<0 || EP1[beatIdx].type!=="vn") return;   // gameplay beats don't advance on click
+  if(!started && !sceneMode) return;
+  if(!inVN()) return;                                 // gameplay beats don't advance on click
   if(typing){ finishTyping(); return; }
   if(pausing){ stopVO(); clearPause(); nextStep(); return; }   // skip a pause / group laugh on click
   nextStep();
@@ -1054,7 +1251,7 @@ function showGameplay(b){
   gpStatus.textContent = b.type==="combat" ? "Defeat the hostiles to continue…" : "Reach the objective to continue…";
   gpStatus.style.color = "#9fc0ff";
   stopVO(); stopCGAudio(); stopSfx(); clearAuto(); clearPause();
-  voMuteBtn.style.display = "none"; autoBtn.style.display = "none";   // no VN voice/static/auto during gameplay
+  voMuteBtn.style.display = "none"; autoBtn.style.display = "none"; skipBtn.style.display = "none";   // no VN voice/static/auto/skip during gameplay
   // focus the flight game as soon as it loads so keys work without clicking first
   gpFrame.onload = ()=>{ try{ gpFrame.focus(); gpFrame.contentWindow.focus(); }catch(err){} };
   gpFrame.src = bustCache(embedWithPos(b.embed));
@@ -1084,12 +1281,64 @@ function bustCache(url){
   return path + (path.indexOf("?") < 0 ? "?" : "&") + "n=" + Date.now() + hash;
 }
 function hideGameplay(){
-  voMuteBtn.style.display = ""; autoBtn.style.display = "";   // VN is back — show voice + auto toggles
+  voMuteBtn.style.display = ""; autoBtn.style.display = ""; skipBtn.style.display = "";   // VN is back — show voice + auto + skip toggles
   if(!gameplay.classList.contains("hidden")){
     gameplay.classList.add("hidden");
     gpFrame.onload=null; gpFrame.src="about:blank";   // don't let the blank load grab focus
     try{ window.focus(); }catch(e){}                   // return focus to the VN (Space to advance)
   }
+}
+// Like hideGameplay, but the flight iframe stays MOUNTED (src untouched) so the live
+// iso keeps its state — used when a standalone VN scene plays over the running game and
+// then hands control straight back to it. (Setting src=about:blank would wipe the iso.)
+function hideGameplayKeep(){
+  voMuteBtn.style.display = ""; autoBtn.style.display = ""; skipBtn.style.display = "";
+  gameplay.classList.add("hidden");
+  stopSfx();
+  try{ window.focus(); }catch(e){}
+}
+// "duo" staging (see the crimson_nova scene): keep the guest pinned right (CSS) and only
+// the CURRENT and PREVIOUS crew speaker on the left. Two fixed slots keep positions stable
+// — a new crew speaker evicts whichever slot ISN'T the immediately-previous speaker.
+const DUO_GUEST = "Crimson";
+let _duoSlots = [null, null], _lastCrew = null;
+function sceneStageDuo(who){
+  if(who !== DUO_GUEST){
+    if(!_duoSlots.includes(who)){
+      let idx = _duoSlots.indexOf(null);
+      if(idx < 0) idx = (_duoSlots[0] === _lastCrew) ? 1 : 0;   // keep last speaker, evict the older
+      _duoSlots[idx] = who;
+    }
+    _lastCrew = who;
+  }
+  const want = [..._duoSlots.filter(Boolean), DUO_GUEST];
+  if(want.join("|") !== present.join("|")) setCast(want);
+}
+// Play a standalone scene (SCENES[id]) over the still-live flight game, then resume it.
+function startScene(id){
+  const sc=SCENES[id]; if(!sc || sceneMode) return;
+  hideGameplayKeep();
+  sceneMode=true; activeScene={ id, steps:sc.steps, scene:sc.scene||"", duo:!!sc.duo };
+  _duoSlots=[null,null]; _lastCrew=null;
+  castEl.classList.toggle("duo", !!sc.duo);
+  epScene.textContent = sc.scene || "";
+  bar.classList.remove("hidden");
+  present=[]; exprOf={}; rebuildCast();     // clean stage before the scene's opening directive
+  stepIdx=-1;
+  nextStep();
+}
+function endScene(){
+  const id = activeScene ? activeScene.id : null;
+  sceneMode=false; activeScene=null; stepIdx=-1;
+  stopVO(); clearAuto(); clearPause();
+  bar.classList.add("hidden");
+  setCG(null);
+  castEl.classList.remove("duo");
+  present=[]; exprOf={}; rebuildCast();      // clear the VN stage
+  voMuteBtn.style.display = "none"; autoBtn.style.display = "none"; skipBtn.style.display = "none";   // hideGameplayKeep showed these for the scene; gameplay's back, hide them again
+  gameplay.classList.remove("hidden");       // reveal the still-mounted flight game
+  try{ gpFrame.contentWindow.focus(); }catch(e){}
+  try{ gpFrame.contentWindow.postMessage({ type:"sceneDone", id }, "*"); }catch(e){}
 }
 // Gameplay can't be skipped — the only way forward is the embedded game telling us
 // the battle was won (combat) or the objective waypoint was reached (travel).
@@ -1129,6 +1378,10 @@ window.addEventListener("message", (e)=>{
   }
   if(e.data.type==="pos" && typeof e.data.ax==="number"){ lastPos={ax:e.data.ax, ay:e.data.ay}; return; }
   if(e.data.type==="defeated"){ gameOver(); return; }     // ship destroyed → game-over screen
+  // the flight game reached a scripted encounter (Crimson Nova's hangar) and wants a VN
+  // scene played over it — works whenever the iso is embedded (story leg or free play);
+  // startScene/endScene never touch beatIdx, so a story beat resumes intact afterwards.
+  if(e.data.type==="playScene"){ if(!sceneMode) startScene(e.data.id); return; }
   const b = beatIdx>=0 ? EP1[beatIdx] : null;
   if(!b) return;
   if(e.data.type==="missionComplete" && b.type==="combat"){
@@ -1367,6 +1620,7 @@ function startEpisode(){
   lastPos=null;                       // fresh playthrough starts at the rim spawn
   try{ localStorage.removeItem("stargear_fog_v1"); }catch(e){}  // clear the iso's saved fog (FOG_KEY)
   try{ localStorage.removeItem("stargear_ep0_done"); }catch(e){} // and the "episode finished" achievement flag
+  document.getElementById("endAchToast").classList.remove("on");
   endOverlay.classList.add("hidden");
   present=[]; exprOf={}; rebuildCast();
   // fade the title to black (0.5s), build Scene 1 behind the black, then fade into it
@@ -1383,6 +1637,19 @@ function endEpisode(){
   // isn't running at this point (the END beat is a VN scene, so its iframe is torn
   // down), so this is a shared-localStorage handshake it reads at its next boot.
   try{ localStorage.setItem("stargear_ep0_done","1"); }catch(e){}
+  // Also unlock it directly, right here, in the same achievements list the iso reads
+  // (stargear_ach_v1) — waiting for the player to separately click into free roam
+  // meant the award never visibly "popped" for anyone who just watched the ending
+  // (Steve, 2026-07-26 playtest). The end screen shows its own toast to match.
+  try{
+    const raw = localStorage.getItem("stargear_ach_v1");
+    const unlocked = new Set(raw ? JSON.parse(raw) : []);
+    if(!unlocked.has("ep0_complete")){
+      unlocked.add("ep0_complete");
+      localStorage.setItem("stargear_ach_v1", JSON.stringify([...unlocked]));
+      requestAnimationFrame(()=>document.getElementById("endAchToast").classList.add("on"));
+    }
+  }catch(e){}
   bar.classList.add("hidden"); hideGameplay(); stopVO();
   setCG(null);
   beatBar.style.width="100%";
@@ -1608,6 +1875,13 @@ document.addEventListener("keydown",(e)=>{
     }
     return;
   }
+  // A standalone scene (Crimson Nova) plays over free-roam — it owns the keyboard so
+  // Space advances the dialogue instead of the free-play handler swallowing it.
+  if(sceneMode){
+    if(e.code==="Space" || e.code==="ArrowRight" || e.code==="Enter"){ e.preventDefault(); advance(); }
+    else if(e.code==="KeyA"){ e.preventDefault(); toggleAuto(); }
+    return;
+  }
   // The load picker owns the keyboard while it's up, or Space would start a new game
   // behind it. Esc backs out.
   if(!document.getElementById("loadPanel").classList.contains("hidden")){
@@ -1660,6 +1934,7 @@ gpSkip.addEventListener("click", ()=>{
   if(b && b.type!=="vn") runBeat(beatIdx+1);
 });
 autoBtn.addEventListener("click", toggleAuto);
+skipBtn.addEventListener("click", skipVNSection);
 voMuteBtn.addEventListener("click", ()=>{
   voMuted = !voMuted;
   if(curVO) curVO.muted = voMuted;
@@ -1675,6 +1950,15 @@ voMuteBtn.addEventListener("click", ()=>{
 setBackground("BG01");
 preloadVO();          // warm the voice clips so the typewriter can pace to them
 preloadImages();      // warm the BG/CG art so it never flashes a placeholder first
+
+// TESTING ONLY (remove before release): episode1.html?freeplay=1 boots straight into
+// free roam so the Crimson Nova hangar (and other free-play content) can be tested
+// without playing/skipping the whole story.
+if(/[?&]freeplay=1/.test(location.search)){
+  startOverlay.classList.add("hidden");
+  started = true;
+  startFreePlay("Dev free play — testing");
+}
 
 </script>
 </body>

@@ -1,0 +1,369 @@
+BG: space rock with crimson's ship parked in the background
+
+
+Dialogue
+Expression
+
+Voss – Neutral
+
+Voss:
+"So... you're Crimson Nova."
+
+Expression
+
+Crimson – Heroic Smile
+
+Crimson:
+"The one and only!"
+
+Expression
+
+Crimson – Finger Point
+
+Crimson:
+"Protector of the frontier!"
+
+Expression
+
+Crimson – Heroic Pose
+
+Crimson:
+"Defender of justice!"
+
+Expression
+
+Crimson – Sparkling Confidence
+
+Crimson:
+"Champion of hope!"
+
+Expression
+
+Crimson – Heroic Pose
+
+Crimson:
+"..."
+
+Expression
+
+Crimson – Eyes Closed Smile
+
+Crimson:
+"...I usually get applause by now."
+
+Expression
+
+Tessa – Confused
+
+Tessa:
+"...Should... someone clap?"
+
+Expression
+
+Selyra – Curious
+
+Selyra:
+"Is this some kind of human ritual?"
+
+Expression
+
+Astra – Excited
+
+Astra:
+"No! This is AWESOME!"
+
+Expression
+
+Rex – Excited
+
+Rex:
+"I've heard of him!"
+
+Expression
+
+Rex – Grinning
+
+Rex:
+"He destroyed six pirate cruisers by himself at Black Rift!"
+
+Expression
+
+Astra – Excited
+
+Astra:
+"And escaped before the navy arrived!"
+
+Expression
+
+Crimson – Proud
+
+Crimson:
+"Seven."
+
+Expression
+
+Crimson – Finger Up
+
+Crimson:
+"It was seven cruisers."
+
+Expression
+
+Rex – Embarrassed
+
+Rex:
+"Right... seven."
+
+Expression
+
+Kael – Annoyed
+
+Kael:
+"This is absurd."
+
+Expression
+
+Kael – Angry
+
+Kael:
+"We're wasting valuable time."
+
+Expression
+
+Crimson – Dramatic Shock
+
+Crimson:
+"Oh!"
+
+Expression
+
+Crimson – Heroic Concern
+
+Crimson:
+"You're the serious one."
+
+Expression
+
+Kael – Angry
+
+Kael:
+"I prefer competent."
+
+Expression
+
+Crimson – Laughing
+
+Crimson:
+"Hahaha!"
+
+Expression
+
+Crimson – Confident
+
+Crimson:
+"Good."
+
+Expression
+
+Crimson – Heroic Smile
+
+Crimson:
+"I'd hate to disappoint you."
+
+Expression
+
+Kael – Irritated
+
+Kael:
+"I somehow doubt that's possible."
+
+Expression
+
+Voss – Calm Smile
+
+Voss:
+"Despite the theatrics..."
+
+Expression
+
+Voss – Respectful
+
+Voss:
+"...your reputation precedes you."
+
+Expression
+
+Voss – Neutral
+
+Voss:
+"You've protected more civilian convoys than most patrol fleets."
+
+Expression
+
+Crimson – Humble Smile
+
+Crimson:
+"..."
+
+Expression
+
+Crimson – Soft Smile
+
+Crimson:
+"Someone has to."
+
+(The mood briefly becomes genuine.)
+
+Expression
+
+Crimson – Grinning
+
+Crimson:
+"Anyway!"
+
+Expression
+
+Crimson – Heroic Pose
+
+Crimson:
+"I'm available for hire."
+
+Expression
+
+Tessa – Confused
+
+Tessa:
+"...You charge?"
+
+Expression
+
+Crimson – Serious
+
+Crimson:
+"Fuel isn't free."
+
+Expression
+
+Crimson – Smile
+
+Crimson:
+"Neither are smoke bombs."
+
+Expression
+
+Astra – Laughing
+
+Astra:
+"You use smoke bombs in space?"
+
+Expression
+
+Crimson – Finger Up
+
+Crimson:
+"Only during the entrance."
+
+Expression
+
+Tessa – Confused
+
+Tessa:
+"...How?"
+
+Expression
+
+Crimson – Wink
+
+Crimson:
+"Trade secret."
+
+Expression
+
+Voss – Smile
+
+Voss:
+"What are your terms?"
+
+Expression
+
+Crimson – Professional
+
+Crimson:
+"Pay me before departure."
+
+Expression
+
+Crimson – Confident
+
+Crimson:
+"I fight until the battle's won."
+
+Expression
+
+Crimson – Heroic
+
+Crimson:
+"No civilian casualties."
+
+Expression
+
+Crimson – Smile
+
+Crimson:
+"No piracy."
+
+Expression
+
+Crimson – Finger Point
+
+Crimson:
+"And absolutely no interrupting my entrance."
+
+Expression
+
+Rex – Laughing
+
+Rex:
+"Deal."
+
+Expression
+
+Kael – Deadpan
+
+Kael:
+"I object."
+
+Expression
+
+Selyra – Curious
+
+Selyra:
+"I wish to witness another entrance."
+
+Expression
+
+Astra – Excited
+
+Astra:
+"Can we hire him right now?"
+
+Expression
+
+Crimson – Heroic Pose
+
+Crimson:
+"I knew I liked this crew."
+
+Expression
+
+Voss – Smile
+
+Voss:
+"Welcome aboard... temporarily."
+
+Expression
+
+Crimson – Salute
+
+Crimson:
+"Justice never clocks out, Captain."
