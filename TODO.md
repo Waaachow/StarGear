@@ -550,4 +550,22 @@ clean on both files). Not yet re-played by Steve.
 | 13 | **Crimson's hangar now appears on the Star Map** once you've actually met him (`crimsonMet`), using the same starburst glyph as his Mercenary menu entry. Hidden before that — he's still just a rumour at the Hub. | `drawMapView` |
 | 14 | **Crew face ability label could run to the panel edge** — "Disruptor Pulse" (Kael's) is the longest ability name in the game and had no width guard, unlike every other dynamic label in the file. Clamped with `fitText`. | combat side panel crew-face loop |
 
+---
+
+## itch.io page went PUBLIC — 2026-07-26
+
+Previously restricted/unlisted. Launch materials built same day (not part of the itch build zip):
+- `itch_screenshots/` — 10 PNGs (title, cinematic, VN dialogue, free-roam, Ship Config, Star Map,
+  combat, boss intro, station dock, Crimson hangar), captured live via Python Playwright against
+  `http://localhost:8123`.
+- `itch_gifs/` — 6 short loops (module drag/drop, combat kill + scrap payout, waypoint placement,
+  Tithe weak-point → finishing blow, VN dialogue advancing, Crimson's guest-turn Supernova Strike).
+- A full launch-copy plan (itch page rewrite, release devlog, per-subreddit Reddit drafts, LinkedIn
+  post) built as a Claude Artifact — ask for it by name in a future session, since it isn't saved
+  as a file here.
+
+**Open issue found during this pass, not yet fixed:** the title-screen splash art reads
+**"Star Gear Odyssey"** (with a Japanese subtitle) while every in-fiction UI element (the VN header,
+the Field Manual) says **"STARGEAR"**. Pick one and fix the mismatch before the next release.
+
 
