@@ -1,0 +1,2691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StarGear — Episode 1: Echoes of Steel</title>
+<style>
+  :root{
+    --accent:#46c7ff;
+    --panel-bg:rgba(8,14,28,0.9); --panel-border:rgba(120,180,255,0.35);
+    --barH:210px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Segoe UI",system-ui,sans-serif;
+    background:#04060e; color:#eaf2ff; overflow:hidden; user-select:none;
+  }
+
+  /* ---------- background layer ---------- */
+  #bgWrap{position:fixed; inset:0; z-index:0; overflow:hidden;}
+  #bgImg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+         filter:brightness(.62) saturate(.95); transition:opacity .5s ease;}
+  #bgPh{position:absolute; inset:0; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; gap:.4rem; text-align:center;
+        background:
+          radial-gradient(1200px 600px at 70% -10%, rgba(40,80,160,0.35), transparent 60%),
+          radial-gradient(900px 500px at 20% 110%, rgba(80,40,140,0.30), transparent 60%),
+          linear-gradient(180deg,#070b18 0%, #04060e 100%);}
+  #bgPh .id{font-size:.8rem; letter-spacing:.3em; color:#6fa6c8;}
+  #bgPh .nm{font-size:clamp(1.2rem,3vw,2rem); letter-spacing:.1em; color:#9fc0ff;
+            text-shadow:0 0 30px rgba(70,150,255,0.4);}
+  #bgPh .tag{font-size:.7rem; letter-spacing:.25em; color:rgba(255,255,255,0.3); text-transform:uppercase;}
+
+  /* ---------- cast layer ---------- */
+  #cast{position:fixed; left:0; right:0; bottom:0; top:0; z-index:2;
+        display:flex; align-items:flex-end; justify-content:space-around;
+        padding:0 2vw; pointer-events:none;}
+  .char{position:relative; display:flex; flex-direction:column; align-items:center;
+        justify-content:flex-end; width:clamp(170px,21vw,290px); height:86vh;
+        flex:0 0 auto; z-index:1;   /* never shrink — a crowded stage overlaps instead (below) */
+        opacity:.85; transform:translateY(10px); transition:opacity .4s ease, transform .4s ease, filter .4s ease;
+        filter:brightness(.45) saturate(.8);}
+  .char.active{opacity:1; transform:translateY(0); filter:brightness(1) saturate(1); z-index:3;}
+  /* five or six on stage: keep everyone full-size and overlap shoulders; the active
+     speaker pops to the front (z-index above). rebuildCast stamps data-n. */
+  #cast[data-n="5"] .char{margin:0 -1.2vw;}
+  #cast[data-n="6"] .char{margin:0 -2.8vw;}
+  /* seven on stage (the six crew + a guest, e.g. Crimson Nova): tighter overlap + a
+     touch narrower so the whole line still fits the frame */
+  #cast[data-n="7"] .char{margin:0 -4.2vw; width:clamp(150px,18vw,250px);}
+  /* "duo" staging — whenever the crew are talking WITH an NPC rather than among
+     themselves: the NPC(s) pinned to the right edge, only the current + previous crew
+     speaker shown on the left. Driven by a `duoGuest` field on VN steps (see
+     sceneStageDuo/nextStep) — not tied to any one character. */
+  #cast.duo{justify-content:flex-start; gap:2.5vw;}
+  #cast.duo .char.guest{margin-left:auto;}
+  .char::before{content:""; position:absolute; bottom:18%; left:50%; transform:translateX(-50%);
+        width:78%; height:46%; opacity:0; filter:blur(28px); transition:opacity .4s ease; z-index:0;
+        background:radial-gradient(ellipse at center, var(--c,#46c7ff) 0%, transparent 65%);}
+  .char.active::before{opacity:.32;}
+  .cimg{position:relative; z-index:1; max-height:100%; max-width:100%; object-fit:contain;
+        align-self:flex-end; transform-origin:bottom center; transform:scale(2.75);
+        filter:drop-shadow(0 12px 24px rgba(0,0,0,0.6));}
+  .cph{position:relative; z-index:1; width:min(80%,250px); aspect-ratio:3/4; align-self:flex-end;
+       margin-bottom:6vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+       border-radius:14px; border:1px solid rgba(255,255,255,0.14);
+       background:linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01));}
+  .cph .i{font-size:clamp(40px,7vw,90px); font-weight:800; color:var(--c,#46c7ff);
+          text-shadow:0 0 26px var(--c,#46c7ff);}
+  .cph .n{margin-top:.2rem; letter-spacing:.22em; text-transform:uppercase; font-size:.74rem; color:rgba(255,255,255,0.7);}
+  .cph .x{margin-top:.15rem; font-size:.66rem; letter-spacing:.12em; color:var(--c,#46c7ff); text-transform:uppercase;}
+  .cph .note{margin-top:.5rem; font-size:.56rem; color:rgba(255,255,255,0.3); text-align:center; padding:0 8px;}
+
+  /* ---------- CG layer (full-screen event art) ---------- */
+  #cg{position:fixed; inset:0; z-index:14; display:none; background:#02030a;}
+  #cg.show{display:block;}
+  #cgImg{position:absolute; inset:0; width:100%; height:100%; object-fit:contain;}
+  #cgPh{position:absolute; inset:0; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; gap:.5rem; text-align:center;
+        background:radial-gradient(900px 600px at 50% 30%, rgba(40,70,150,0.4), transparent 70%), #03040c;}
+  #cgPh .id{font-size:.85rem; letter-spacing:.35em; color:#7fb0e0;}
+  #cgPh .nm{font-size:clamp(1.5rem,4vw,2.6rem); letter-spacing:.08em; color:#dceaff;
+            text-shadow:0 0 40px rgba(70,150,255,0.5);}
+  #cgPh .desc{max-width:640px; font-size:.95rem; line-height:1.5; color:rgba(255,255,255,0.55); padding:0 20px;}
+  #cgPh .tag{margin-top:.4rem; font-size:.66rem; letter-spacing:.28em; color:rgba(255,255,255,0.3); text-transform:uppercase;}
+
+  /* ---------- dialogue bar ---------- */
+  #bar{position:fixed; left:0; right:0; bottom:0; z-index:18; min-height:var(--barH);
+       background:linear-gradient(180deg, transparent, rgba(4,7,15,0.55) 18%, var(--panel-bg) 46%);
+       border-top:1px solid var(--panel-border); padding:30px clamp(24px,6vw,90px) 26px;
+       backdrop-filter:blur(6px); cursor:pointer;}
+  #bar.hidden{display:none;}
+  #nameplate{display:inline-block; padding:.32rem 1.2rem; border-radius:8px; font-weight:700;
+       letter-spacing:.12em; text-transform:uppercase; font-size:1rem; background:#0b1426;
+       border:1px solid var(--accent); color:var(--accent);
+       box-shadow:0 0 18px color-mix(in srgb, var(--accent) 40%, transparent); margin-bottom:.7rem;}
+  #nameplate.hidden{visibility:hidden;}
+  #bar.speaking #nameplate{animation:talk 1.1s ease-in-out infinite;}
+  @keyframes talk{0%,100%{box-shadow:0 0 18px color-mix(in srgb,var(--accent) 40%,transparent);}
+                  50%{box-shadow:0 0 30px color-mix(in srgb,var(--accent) 85%,transparent);}}
+  #text{font-size:clamp(1.1rem,2.1vw,1.65rem); line-height:1.5; max-width:1100px; min-height:2.6em;}
+  #text.narr{font-style:italic; color:#adbfe0;}
+  #text.signal{color:#8dffb0; text-shadow:0 0 18px rgba(141,255,176,0.4); letter-spacing:.04em; font-family:Consolas,monospace;}
+  #text.unknown{color:#ff7a7a; text-shadow:0 0 18px rgba(255,90,90,0.4); letter-spacing:.04em; font-family:Consolas,monospace;}
+  /* CG caption mode: no box, text floated top-centre over the illustration */
+  #bar.overCg{bottom:auto; top:7%; min-height:0; background:transparent; border-top:0;
+       backdrop-filter:none; padding:20px clamp(24px,6vw,90px); text-align:center;}
+  #bar.overCg #nameplate{margin-bottom:.7rem;}
+  #bar.overCg #text{margin:0 auto; text-shadow:0 3px 16px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.9);}
+  #bar.overCg #advance{display:none;}
+  .cursor{display:inline-block; width:.55ch; animation:blink 1s steps(1) infinite; color:#9fc0ff;}
+  @keyframes blink{50%{opacity:0;}}
+  #advance{position:absolute; right:clamp(24px,6vw,90px); bottom:14px; font-size:.74rem;
+       letter-spacing:.15em; color:rgba(255,255,255,0.5); display:flex; align-items:center; gap:.5rem;}
+  #advance .arrow{display:inline-block; animation:bob 1.1s ease-in-out infinite; color:#9fc0ff;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+  kbd{background:#101a30; border:1px solid rgba(255,255,255,0.2); border-bottom-width:2px;
+      border-radius:5px; padding:1px 7px; font-size:.72rem; color:#cfe0ff;}
+
+  /* ---------- header / progress ---------- */
+  #hud{position:fixed; top:16px; left:24px; z-index:22; opacity:.92;}
+  #voMute{position:fixed; top:14px; right:18px; z-index:30; cursor:pointer; font-size:1.05rem;
+       line-height:1; background:rgba(10,18,32,0.82); color:#cfe3ff;
+       border:1px solid var(--panel-border); border-radius:8px; padding:.34rem .54rem;}
+  #voMute:hover{border-color:var(--accent);}
+  #voMute.muted{color:#7a8aa0;}
+  #autoPlay{position:fixed; top:14px; right:64px; z-index:30; cursor:pointer; font-family:inherit;
+       font-size:.74rem; letter-spacing:.1em; line-height:1; color:#cfe3ff;
+       background:rgba(10,18,32,0.82); border:1px solid var(--panel-border);
+       border-radius:8px; padding:.46rem .6rem;}
+  #autoPlay:hover{border-color:var(--accent);}
+  #autoPlay.on{background:#14507a; border-color:var(--accent); color:#eafcff;}
+  #skipVN{position:fixed; top:14px; right:152px; z-index:30; cursor:pointer; font-family:inherit;
+       font-size:.74rem; letter-spacing:.1em; line-height:1; color:#cfe3ff;
+       background:rgba(10,18,32,0.82); border:1px solid var(--panel-border);
+       border-radius:8px; padding:.46rem .6rem;}
+  #skipVN:hover{border-color:var(--accent); color:#eafcff;}
+  #epTitle{font-size:.9rem; letter-spacing:.22em; color:#9fc0ff; text-transform:uppercase;}
+  #epScene{font-size:.74rem; letter-spacing:.2em; color:rgba(255,255,255,0.5); margin-top:.25rem;}
+  #beatBar{position:fixed; top:0; left:0; height:3px; z-index:22; width:0%;
+       background:linear-gradient(90deg,var(--accent),transparent); transition:width .4s ease;}
+
+  /* ---------- gameplay beat (embedded flight / combat) ---------- */
+  #gameplay{position:fixed; inset:0; z-index:26; display:flex; flex-direction:column; background:#04060e;}
+  #gameplay.hidden{display:none;}
+  #gpHeader{display:flex; align-items:center; gap:18px; padding:12px 22px;
+       background:linear-gradient(180deg,rgba(10,18,32,0.96),rgba(8,14,26,0.9));
+       border-bottom:1px solid var(--panel-border);}
+  #gpKind{font-size:.72rem; letter-spacing:.25em; text-transform:uppercase; color:#0b0e14;
+       background:var(--accent); padding:.3rem .8rem; border-radius:6px; font-weight:700;}
+  #gpTitle{font-weight:700; letter-spacing:.04em; font-size:1.05rem; color:#eaf2ff;}
+  #gpObj{font-size:.82rem; color:#9fc0ff; margin-left:auto; max-width:46%; text-align:right;}
+  #gpFrame{flex:1; border:0; width:100%; background:#04060e;}
+  /* Gameplay footer hidden — the flight game speaks for itself. gpStatus/gpSkip
+     stay in the DOM (JS references them). */
+  #gpFooter{display:none;}
+  #gpHint{font-size:.78rem; color:rgba(255,255,255,0.55); letter-spacing:.04em;}
+  #gpStatus{font-size:.8rem; letter-spacing:.06em; color:#7ee787; margin-left:auto; min-width:140px; text-align:right;}
+  .gpBtn{font-family:inherit; font-size:.86rem; letter-spacing:.08em; cursor:pointer;
+       color:#eaf2ff; background:#13243a; border:1px solid var(--panel-border);
+       padding:.5rem 1.1rem; border-radius:8px;}
+  .gpBtn:hover{border-color:var(--accent); box-shadow:0 0 14px rgba(70,150,255,0.3);}
+  .gpBtn.primary{background:#14507a; border-color:var(--accent); color:#eafcff;}
+  .gpBtn.skip{background:transparent; color:rgba(255,255,255,0.5);}
+  .gpBtn.hidden{display:none;}
+
+  /* ---------- start / end overlays ---------- */
+  .overlay{position:fixed; inset:0; z-index:40; display:flex; flex-direction:column;
+       align-items:center; justify-content:center; text-align:center; gap:1rem; cursor:pointer;
+       background:radial-gradient(900px 600px at 50% 20%, rgba(30,60,140,0.35), transparent 70%), rgba(3,5,12,0.92);}
+  .overlay.hidden{display:none;}
+  .overlay .sub{color:#9fc0ff; letter-spacing:.32em; text-transform:uppercase; font-size:.85rem;}
+  .overlay h1{font-size:clamp(2rem,6vw,3.6rem); letter-spacing:.06em; color:#dceaff;
+       text-shadow:0 0 40px rgba(70,150,255,0.5);}
+  .overlay .hint{margin-top:1.4rem; color:rgba(255,255,255,0.6); font-size:.92rem;}
+
+  /* ---------- start menu (layered animated title) ---------- */
+  :root{ --sg-glow:150,200,255;                /* light-blue logo glow          */
+         --sg-ship-x:25%; --sg-ship-y:70%; --sg-ship-size:60%; }  /* tune ship placement */
+  #startOverlay{cursor:default; background:#05070d; padding:0; overflow:hidden;
+       transition:opacity .6s ease;}
+  #startOverlay.fading{opacity:0; pointer-events:none;}   /* fade out when Start is pressed */
+  /* full-screen black used for fade-to-black transitions (title -> black -> scene) */
+  #fadeBlack{position:fixed; inset:0; z-index:60; background:#000; opacity:0;
+       pointer-events:none; transition:opacity .5s ease;}
+  #fadeBlack.on{opacity:1;}
+  /* Blurred copy of the background. The frame now covers the viewport so this is
+     never visible — kept as insurance for the moment before the art loads. */
+  .sgBgfill{position:absolute; inset:0; z-index:0;
+       background:url("Assets/Start_Menu/Menu_1_background.png") center/cover no-repeat;
+       filter:blur(28px) brightness(.45); transform:scale(1.1);}
+  /* The art frame holds the 1376:768 ratio and COVERS the viewport — whichever axis
+     is short is scaled up and the overflow is cropped, so there are never bars.
+     179.17vh is 1376/768 expressed as a height multiple; min() here would letterbox.
+     Anchored to the TOP, not the centre: when the viewport is wider than 16:9 the frame
+     is taller than the screen, and cropping from the bottom (empty nebula) keeps the
+     logo intact. On narrow viewports the height lands at exactly 100vh, so top:0 is
+     the same as centring. */
+  .sgFrame{position:absolute; top:0; left:50%; z-index:1;
+       width:max(100vw, 179.17vh); aspect-ratio:1376 / 768;
+       transform:translateX(-50%); overflow:hidden;}
+  .sgFull{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+       user-select:none; -webkit-user-drag:none; pointer-events:none;}
+  /* The background is deliberately STILL — the slow sgDrift pan read as a wobble
+     rather than as parallax (playtest, 2026-07-20). The ship bounce and logo glow
+     are the only motion on the title now. */
+  .sgShipBox{position:absolute; left:var(--sg-ship-x); top:var(--sg-ship-y);
+       width:var(--sg-ship-size); aspect-ratio:1376 / 768;
+       transform:translate(-50%,-50%); pointer-events:none;}
+  .sgShipAlign{width:100%; height:100%; transform:translate(16%,-7%);}  /* ship art centre -> box centre */
+  .sgShip{width:100%; height:100%; object-fit:contain;
+       animation:sgBounce 4.8s ease-in-out infinite; will-change:transform;}
+  @keyframes sgBounce{0%,100%{transform:translateY(-2%) rotate(-.5deg);}
+                      50%    {transform:translateY( 2%) rotate( .5deg);}}
+  .sgLogo{animation:sgGlow 3.2s ease-in-out infinite; will-change:filter;}
+  @keyframes sgGlow{
+    0%,100%{filter:drop-shadow(0 0 6px  rgba(var(--sg-glow),.35))
+                   drop-shadow(0 0 14px rgba(var(--sg-glow),.20));}
+    50%    {filter:drop-shadow(0 0 14px rgba(var(--sg-glow),.75))
+                   drop-shadow(0 0 34px rgba(var(--sg-glow),.45));}}
+  /* Anchored to the VIEWPORT, not the art frame — the frame now overflows and gets
+     cropped, which would take the buttons with it. Bottom-anchored so the stack can
+     grow downward-safe as options are added. */
+  #startMenu{position:absolute; left:50%; bottom:6vh; transform:translateX(-50%);
+       z-index:5; display:flex; flex-direction:column; align-items:center; gap:14px; margin:0;}
+  .menuBtn{font-family:inherit; cursor:pointer; min-width:260px;
+       font-size:1.15rem; letter-spacing:.28em; text-transform:uppercase; font-weight:600;
+       color:#eafcff; padding:.9rem 2.6rem; border-radius:10px;
+       background:linear-gradient(180deg, rgba(20,80,122,0.92), rgba(11,32,58,0.92));
+       border:1px solid var(--accent);
+       box-shadow:0 0 22px rgba(70,150,255,0.35), inset 0 0 18px rgba(70,150,255,0.15);
+       transition:transform .15s ease, box-shadow .2s ease, background .2s ease;}
+  .menuBtn:hover{transform:translateY(-2px);
+       background:linear-gradient(180deg, rgba(30,110,160,0.96), rgba(16,44,78,0.96));
+       box-shadow:0 0 34px rgba(70,150,255,0.6), inset 0 0 22px rgba(70,150,255,0.25);}
+  .menuBtn:active{transform:translateY(0);}
+  #startMenu .hint{margin-top:.4rem; color:rgba(255,255,255,0.65); font-size:.85rem;
+       text-shadow:0 2px 8px rgba(0,0,0,0.9);}
+  /* ---------- title-screen LOAD GAME slot picker ---------- */
+  #loadPanel{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+       z-index:6; width:min(92vw,560px); display:flex; flex-direction:column; gap:12px;
+       padding:26px 26px 20px; border-radius:14px; text-align:left;
+       background:rgba(4,10,18,0.93); border:1px solid rgba(120,200,220,0.45);
+       box-shadow:0 0 60px rgba(0,0,0,0.8);}
+  #loadPanel.hidden{display:none;}
+  /* `.hidden` is per-element in this file, not a global utility — these two need
+     their own rules or the title buttons stay visible behind the picker, and LOAD
+     shows even when there's nothing to load. */
+  #startMenu.hidden{display:none;}
+  #loadBtn.hidden{display:none;}
+  #loadPanel .lpTitle{font-size:1rem; letter-spacing:.3em; color:#8af2ff; font-weight:700;}
+  #loadSlots{display:flex; flex-direction:column; gap:10px;}
+  .lpSlot{font-family:inherit; text-align:left; cursor:pointer; padding:.7rem .9rem;
+       border-radius:10px; color:#cfeef6; background:rgba(11,32,58,0.9);
+       border:1px solid rgba(120,200,220,0.35); transition:background .15s, border-color .15s;}
+  .lpSlot:hover:not(:disabled){background:rgba(20,80,122,0.95); border-color:#8af2ff;}
+  .lpSlot:disabled{opacity:.45; cursor:default;}          /* empty slot */
+  .lpSlot .lpMain{font-weight:600; letter-spacing:.06em;}
+  .lpSlot .lpSub{font-size:.8rem; color:rgba(150,200,220,0.8); margin-top:.25rem;}
+  /* slot row = the slot button plus its download button */
+  .lpRow{display:flex; gap:8px; align-items:stretch;}
+  .lpRow .lpSlot{flex:1;}
+  .lpDl{font-family:inherit; cursor:pointer; width:44px; font-size:1.1rem; color:#8af2ff;
+       border-radius:10px; background:rgba(11,32,58,0.9); border:1px solid rgba(120,200,220,0.35);}
+  .lpDl:hover{background:rgba(20,80,122,0.95); border-color:#8af2ff;}
+  #loadPanel .lpFile{font-family:inherit; cursor:pointer; text-align:center; padding:.6rem .9rem;
+       border-radius:10px; color:#cfeef6; background:rgba(11,32,58,0.6);
+       border:1px dashed rgba(120,200,220,0.5);}
+  #loadPanel .lpFile:hover{background:rgba(20,80,122,0.9); border-color:#8af2ff;}
+  #loadPanel .lpMsg{min-height:1.1em; font-size:.8rem; color:#7ee787;}
+  #loadPanel .lpBack{min-width:0; align-self:flex-start; font-size:.9rem; padding:.5rem 1.2rem;}
+
+  /* ---------- opening narration (title -> prologue -> Scene 1) ----------
+     A shot list: each narration block gets a still that drifts (Ken Burns) while
+     the line fades in over it, crossfading shot-to-shot in step with the VO clip.
+     The line timings are derived from the clip's real duration at runtime
+     (see startPrologue), so re-recording the VO doesn't need new numbers.
+     Stills are optional — a shot whose image is missing simply plays black, so
+     the sequence still reads before Assets/intro/ is filled in. */
+  #prologue{position:fixed; inset:0; z-index:50; cursor:pointer; background:#000;
+       transition:opacity .8s ease; overflow:hidden;}
+  #prologue.hidden{display:none;}
+  #prologue.fading{opacity:0;}
+  /* stage = the two crossfading image layers */
+  #prologue .plStage{position:absolute; inset:0; z-index:0;}
+  #prologue .plShot{position:absolute; inset:0; opacity:0; background:#000 center/cover no-repeat;
+       transition:opacity 1.4s ease; will-change:opacity,transform;}
+  #prologue .plShot.on{opacity:1;}
+  /* vignette + floor gradient so the narration stays legible over any still */
+  #prologue .plScrim{position:absolute; inset:0; z-index:1; pointer-events:none;
+       background:radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.55) 100%),
+                  linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 30%,
+                                          rgba(0,0,0,0) 55%, rgba(0,0,0,0.75) 100%);}
+  /* Ken Burns moves. Duration is set per shot from the derived timing. */
+  @keyframes kbZoomIn { from{transform:scale(1.02);} to{transform:scale(1.20);} }
+  @keyframes kbZoomOut{ from{transform:scale(1.20);} to{transform:scale(1.02);} }
+  @keyframes kbPanL   { from{transform:scale(1.16) translateX( 3%);} to{transform:scale(1.16) translateX(-3%);} }
+  @keyframes kbPanR   { from{transform:scale(1.16) translateX(-3%);} to{transform:scale(1.16) translateX( 3%);} }
+  @keyframes kbOrbit  { from{transform:scale(1.10) rotate(-1.4deg);} to{transform:scale(1.22) rotate(1.4deg);} }
+  @keyframes kbRush   { from{transform:scale(1.00);} to{transform:scale(1.55);} }
+  #prologue .plText{position:absolute; z-index:2; left:50%; bottom:18vh; transform:translate(-50%,10px);
+       width:min(90vw,1000px); text-align:center; opacity:0;
+       font-size:clamp(1.15rem,2.6vw,2rem); line-height:1.6; letter-spacing:.04em;
+       color:#dceaff; text-shadow:0 2px 12px rgba(0,0,0,0.95), 0 0 30px rgba(70,150,255,0.45);
+       transition:opacity .9s ease, transform .9s ease;}
+  #prologue .plText.on{opacity:1; transform:translate(-50%,0);}
+  /* title card — replaces the narration text for the final beat */
+  #prologue .plCard{position:absolute; z-index:2; inset:0; display:flex; flex-direction:column;
+       align-items:center; justify-content:center; gap:1.1rem; opacity:0;
+       transition:opacity 1.6s ease; pointer-events:none;}
+  #prologue .plCard.on{opacity:1;}
+  #prologue .plCard .pcLogo{width:min(76vw,820px); height:auto; margin-bottom:.4rem;
+       filter:drop-shadow(0 0 44px rgba(70,150,255,0.75));}
+  #prologue .plCard .pcEp{font-size:clamp(.85rem,1.8vw,1.2rem); letter-spacing:.42em;
+       color:rgba(160,210,255,0.85);}
+  #prologue .plCard .pcSub{font-size:clamp(1.1rem,2.4vw,1.8rem); letter-spacing:.14em;
+       color:#dceaff; text-shadow:0 0 26px rgba(70,150,255,0.5);}
+  #prologue .plSkip{position:absolute; z-index:2; bottom:5vh; left:50%; transform:translateX(-50%);
+       color:rgba(255,255,255,0.4); font-size:.82rem; letter-spacing:.16em;
+       text-shadow:0 2px 8px rgba(0,0,0,0.9);}
+
+  /* ---------- thanks-for-playing end screen ---------- */
+  #endOverlay{justify-content:flex-end; padding-bottom:8vh;
+       background:#04060e url("Assets/THANKS.png") center/cover no-repeat;}
+  #endOverlay.defeat{background-image:url("Assets/DEFEAT.png");}
+  #endOverlay::after{content:""; position:absolute; inset:0; z-index:0;
+       background:linear-gradient(180deg, rgba(3,5,12,0) 55%, rgba(3,5,12,0.8) 100%);
+       pointer-events:none;}
+  #endOverlay .hint{position:relative; z-index:1; text-shadow:0 2px 10px rgba(0,0,0,0.9);}
+  #endOverlay #freePlayBtn{position:relative; z-index:2; margin-bottom:18px;}
+  #endOverlay.defeat #freePlayBtn{display:none;}   /* dying doesn't earn free play */
+  /* Achievement banner on the ending screen itself — the iso's own toast only shows if
+     the player goes back into free roam, so completing the story needs its own,
+     immediate confirmation (Steve, 2026-07-26: "the story award didn't pop"). */
+  #endAchToast{position:relative; z-index:2; margin-bottom:14px; padding:10px 22px;
+       background:rgba(4,10,18,0.9); border:1.5px solid rgba(242,193,78,0.85);
+       text-align:center; opacity:0; transition:opacity .5s ease;}
+  #endAchToast.on{opacity:1;}
+  #endAchToast .cap{color:#f2c14e; font-size:11px; font-weight:bold; letter-spacing:.1em;}
+  #endAchToast .nm{color:#ffffff; font-size:16px; font-weight:bold; margin-top:4px;}
+  #endOverlay.defeat #endAchToast{display:none;}
+</style>
+</head>
+<body>
+  <div id="bgWrap">
+    <img id="bgImg" alt="" hidden />
+    <div id="bgPh"><div class="id"></div><div class="nm"></div><div class="tag">background placeholder</div></div>
+  </div>
+
+  <div id="cast"></div>
+
+  <div id="cg">
+    <img id="cgImg" alt="" hidden />
+    <div id="cgPh"><div class="id"></div><div class="nm"></div><div class="desc"></div><div class="tag">event CG placeholder</div></div>
+  </div>
+
+  <div id="hud">
+    <div id="epTitle">StarGear — Episode 1</div>
+    <div id="epScene">Echoes of Steel</div>
+  </div>
+  <button id="skipVN" title="Skip to the end of this scene" aria-label="Skip scene">Skip ▸</button>
+  <button id="autoPlay" title="Auto-play off — click to play the story automatically" aria-label="Toggle auto-play">▶ AUTO</button>
+  <button id="voMute" title="Mute / unmute voice" aria-label="Mute voice">🔊</button>
+  <div id="beatBar"></div>
+
+  <div id="bar" class="hidden">
+    <div id="nameplate">Voss</div>
+    <div id="text"></div>
+    <div id="advance"><span>Press <kbd>Space</kbd></span><span class="arrow">▼</span></div>
+  </div>
+
+  <div id="gameplay" class="hidden">
+    <div id="gpHeader">
+      <span id="gpKind">Flight</span>
+      <span id="gpTitle"></span>
+      <span id="gpObj"></span>
+    </div>
+    <iframe id="gpFrame" title="StarGear flight"></iframe>
+    <div id="gpFooter">
+      <span id="gpHint">Click into the view to fly. Arrows / WASD to move. Open the Star Map (M) for your objective.</span>
+      <span id="gpStatus"></span>
+      <!-- TESTING ONLY — remove before release -->
+      <button id="gpSkip" class="gpBtn skip" title="Testing: skip this segment">Skip ▸</button>
+      <!-- free play only: the story is over, so this is the way back to the title.
+           (Esc alone can't do it — the flight game holds keyboard focus.) -->
+      <button id="gpExit" class="gpBtn skip hidden" title="Back to the title screen">◀ Title</button>
+    </div>
+  </div>
+
+  <div id="startOverlay" class="overlay">
+    <div class="sgBgfill"></div>
+    <div class="sgFrame">
+      <img class="sgFull sgBg"   src="Assets/Start_Menu/Menu_1_background.png" alt="">
+      <div class="sgShipBox"><div class="sgShipAlign">
+        <img class="sgShip" src="Assets/Start_Menu/Menu_2_Ship.png" alt="">
+      </div></div>
+      <img class="sgFull sgLogo" src="Assets/Start_Menu/Menu_3_logo.png" alt="">
+    </div>
+    <div id="startMenu">
+      <button id="startBtn" class="menuBtn">Start</button>
+      <!-- Always available, even with every slot empty, so a save file can be
+           imported on a fresh browser — see refreshLoadBtn(). -->
+      <button id="loadBtn" class="menuBtn">Load Game</button>
+      <div class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> to begin</div>
+    </div>
+    <div id="loadPanel" class="hidden">
+      <div class="lpTitle">LOAD GAME</div>
+      <div id="loadSlots"></div>
+      <button id="loadFileBtn" class="lpFile">⤒ Load from file… (.sgsave, incl. Episode 0 saves)</button>
+      <input id="loadFileInput" type="file" accept=".sgsave,.json,application/json" hidden>
+      <div class="lpMsg" id="lpMsg"></div>
+      <button id="loadCancel" class="menuBtn lpBack">◀ Back</button>
+    </div>
+  </div>
+  <!-- Opening narration. Sits between the title screen and Scene 1; click or any
+       advance key skips straight through to the episode. -->
+  <div id="prologue" class="hidden">
+    <!-- two layers so shots crossfade into each other rather than cutting -->
+    <div class="plStage"><div class="plShot" id="plShotA"></div><div class="plShot" id="plShotB"></div></div>
+    <div class="plScrim"></div>
+    <div class="plText" id="plText"></div>
+    <div class="plCard" id="plCard">
+      <img class="pcLogo" src="Assets/Start_Menu/Menu_3_logo.png" alt="STARGEAR">
+      <div class="pcEp">EPISODE 1</div>
+      <div class="pcSub">Echoes of Steel</div>
+    </div>
+    <div class="plSkip">Press <kbd>Space</kbd> to skip</div>
+  </div>
+  <div id="endOverlay" class="overlay hidden">
+    <!-- After the story is beaten you can drop back into the sector for optional
+         content (bounties, side missions) instead of returning to the title. The
+         button is hidden on the DEFEAT screen — see #endOverlay.defeat rules. -->
+    <div id="endAchToast"><div class="cap">ACHIEVEMENT UNLOCKED</div><div class="nm">Echoes of Steel</div></div>
+    <button id="freePlayBtn" class="menuBtn">◀ RETURN TO THE SECTOR</button>
+    <div class="hint">Click the backdrop to return to the title</div>
+  </div>
+  <div id="fadeBlack"></div>
+
+<script>
+"use strict";
+// ============================================================
+// ASSET REGISTRY — placeholders render until the real files are dropped in.
+// Expected upload paths are listed in EPISODE1_ASSETS.md.
+// ============================================================
+const BACKGROUNDS = {
+  BG_Black:"Cold Open — Black Screen", BG_Bridge:"Bridge", BG_Bridge_Red:"Bridge — Red Alert",
+  BG_Cogwheel_Docks:"Cogwheel Station — Docks", BG_Cogwheel_Concourse:"Cogwheel Station — Concourse",
+  BG_Engineer:"Engineer's Workshop", BG_Space_Broker:"Space Broker's Office",
+  BG_Station_Manager:"Elias' Office", BG_Station_Corridor:"Cogwheel Station — Corridor",
+  BG_Observation_Deck:"StarGear — Observation Deck", BG_Prison:"Cogwheel Station — Holding Cells",
+  BG_Prison_Corridor:"Cogwheel Station — Prison Corridor", BG_IronForge_CommandDock:"The Iron Forge — Command Dock",
+  BG_MedicalBay:"StarGear — Medical Bay", BG_Crew_Lounge:"StarGear — Crew Lounge",
+  BG_CaptainQuarters:"StarGear — Captain's Quarters", BG_DarkCommand:"Unknown Location — Command Room",
+};
+const CGS = {
+  CG01:["Burning Convoy","The StarGear emerges from a Space Hop jump to defend a civilian mining convoy under pirate attack."],
+  CG02:["The Silent Graveyard","The StarGear drifts through a vast field of derelict ships — a thirty-year-old battlefield."],
+  CG03:["GearWorks Relay","A colossal abandoned GearWorks communications satellite, its data banks still holding secrets."],
+  CG04:["The Escape Pod","Nine years ago: Captain Voss reaches for a damaged escape pod, and finds a frightened young Astra inside."],
+  CG05:["The Iron Forge","A colossal abandoned GearWorks shipyard, repurposed into Captain Raze's pirate fortress."],
+  CG06:["The Assembly Line","Thousands of identical A-Series androids stand silent in the Iron Forge's manufacturing hall — all wearing Astra's face."],
+  CG07:["The Rescue","Astra sits with the heavily damaged A-17 in the StarGear's medical bay, choosing mercy over vengeance."],
+  CG08:["StarGear Departs","The StarGear leaves Cogwheel Station behind, its next journey already calling."],
+};
+const CHARS = {
+  Voss:  {color:"#46c7ff", i:"V"},
+  Kael:  {color:"#5be3c4", i:"K"},
+  Selyra:{color:"#ff9ec4", i:"S"},
+  Rex:   {color:"#ffae42", i:"R"},
+  Tessa: {color:"#5be38b", i:"T"},
+  Astra: {color:"#b481ff", i:"A"},
+  // Helios Reach cast (new this episode)
+  Elias: {color:"#c9a24b", i:"E"},                // Cogwheel Station Administrator
+  Quinn: {color:"#e08a3c", i:"Q"},                // veteran civilian convoy captain
+  Rowan: {color:"#8a9bb0", i:"C"},                // Cogwheel Station Chief of Security
+  Raze:  {color:"#8a3a3a", i:"Z"},                // antagonist — former GearWorks engineer
+  Dax:   {color:"#c96a3a", i:"D"},                // pirate lieutenant, Story Battle 2 boss
+  A17:   {color:"#7a5ad1", i:"7", label:"A-17"},  // Astra's "sister" unit, Iron Forge
+  // voice-only / no portrait (transmissions, recordings, silhouettes)
+  Pirate:     {color:"#ff5a5a", i:"?", voiceOnly:true, label:"Pirate Captain",        style:"unknown"},
+  Officer:    {color:"#8dffb0", i:"?", voiceOnly:true, label:"Recording — Officer",   style:"signal"},
+  Android:    {color:"#ff5a5a", i:"?", voiceOnly:true, label:"Recording — Unknown",   style:"unknown"},
+  Young_Astra:{color:"#b481ff", i:"?", voiceOnly:true, label:"Young Astra"},
+  Subordinate:{color:"#8dffb0", i:"?", voiceOnly:true, label:"Subordinate",           style:"signal"},
+  Mystery:    {color:"#ff5a5a", i:"?", voiceOnly:true, label:"???",                   style:"unknown"},
+};
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");
+// Real art that doesn't follow the assets/bg/bg0X.png convention can be mapped here
+// by its id; anything not listed falls back to the default path.
+const BG_OVERRIDE = {
+  // Bridge art is shared with Episode 0 — same ship, same room, no need to redraw it.
+  BG_Bridge:     "Assets/Bridge.png",
+  BG_Bridge_Red: "Assets/Bridge Red Alert.png",
+  // Everything else is new to Helios Reach and has no art yet — falls back to the
+  // convention path Assets/bg/<id-lowercased>.png until a file lands, at which point
+  // add an override line here (any filename works, no convention required).
+};
+const CG_OVERRIDE = {
+  CG01: "Assets/CG/CG01 – Burning Convoy.png",   // delivered — en-dash in the filename
+  // CG02–CG08 fall back to Assets/cg/cg0X.png as placeholders until art lands.
+};
+const bgFile   = id => BG_OVERRIDE[id] || `Assets/bg/${id.toLowerCase()}.png`;
+const cgFile   = id => CG_OVERRIDE[id] || `Assets/cg/${id.toLowerCase()}.png`;
+// Real character art lives in Assets/char/<NAME>/<Expression>.png — folders are
+// UPPERCASE, basenames are per-character (some files carry a " (n)" suffix). The
+// script uses a few expression names with no dedicated art, so we alias them to
+// the nearest available pose and ultimately fall back to Neutral.
+const CHAR_ART = {
+  ASTRA: ["Alert","Angry","Curious","Injured","Laughing","Neutral","Shocked","Smile","Stern","Thinking"],
+  KAEL:  ["Angry","Concerned","Curious","Deadpan","Determined","Embarrassed","Excited","Injured","Laughing","Neutral","Shocked","Thinking"],
+  REX:   ["Angry","Battle","Injured","Laughing","Neutral","Serious","Shocked","Smirk","Thinking","Uneasy"],
+  SELYRA:["Angry","Concerned","GentleSmile","Injured","Laughing","Neutral","Serious","Shocked","Smile","Thinking"],
+  TESSA: ["Angry","Determined","Focused","Injured","Laughing","Neutral","Shocked","Smile","Smirk","Thinking"],
+  VOSS:  ["Angry","Concerned","Injured","Laughing","Neutral","Shocked","Smirk","Stern","Thinking"],
+  // Helios Reach cast — no art yet; each list is exactly the poses the script calls
+  // for, so a placeholder shows the right label today and a real file slots in with
+  // no code change once drawn. Add poses here as they're drawn (or rename to match).
+  ELIAS: ["Neutral","ProfessionalSmile","Concerned"],
+  QUINN: ["Neutral","Grateful","Concerned"],
+  ROWAN: ["Neutral","Professional","Tired"],
+  RAZE:  ["Neutral","Smile","Cold"],
+  DAX:   ["Neutral","Excited","Smirk"],
+  A17:   ["Neutral","Stern"],
+};
+// normalize for matching: "Shocked (4)"->"shocked", "Gentle Smile"->"gentlesmile"
+const enorm = s => (s||"").toLowerCase().replace(/\s*\(\d+\)\s*/g,"").replace(/[^a-z0-9]/g,"");
+// script expression -> ordered fallback candidates (matched via enorm to real files)
+const EXPR_ALIAS = {
+  analytical:["Curious","Stern","Thinking","Alert"],
+  worried:   ["Concerned","Uneasy","Thinking","Shocked"],
+  confident: ["Smirk","Determined","Smile"],
+  smallsmile:["Smile","GentleSmile","Smirk","Laughing"],
+  softsmile: ["GentleSmile","Smile","Smirk","Laughing"],
+  gentlesmile:["GentleSmile","Smile","Laughing"],
+  focused:   ["Focused","Serious","Determined","Stern"],
+  determined:["Determined","Serious","Stern"],
+  stern:     ["Stern","Serious","Uneasy"],
+  concerned: ["Concerned","Uneasy","Serious"],
+  curious:   ["Curious","Thinking","Alert"],
+  excited:   ["Excited","Laughing","Smile"],
+  smirk:     ["Smirk","Smile","Laughing"],
+  smile:     ["Smile","GentleSmile","Smirk","Laughing"],
+  calmsmile: ["Smirk","Smile","Neutral"],
+  respectful:["Stern","Concerned","Neutral"],
+  confused:  ["Thinking","Concerned","Shocked"],
+  grinning:  ["Smirk","Laughing","Smile"],
+  embarrassed:["Embarrassed","Uneasy","Concerned","Shocked"],
+  annoyed:   ["Angry","Determined","Concerned"],
+  irritated: ["Angry","Concerned","Determined"],
+  deadpan:   ["Neutral","Concerned","Thinking"],
+  eyesclosedsmile:["Laughing","Smile","Neutral"],
+  humblesmile:    ["GentleSmile","Smile","Neutral"],
+  professional:   ["Professional","Serious","Determined","Stern","Neutral"],
+  heroic:         ["Determined","Serious","Neutral"],
+  // Episode 1 additions — expression words the Helios Reach script uses that the
+  // existing crew's Episode 0 pose sets don't have a literal match for.
+  happy:     ["Smile","Laughing","GentleSmile","Excited"],
+  sad:       ["Injured","Concerned","Thinking"],
+  serious:   ["Serious","Determined","Stern","Concerned"],
+  regret:    ["Concerned","Thinking","Injured"],
+  warmsmile: ["Smirk","GentleSmile","Smile","Concerned"],
+  tired:     ["Thinking","Concerned","Injured"],
+  grateful:  ["Smile","GentleSmile","Smirk","Neutral"],
+  professionalsmile:["Smile","Smirk","Professional","Neutral"],
+  cold:      ["Stern","Serious","Deadpan","Neutral"],
+  expressionless:["Neutral","Deadpan","Stern"],
+  scarred:   ["Concerned","Stern","Neutral"],
+  nervous:   ["Concerned","Uneasy","Shocked"],
+  furious:   ["Angry","Determined"],
+};
+// Guest characters normally live at Assets/char/<NAME>/ with no override needed —
+// reserved for a future guest who needs a sub-folder (Episode 0's Crimson pattern).
+const CHAR_DIR = {};
+function charFile(who, expr){
+  const dir = (who||"").toUpperCase();
+  const path = CHAR_DIR[dir] || dir;
+  const files = CHAR_ART[dir] || [];
+  const byNorm = {}; files.forEach(f => { byNorm[enorm(f)] = f; });
+  const cands = [expr||"Neutral", ...(EXPR_ALIAS[enorm(expr||"neutral")] || [])];
+  for(const c of cands){ const hit = byNorm[enorm(c)]; if(hit) return `Assets/char/${path}/${hit}.png`; }
+  const nf = byNorm["neutral"] || files[0];
+  return `Assets/char/${path}/${nf || "Neutral"}.png`;
+}
+
+// ============================================================
+// EPISODE 1 SCRIPT — "Echoes of Steel". Beats run in order, transcribed from
+// Episode 1 Prep/Star_Gear_Ep1_Script.txt (57 scenes / 7 parts). VN beats hold
+// dialogue steps; travel/combat beats embed the playable StarGear flight game.
+//   step fields: bg, cg(string|null), clearCast, cast[], who, expr, text, narr
+// No vo: paths yet — the Prep folder only has whole-character keeper masters
+// (<Name>_ep1.mp3), not individual cut lines. That's a later pass (see plan).
+// Zone ids used below (cogwheel/convoy/graveyard/satellite/ironforge/
+// ironforgedock) are not implemented yet in ep1_flight.html — that's the
+// next piece of work (Helios Reach world + Story Battle bosses).
+// ============================================================
+const EP1 = [
+  // Scene 1 — Cold Open
+  { type:"vn", scene:"Scene 1 · Cold Open", steps:[
+    {bg:"BG_Black", clearCast:true, pause:800, quiet:true},
+    {narr:"Every machine is built with a purpose."},
+    {narr:"Some are built to build."},
+    {narr:"Some are built to protect."},
+    {narr:"Some... are built to destroy."},
+    {pause:900},
+    {narr:"But purpose is not destiny."},
+    {pause:1000},
+    {narr:"STAR GEAR — Episode 1: Echoes of Steel"},
+    {pause:800},
+  ]},
+
+  // Scene 2 — Entering Helios Reach
+  { type:"vn", scene:"Scene 2 · Entering Helios Reach", steps:[
+    {bg:"BG_Bridge", clearCast:true, pause:900, quiet:true},
+    {who:"Rex",    expr:"Excited", text:"So this is Helios Reach!"},
+    {who:"Tessa",  expr:"Happy",   text:"It actually has traffic."},
+    {who:"Rex",    expr:"Excited", text:"And look! Actual stations!"},
+    {who:"Selyra", expr:"Curious", text:"There appear to be... many more ships than our previous destination."},
+    {who:"Kael",   expr:"Neutral", text:"Trade routes."},
+    {who:"Kael",   expr:"Neutral", text:"They're heavily travelled."},
+    {who:"Astra",  expr:"Happy",   text:"I wonder what everyone here is like."},
+    {who:"Voss",   expr:"Smile",   text:"We'll soon find out."},
+    {who:"Voss",   expr:"Smile",   text:"Our contract begins at Cogwheel Station."},
+    {who:"Voss",   expr:"Neutral", text:"We're escorting civilian shipping while we're in the sector."},
+    {who:"Rex",    expr:"Excited", text:"So..."},
+    {who:"Rex",    expr:"Smirk",   text:"No haunted ghost fleets?"},
+    {who:"Voss",   expr:"Smirk",   text:"I certainly hope not."},
+    {narr:"Everyone chuckles."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC01", title:"Cogwheel Station",
+    objective:"Fly the StarGear to Cogwheel Station, your escort contract's home base in Helios Reach.",
+    recap:"Flew the StarGear across Helios Reach to Cogwheel Station.",
+    embed:"ep1_flight.html#goto=cogwheel" },
+
+  // Scenes 3–6 — Cogwheel Station (Docks / Concourse / Engineer / Broker)
+  { type:"vn", scene:"Scenes 3–6 · Cogwheel Station", steps:[
+    {bg:"BG_Cogwheel_Docks", clearCast:true, duoGuest:"Elias"},
+    {who:"Elias", expr:"Neutral", text:"Welcome to Cogwheel Station."},
+    {who:"Elias", expr:"Neutral", text:"I'm Elias Mercer."},
+    {who:"Elias", expr:"Neutral", text:"Station Administrator."},
+    {who:"Voss",  expr:"Neutral", text:"Captain Voss."},
+    {who:"Voss",  expr:"Neutral", text:"StarGear."},
+    {who:"Elias", expr:"ProfessionalSmile", text:"We've been expecting you."},
+    {who:"Elias", expr:"ProfessionalSmile", text:"We appreciate the extra security."},
+    {who:"Rex",   expr:"Smirk",   text:"We're getting famous."},
+    {who:"Kael",  expr:"Deadpan", text:"Don't let it go to your head."},
+    {narr:"Elias smiles, but his eyes drift to Astra — the smile fades, just for a second, before he quickly hides it."},
+    {who:"Elias", expr:"Concerned", text:"..."},
+    {who:"Elias", expr:"Concerned", text:"I've arranged docking clearance."},
+    {who:"Elias", expr:"ProfessionalSmile", text:"Please... make yourselves comfortable."},
+    {narr:"Astra notices. Barely."},
+    {bg:"BG_Cogwheel_Concourse", duoGuest:null},
+    {narr:"Huge mechanical shopping district — animated advertisements, travellers, cargo robots. The crew splits up."},
+    {who:"Rex",    expr:"Excited", text:"I call food first!"},
+    {who:"Tessa",  expr:"Determined", text:"I'm finding the engineer."},
+    {who:"Selyra", expr:"Curious", text:"I wish to study local mechanical culture."},
+    {who:"Kael",   expr:"Determined", text:"I'll inspect station security."},
+    {narr:"Everyone leaves. Only Astra and Voss remain.", clearCast:true},
+    {narr:"A little girl walks around the corner, sees Astra, and freezes — then hides behind her mother, who pulls her away."},
+    {who:"Astra", expr:"Curious", text:"..."},
+    {who:"Astra", expr:"Curious", text:"Was it something I said?"},
+    {who:"Voss",  expr:"Neutral", text:"I wouldn't worry."},
+    {who:"Voss",  expr:"Neutral", text:"People are cautious around strangers."},
+    {narr:"Astra nods. But Voss doesn't sound convinced."},
+    {bg:"BG_Engineer", clearCast:true},
+    {narr:"Tessa is already talking with the station engineer, ship modules lining the walls."},
+    {who:"Tessa", expr:"Smirk", text:"Think you can keep the StarGear running a little longer?"},
+    {narr:"The engineer laughs and waves her inside. (Ship Configuration, Module Shop and Repairs are now available at Cogwheel Station.)"},
+    {bg:"BG_Space_Broker", clearCast:true},
+    {narr:"The broker smiles — until Astra enters. He freezes, just for a moment, then continues normally. No one comments. (Salvage, trade goods and bounties are now available at Cogwheel Station.)"},
+  ]},
+
+  // Scene 7 — Leaving Station
+  { type:"vn", scene:"Scene 7 · Leaving Station", steps:[
+    {bg:"BG_Bridge", clearCast:true},
+    {who:"Rex",    expr:"Thinking", text:"People here are weird."},
+    {who:"Tessa",  expr:"Neutral",  text:"Hm?"},
+    {who:"Rex",    expr:"Thinking", text:"Didn't you notice?"},
+    {who:"Rex",    expr:"Thinking", text:"They kept staring."},
+    {who:"Selyra", expr:"Neutral",  text:"They stared at all of us."},
+    {who:"Rex",    expr:"Serious",  text:"No."},
+    {who:"Rex",    expr:"Serious",  text:"They stared at Astra."},
+    {narr:"Silence. Everyone looks."},
+    {who:"Astra", expr:"Laughing", text:"Maybe my hair looked funny."},
+    {narr:"Nobody laughs. Even Voss is quiet."},
+    {narr:"COMMUNICATIONS ALERT — a distress beacon. A mining convoy, under attack."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC02", title:"Mining Convoy",
+    objective:"Respond to the distress beacon — a civilian mining convoy is under pirate attack.",
+    recap:"Answered the mining convoy's distress beacon.",
+    embed:"ep1_flight.html#goto=convoy" },
+
+  // Scene 8 — Battle Start (CG01)
+  { type:"vn", scene:"Scene 8 · Burning Convoy", steps:[
+    {cg:"CG01", clearCast:true},
+    {narr:"The StarGear drops out of a Space Hop jump between the pirates and the burning convoy."},
+    {who:"Pirate", expr:"Neutral", text:"Another hero ship?"},
+    {who:"Pirate", expr:"Neutral", text:"Blast them."},
+    {who:"Rex",    expr:"Excited", text:"Finally!"},
+    {who:"Kael",   expr:"Determined", text:"Enemy formation ahead."},
+    {who:"Voss",   expr:"Stern",   text:"Protect the convoy."},
+    {who:"Voss",   expr:"Stern",   text:"Nobody gets left behind."},
+    {cg:null},
+  ]},
+  { type:"combat", kind:"Story Battle 1", loc:"LOC02", title:"Burning Convoy",
+    objective:"Defend the mining convoy — destroy the raiding pirate ships.",
+    recap:"Drove off the pirates raiding the mining convoy.",
+    embed:"ep1_flight.html#mission&at=convoy&enemies=4" },
+
+  // Scene 9 — After Battle
+  { type:"vn", scene:"Scene 9 · After Battle", steps:[
+    {bg:"BG_Bridge", clearCast:true},
+    {narr:"The enemy flagship is heavily damaged. Communications open — the Pirate Captain appears. Scarred. Nervous."},
+    {who:"Pirate", expr:"Neutral", text:"..."},
+    {narr:"Then he notices Astra standing behind Voss. His face changes instantly — fear, recognition, disbelief."},
+    {who:"Pirate", expr:"Neutral", text:"...No."},
+    {who:"Pirate", expr:"Neutral", text:"It can't be."},
+    {pause:800},
+    {who:"Pirate", expr:"Neutral", text:"A-..."},
+    {who:"Pirate", expr:"Neutral", text:"No..."},
+    {who:"Pirate", expr:"Neutral", text:"Prototype..."},
+    {who:"Astra",  expr:"Shocked", text:"...Prototype?"},
+    {narr:"The pirate begins backing away, breathing panicked."},
+    {who:"Pirate", expr:"Neutral", text:"Captain Raze..."},
+    {who:"Pirate", expr:"Neutral", text:"...was right."},
+    {who:"Pirate", expr:"Neutral", text:"She's alive."},
+    {narr:"Transmission cuts. Pirates immediately retreat — jump signatures disappear."},
+    {narr:"Silence fills the bridge. Nobody speaks."},
+    {who:"Rex", expr:"Shocked", text:"..."},
+    {who:"Rex", expr:"Shocked", text:"...Okay.", vo:"audio/Episode1/vo/rex_L730.mp3"},
+    {who:"Rex", expr:"Shocked", text:"That was weird."},
+    {narr:"Everyone slowly turns toward Astra. She looks completely confused."},
+    {pause:1000},
+    {narr:"Fade to black."},
+  ]},
+
+  // ---- Part 2 — Shadows of the Past ----
+
+  // Scene 10 — Bridge After the Encounter
+  { type:"vn", scene:"Scene 10 · Bridge After the Encounter", steps:[
+    {bg:"BG_Bridge", clearCast:true},
+    {who:"Rex",    expr:"Shocked",   text:"...Okay."},
+    {who:"Rex",    expr:"Shocked",   text:"Can somebody explain what just happened?"},
+    {who:"Tessa",  expr:"Thinking",  text:"He recognised Astra."},
+    {who:"Selyra", expr:"Concerned", text:"He appeared... frightened."},
+    {who:"Astra",  expr:"Shocked",   text:"I've never seen him before."},
+    {who:"Kael",   expr:"Serious",   text:"He called you 'Prototype'."},
+    {narr:"Silence. Everyone slowly looks toward Voss. He keeps staring out the bridge window."},
+    {who:"Voss", expr:"Stern",   text:"Our priority is the convoy."},
+    {who:"Voss", expr:"Neutral", text:"We'll discuss this later."},
+    {narr:"Kael notices Voss avoiding the subject. He doesn't push. Yet."},
+    {narr:"The convoy captain hails the StarGear."},
+  ]},
+
+  // Scene 11 — Convoy Debrief (+ Optional Bridge Skit 01)
+  { type:"vn", scene:"Scene 11 · Convoy Debrief", steps:[
+    {bg:"BG_Bridge", clearCast:true, duoGuest:"Quinn"},
+    {who:"Quinn", expr:"Grateful", text:"StarGear."},
+    {who:"Quinn", expr:"Grateful", text:"You have our thanks."},
+    {who:"Quinn", expr:"Grateful", text:"If you hadn't arrived..."},
+    {who:"Voss",  expr:"Neutral",  text:"I'm just glad everyone made it."},
+    {who:"Quinn", expr:"Concerned", text:"..."},
+    {who:"Quinn", expr:"Concerned", text:"I should warn you."},
+    {who:"Quinn", expr:"Concerned", text:"Those pirates haven't been this bold for years."},
+    {who:"Quinn", expr:"Concerned", text:"They've been searching for something."},
+    {who:"Kael",  expr:"Determined", text:"What?"},
+    {who:"Quinn", expr:"Concerned", text:"No one knows."},
+    {who:"Quinn", expr:"Concerned", text:"They've been raiding old wrecks."},
+    {who:"Quinn", expr:"Concerned", text:"Abandoned stations."},
+    {who:"Quinn", expr:"Concerned", text:"Factory sites."},
+    {narr:"Tessa exchanges a glance with Voss."},
+    {who:"Quinn", expr:"Concerned", text:"They barely even steal cargo anymore."},
+    {narr:"Transmission ends.", duoGuest:null},
+    {who:"Astra", expr:"Thinking", text:"Do you think..."},
+    {who:"Astra", expr:"Thinking", text:"...I really look like someone?"},
+    {who:"Rex",   expr:"Neutral",  text:"Lots of people have doubles."},
+    {who:"Tessa", expr:"Neutral",  text:"Not enough to make pirates run away."},
+    {who:"Astra", expr:"Thinking", text:"..."},
+    {who:"Rex",   expr:"Uneasy",   text:"..."},
+    {who:"Rex",   expr:"Uneasy",   text:"Sorry."},
+    {narr:"Free exploration unlocked — salvage, bounties, scans, and the way back to Cogwheel Station are all open."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC03", title:"Return to Cogwheel Station",
+    objective:"Return to Cogwheel Station.",
+    recap:"Returned to Cogwheel Station.",
+    embed:"ep1_flight.html#goto=cogwheel" },
+
+  // Scenes 12–14 — Cogwheel Station (tense) / Elias' Office / Corridor
+  { type:"vn", scene:"Scenes 12–14 · Elias' Office", steps:[
+    {bg:"BG_Cogwheel_Concourse", clearCast:true},
+    {narr:"Same concourse. Different atmosphere. The music is quieter. NPCs stop talking as Astra walks past — a mechanic quietly closes his toolbox, a waitress steps back inside, a family crosses to the far side of the corridor. Nobody says anything."},
+    {who:"Astra", expr:"Neutral", text:"..."},
+    {who:"Astra", expr:"Neutral", text:"It's me."},
+    {narr:"Nobody answers."},
+    {bg:"BG_Station_Manager", duoGuest:"Elias"},
+    {who:"Elias", expr:"Concerned", text:"I hoped..."},
+    {who:"Elias", expr:"Concerned", text:"...I was mistaken."},
+    {who:"Voss",  expr:"Neutral",   text:"Mistaken about what?"},
+    {narr:"Elias sighs, looking toward Astra."},
+    {who:"Elias", expr:"Concerned", text:"Years ago..."},
+    {who:"Elias", expr:"Concerned", text:"This sector suffered pirate attacks unlike anything we'd seen."},
+    {who:"Elias", expr:"Concerned", text:"..."},
+    {who:"Elias", expr:"Concerned", text:"They weren't ordinary pirates."},
+    {who:"Elias", expr:"Concerned", text:"They used combat androids."},
+    {narr:"Silence."},
+    {who:"Elias", expr:"Concerned", text:"They looked..."},
+    {who:"Elias", expr:"Concerned", text:"...very much like her."},
+    {narr:"Everyone looks toward Astra. She slowly steps backwards."},
+    {who:"Astra", expr:"Shocked", text:"I..."},
+    {who:"Astra", expr:"Shocked", text:"I don't..."},
+    {who:"Elias", expr:"Concerned", text:"I'm sorry."},
+    {who:"Elias", expr:"Concerned", text:"I don't believe you're one of them."},
+    {who:"Elias", expr:"Concerned", text:"But memories..."},
+    {who:"Elias", expr:"Concerned", text:"...don't disappear."},
+    {bg:"BG_Station_Corridor", quiet:true, duoGuest:null},
+    {narr:"Astra quietly walks ahead. The crew follows. Nobody speaks."},
+    {who:"Astra", expr:"Neutral", text:"Captain."},
+    {narr:"Voss looks up."},
+    {who:"Astra", expr:"Thinking", text:"...Have you ever wondered..."},
+    {who:"Astra", expr:"Thinking", text:"...where I came from?"},
+    {narr:"Voss hesitates — just long enough for Kael to notice."},
+    {who:"Voss",  expr:"Concerned", text:"Everyone has a past."},
+    {who:"Astra", expr:"Thinking",  text:"I don't."},
+    {narr:"Silence."},
+  ]},
+
+  // Scene 15 — Kael's Suspicion
+  { type:"vn", scene:"Scene 15 · Kael's Suspicion", steps:[
+    {bg:"BG_Bridge", clearCast:true, cast:["Voss"]},
+    {narr:"Back aboard the StarGear. Everyone disperses. Only Kael remains."},
+    {who:"Kael", expr:"Serious", text:"Captain."},
+    {who:"Voss", expr:"Neutral", text:"Yes?"},
+    {who:"Kael", expr:"Serious", text:"You know something."},
+    {narr:"Silence."},
+    {who:"Voss", expr:"Concerned", text:"..."},
+    {who:"Kael", expr:"Determined", text:"I won't ask again."},
+    {narr:"Kael leaves. Voss remains alone, looking out into space."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC04", title:"The Silent Graveyard",
+    objective:"Investigate a thirty-year-old distress beacon, still repeating at the edge of Helios Reach.",
+    recap:"Traced the old distress beacon to the Silent Graveyard.",
+    embed:"ep1_flight.html#goto=graveyard" },
+
+  // Scenes 16–18 — The Silent Graveyard / The Black Box
+  { type:"vn", scene:"Scenes 16–18 · The Silent Graveyard", steps:[
+    {bg:"BG_Bridge", clearCast:true},
+    {who:"Tessa",  expr:"Focused",  text:"This transmission predates the pirate raids."},
+    {who:"Selyra", expr:"Curious",  text:"Why is it still broadcasting?"},
+    {who:"Rex",    expr:"Smirk",    text:"Only one way to find out."},
+    {cg:"CG02"},
+    {narr:"The StarGear drifts through a vast field of derelict ships — rusted miners, shattered patrol frigates, broken cargo transports. Faded distress beacons blink weakly in the dark. One enormous wreck bears deep claw-like scars across its hull."},
+    {cg:null},
+    {narr:"Tessa recovers the patrol cruiser's recording. Static. Distorted voices."},
+    {who:"Officer", expr:"Neutral", text:"All ships!"},
+    {who:"Officer", expr:"Neutral", text:"They're boarding!"},
+    {narr:"Weapons fire. Screaming. Then..."},
+    {who:"Android", expr:"Neutral", text:"Target eliminated."},
+    {who:"Android", expr:"Neutral", text:"Proceeding to next target."},
+    {narr:"The recording clears — for only two seconds. A battle android walks through the corridor. Pink twin tails. Blue eyes. Almost identical to Astra. She looks directly into the camera."},
+    {narr:"Recording ends. Nobody speaks."},
+    {narr:"Astra quietly stands."},
+    {who:"Astra", expr:"Shocked", text:"..."},
+    {who:"Astra", expr:"Shocked", text:"...I need..."},
+    {who:"Astra", expr:"Shocked", text:"...some air."},
+    {narr:"She leaves the bridge. Fade out."},
+  ]},
+
+  // ---- Part 3 — Ghosts of Memory ----
+
+  // Scene 19 — Astra Alone
+  { type:"vn", scene:"Scene 19 · Astra Alone", steps:[
+    {bg:"BG_Observation_Deck", clearCast:true, cast:["Astra"], quiet:true},
+    {narr:"Astra stands alone, watching the stars drift past."},
+    {who:"Astra", expr:"Sad", text:"..."},
+    {who:"Astra", expr:"Sad", text:"...Who am I?"},
+    {narr:"She presses her hand against the glass."},
+    {who:"Astra", expr:"Sad", text:"I don't remember."},
+    {who:"Astra", expr:"Sad", text:"I don't remember anything."},
+    {who:"Astra", expr:"Thinking", text:"I don't even know..."},
+    {who:"Astra", expr:"Thinking", text:"...if my memories are real."},
+    {pause:1000},
+  ]},
+
+  // Scenes 20–21 — Bridge / Transmission (Rowan)
+  { type:"vn", scene:"Scenes 20–21 · An Urgent Call", steps:[
+    {bg:"BG_Bridge", clearCast:true},
+    {who:"Rex",    expr:"Thinking",   text:"So..."},
+    {who:"Rex",    expr:"Thinking",   text:"That thing..."},
+    {who:"Rex",    expr:"Thinking",   text:"It looked exactly like Astra."},
+    {who:"Tessa",  expr:"Concerned",  text:"It wasn't just similar."},
+    {who:"Tessa",  expr:"Concerned",  text:"It was identical."},
+    {who:"Selyra", expr:"Curious",    text:"Perhaps identical appearance serves a tactical purpose."},
+    {who:"Kael",   expr:"Serious",    text:"Captain."},
+    {who:"Kael",   expr:"Serious",    text:"How much do you know?"},
+    {narr:"Voss remains silent. An alarm — incoming priority transmission.", duoGuest:"Rowan"},
+    {who:"Rowan", expr:"Professional", text:"Captain Voss."},
+    {who:"Rowan", expr:"Professional", text:"We've arrested a pirate."},
+    {who:"Rowan", expr:"Professional", text:"He keeps asking for you."},
+    {who:"Rowan", expr:"Professional", text:"..."},
+    {who:"Rowan", expr:"Professional", text:"He specifically requested Astra."},
+    {narr:"Everyone exchanges looks."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC05", title:"Cogwheel Station",
+    objective:"Return to Cogwheel Station — a captured pirate is asking for Astra by name.",
+    recap:"Returned to Cogwheel Station to question the captured pirate.",
+    embed:"ep1_flight.html#goto=cogwheel" },
+
+  // Scenes 22–24 — Prison / Rowan's Story / New Lead
+  { type:"vn", scene:"Scenes 22–24 · The First", steps:[
+    {bg:"BG_Prison", clearCast:true},
+    {narr:"The prisoner sits quietly, hands restrained. He smiles when Astra walks in."},
+    {who:"Pirate", expr:"Neutral", text:"So..."},
+    {who:"Pirate", expr:"Neutral", text:"The famous one."},
+    {who:"Astra",  expr:"Stern",   text:"..."},
+    {who:"Astra",  expr:"Stern",   text:"Do you know me?"},
+    {narr:"The pirate laughs."},
+    {who:"Pirate", expr:"Neutral", text:"No."},
+    {who:"Pirate", expr:"Neutral", text:"But I know what you are."},
+    {narr:"Silence."},
+    {who:"Pirate", expr:"Neutral", text:"Captain Raze talked about you."},
+    {who:"Pirate", expr:"Neutral", text:"The First."},
+    {who:"Pirate", expr:"Neutral", text:"The perfect one."},
+    {narr:"Astra steps backwards."},
+    {who:"Astra",  expr:"Shocked", text:"...First?"},
+    {who:"Pirate", expr:"Neutral", text:"You don't remember."},
+    {who:"Pirate", expr:"Neutral", text:"You really don't remember."},
+    {bg:"BG_Prison_Corridor", duoGuest:"Rowan"},
+    {narr:"Rowan removes his helmet."},
+    {who:"Rowan", expr:"Tired", text:"I owe you an apology."},
+    {narr:"Everyone listens."},
+    {who:"Rowan", expr:"Tired", text:"I've been watching your android."},
+    {who:"Rowan", expr:"Tired", text:"I didn't trust her."},
+    {narr:"Astra lowers her eyes."},
+    {who:"Rowan", expr:"Tired", text:"I lost my younger brother."},
+    {who:"Rowan", expr:"Tired", text:"Battle androids."},
+    {who:"Rowan", expr:"Tired", text:"They came through our colony."},
+    {who:"Rowan", expr:"Tired", text:"They didn't shout."},
+    {who:"Rowan", expr:"Tired", text:"They didn't threaten."},
+    {who:"Rowan", expr:"Tired", text:"They simply..."},
+    {who:"Rowan", expr:"Tired", text:"...completed their objective."},
+    {who:"Rowan", expr:"Tired", text:"They all had the same face."},
+    {narr:"He looks at Astra."},
+    {who:"Rowan", expr:"Neutral", text:"But when you spoke to that prisoner..."},
+    {who:"Rowan", expr:"Neutral", text:"...I realised."},
+    {who:"Rowan", expr:"Neutral", text:"They never looked afraid."},
+    {who:"Rowan", expr:"Neutral", text:"You do."},
+    {narr:"Astra doesn't know what to say."},
+    {who:"Rowan", expr:"Neutral", text:"I still don't trust machines."},
+    {who:"Rowan", expr:"Neutral", text:"..."},
+    {who:"Rowan", expr:"Neutral", text:"But I think..."},
+    {who:"Rowan", expr:"Neutral", text:"I can trust you."},
+    {narr:"This is the first time a local has openly separated Astra from the machines."},
+    {bg:"BG_Bridge", duoGuest:null},
+    {who:"Tessa",  expr:"Focused", text:"He kept mentioning..."},
+    {who:"Tessa",  expr:"Focused", text:"The First."},
+    {who:"Selyra", expr:"Curious", text:"A designation."},
+    {who:"Kael",   expr:"Determined", text:"Or a prototype."},
+    {narr:"Computer beeps. Long-range scan detects an old GearWorks communications satellite — still operational."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC06", title:"GearWorks Satellite",
+    objective:"Investigate the old GearWorks communications satellite.",
+    recap:"Reached the abandoned GearWorks communications satellite.",
+    embed:"ep1_flight.html#goto=satellite" },
+
+  // Scene 25 — Story Battle 2 start (Dax)
+  { type:"vn", scene:"Scene 25 · Pirates Arrive", steps:[
+    {bg:"BG_Bridge", clearCast:true, duoGuest:"Dax"},
+    {who:"Dax",   expr:"Excited", text:"Captain Raze was right!"},
+    {who:"Dax",   expr:"Excited", text:"The prototype really is alive!"},
+    {who:"Dax",   expr:"Excited", text:"You belong with us!"},
+    {who:"Astra", expr:"Angry",   text:"I don't belong to anyone!"},
+  ]},
+  { type:"combat", kind:"Story Battle 2", loc:"LOC06", title:"GearWorks Satellite",
+    objective:"Boss battle — defeat Dax and his escort squadron.",
+    recap:"Defeated Dax's escort squadron at the GearWorks satellite.",
+    embed:"ep1_flight.html#mission&at=satellite&boss=dax" },
+
+  // Scenes 26–28 — After Battle / The Satellite / Download Complete
+  { type:"vn", scene:"Scenes 26–28 · A-Series Combat Platform", steps:[
+    {bg:"BG_Bridge", clearCast:true, duoGuest:"Dax"},
+    {narr:"Dax's ship is heavily damaged. Transmission opens. Unlike the first pirate, he's excited."},
+    {who:"Dax", expr:"Excited", text:"I've always wanted to meet you!"},
+    {who:"Dax", expr:"Excited", text:"The original!"},
+    {who:"Dax", expr:"Excited", text:"You know what Captain Raze says?"},
+    {who:"Dax", expr:"Excited", text:"He says you're wasted."},
+    {who:"Dax", expr:"Excited", text:"You should be leading us!"},
+    {who:"Astra", expr:"Stern", text:"..."},
+    {who:"Astra", expr:"Stern", text:"I don't even know who I am."},
+    {narr:"Dax grins."},
+    {who:"Dax", expr:"Smirk", text:"Oh..."},
+    {who:"Dax", expr:"Smirk", text:"You will."},
+    {who:"Dax", expr:"Smirk", text:"You'll remember everything."},
+    {narr:"Transmission ends. He jumps away.", duoGuest:null},
+    {cg:"CG03"},
+    {narr:"A colossal abandoned GearWorks communications satellite hangs silently above a barren moon, scarred by years of neglect."},
+    {cg:null},
+    {narr:"Tessa successfully downloads archived GearWorks files. Most are corrupted. One remains intact."},
+    {narr:"The file title reads: A-SERIES COMBAT PLATFORM — Access Restricted."},
+    {narr:"Everyone looks toward Voss. He quietly closes his eyes."},
+    {who:"Voss", expr:"Concerned", text:"..."},
+    {who:"Voss", expr:"Concerned", text:"I think..."},
+    {who:"Voss", expr:"Concerned", text:"...it's time I told you everything."},
+    {narr:"Fade to black."},
+  ]},
+
+  // ---- Part 4 — The Captain's Truth ----
+
+  // Scenes 29–31 — Silence / Voss Speaks / Flashback
+  { type:"vn", scene:"Scenes 29–31 · Nine Years Ago", steps:[
+    {bg:"BG_Bridge", clearCast:true, quiet:true},
+    {narr:"No one speaks. The GearWorks file sits on the main display. Waiting."},
+    {who:"Voss", expr:"Concerned", text:"..."},
+    {who:"Voss", expr:"Concerned", text:"Close the file."},
+    {narr:"Nobody moves."},
+    {who:"Kael", expr:"Serious", text:"Captain."},
+    {who:"Kael", expr:"Serious", text:"You owe us an explanation."},
+    {narr:"Voss slowly stands from the captain's chair and walks to the front window, looking out at the stars."},
+    {who:"Voss", expr:"Thinking", text:"Nine years ago..."},
+    {who:"Voss", expr:"Thinking", text:"...I accepted an escort contract."},
+    {who:"Voss", expr:"Thinking", text:"It should have been routine."},
+    {who:"Voss", expr:"Regret",   text:"It wasn't."},
+    {cg:"CG04"},
+    {who:"Voss", expr:"Thinking", text:"There were no survivors."},
+    {who:"Voss", expr:"Thinking", text:"I was preparing to leave."},
+    {who:"Voss", expr:"Thinking", text:"Then..."},
+    {who:"Voss", expr:"Thinking", text:"I found one escape pod."},
+    {narr:"Inside... young Astra. Barely conscious. The pod opens. She looks terrified."},
+    {who:"Young_Astra", expr:"Neutral", text:"..."},
+    {who:"Young_Astra", expr:"Neutral", text:"...Am..."},
+    {who:"Young_Astra", expr:"Neutral", text:"...I..."},
+    {pause:900},
+    {who:"Young_Astra", expr:"Neutral", text:"...alive?"},
+    {cg:null, bg:"BG_Bridge"},
+    {narr:"Back on the bridge. Nobody speaks."},
+  ]},
+
+  // Scenes 32–35 — The Decision / Astra / Crew Reactions / Kael
+  { type:"vn", scene:"Scenes 32–35 · The Decision", steps:[
+    {bg:"BG_Bridge", clearCast:true},
+    {who:"Voss", expr:"Thinking", text:"I knew exactly what she was."},
+    {who:"Voss", expr:"Thinking", text:"I also knew..."},
+    {who:"Voss", expr:"Concerned", text:"...she was afraid."},
+    {who:"Voss", expr:"Warmsmile", text:"So I brought her home."},
+    {who:"Rex",  expr:"Shocked", text:"You knew..."},
+    {who:"Rex",  expr:"Shocked", text:"...all this time?"},
+    {who:"Voss", expr:"Neutral", text:"Yes."},
+    {who:"Tessa", expr:"Concerned", text:"Why didn't you tell us?"},
+    {narr:"Voss smiles sadly."},
+    {who:"Voss", expr:"Regret", text:"Because it wasn't my story to tell."},
+    {narr:"Everyone quietly absorbs that."},
+    {who:"Voss", expr:"Concerned", text:"If Astra ever remembered..."},
+    {who:"Voss", expr:"Concerned", text:"...I wanted it to come from her."},
+    {who:"Voss", expr:"Concerned", text:"I wasn't protecting myself."},
+    {who:"Voss", expr:"Warmsmile", text:"I was protecting her chance..."},
+    {who:"Voss", expr:"Warmsmile", text:"...to simply be Astra."},
+    {narr:"Astra has tears in her eyes."},
+    {who:"Astra", expr:"Sad", text:"So..."},
+    {who:"Astra", expr:"Sad", text:"My name...", vo:"audio/Episode1/vo/astra_L1058.mp3"},
+    {who:"Astra", expr:"Sad", text:"...isn't really Astra?"},
+    {narr:"Voss immediately turns."},
+    {who:"Voss", expr:"Warmsmile", text:"No."},
+    {who:"Voss", expr:"Warmsmile", text:"It is."},
+    {narr:"Silence."},
+    {who:"Voss", expr:"Warmsmile", text:"I gave you that name."},
+    {who:"Voss", expr:"Warmsmile", text:"You accepted it."},
+    {who:"Voss", expr:"Warmsmile", text:"You've answered to it every day since."},
+    {who:"Voss", expr:"Warmsmile", text:"It became yours."},
+    {narr:"Astra quietly smiles through tears."},
+    {who:"Rex", expr:"Determined", text:"I don't care what you were built as."},
+    {who:"Rex", expr:"Smirk",      text:"You're the same Astra who burns breakfast."},
+    {narr:"Astra laughs."},
+    {who:"Tessa", expr:"Smirk", text:"And who asks me to fix things..."},
+    {who:"Tessa", expr:"Smirk", text:"...that aren't broken."},
+    {narr:"Another laugh."},
+    {who:"Selyra", expr:"Neutral", text:"My records indicate you have also stolen desserts."},
+    {who:"Astra",  expr:"Laughing", text:"Once!"},
+    {who:"Rex",    expr:"Laughing", text:"It was definitely more than once."},
+    {narr:"Even Kael almost smiles. The tension finally breaks."},
+    {narr:"Everyone leaves. Kael remains."},
+    {who:"Kael", expr:"Determined", text:"...Captain."},
+    {who:"Kael", expr:"Determined", text:"I still believe the crew should have known."},
+    {narr:"Voss nods."},
+    {who:"Voss", expr:"Concerned", text:"So do I."},
+    {who:"Voss", expr:"Concerned", text:"..."},
+    {who:"Voss", expr:"Concerned", text:"I simply wasn't ready to take that choice away from her."},
+    {narr:"Kael considers this. Finally..."},
+    {who:"Kael", expr:"Neutral", text:"I understand."},
+    {narr:"Not agreement. Understanding."},
+  ]},
+
+  // Scenes 36–37 — Raze's Call / Red Alert
+  { type:"vn", scene:"Scenes 36–37 · Captain Raze", steps:[
+    {bg:"BG_Bridge", clearCast:true, duoGuest:"Raze"},
+    {narr:"Alarm. Communications. Captain Raze appears for the first time."},
+    {who:"Raze", expr:"Neutral", text:"Captain Voss."},
+    {who:"Raze", expr:"Neutral", text:"You've taken exceptional care of company property."},
+    {narr:"Astra's face hardens."},
+    {who:"Raze", expr:"Neutral", text:"Thank you."},
+    {who:"Raze", expr:"Neutral", text:"I'll be taking her back now."},
+    {who:"Voss", expr:"Stern",   text:"No."},
+    {narr:"Raze smiles."},
+    {who:"Raze", expr:"Smile", text:"I wasn't asking."},
+    {narr:"Transmission ends."},
+    {bg:"BG_Bridge_Red", duoGuest:null},
+    {narr:"Klaxons. Red lighting fills the bridge. Long-range sensors detect multiple pirate fleets, converging — three separate attack groups."},
+    {who:"Kael", expr:"Determined", text:"They're surrounding us."},
+    {who:"Rex",  expr:"Excited",    text:"Finally..."},
+    {who:"Rex",  expr:"Excited",    text:"A fair fight."},
+    {narr:"Astra looks determined. No fear."},
+    {who:"Astra", expr:"Stern", text:"I'm done running."},
+    {narr:"Voss sits. The captain's chair rotates toward the viewscreen."},
+    {who:"Voss", expr:"Stern", text:"Battle stations."},
+    {who:"Voss", expr:"Stern", text:"Let's remind them..."},
+    {who:"Voss", expr:"Stern", text:"...why this ship is called StarGear."},
+  ]},
+
+  // ---- Part 5 — The Iron Forge ----
+
+  // Scene 38 — Bridge (Red Alert)
+  { type:"vn", scene:"Scene 38 · Running the Gauntlet", steps:[
+    {bg:"BG_Bridge_Red", clearCast:true},
+    {who:"Tessa",  expr:"Focused",   text:"Three pirate fleets..."},
+    {who:"Tessa",  expr:"Focused",   text:"...all converging on our position."},
+    {who:"Kael",   expr:"Determined", text:"They're herding us."},
+    {who:"Rex",    expr:"Determined", text:"So we punch through."},
+    {who:"Tessa",  expr:"Focused",   text:"They want us to."},
+    {narr:"Selyra enlarges the tactical display. Three fleets. One gap."},
+    {who:"Selyra", expr:"Curious", text:"Their formation leaves only one escape vector."},
+    {narr:"Everyone looks. The route leads to an old orbital complex."},
+    {who:"Voss",  expr:"Stern", text:"They're forcing us somewhere."},
+    {who:"Astra", expr:"Stern", text:"...Captain Raze."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC07", title:"The Iron Forge",
+    objective:"Punch through the pirate blockade's one gap and reach the Iron Forge. Bounties, salvage, upgrades and mercenaries are all available along the way.",
+    recap:"Fought through the pirate blockade toward the Iron Forge.",
+    embed:"ep1_flight.html#goto=ironforge" },
+
+  // Scenes 39–40 — Arrival (CG05) / Communications / Battle Start (Story Battle 3)
+  { type:"vn", scene:"Scenes 39–40 · The Iron Forge", steps:[
+    {cg:"CG05", clearCast:true},
+    {narr:"A colossal abandoned orbital shipyard, repurposed into a pirate fortress. The StarGear approaches, dwarfed by its scale."},
+    {cg:null, bg:"BG_Bridge", duoGuest:"Raze"},
+    {narr:"The StarGear is hailed. Captain Raze appears — this time standing inside the factory, rows of inactive androids behind him, only silhouettes."},
+    {who:"Raze", expr:"Neutral", text:"I've been expecting you."},
+    {who:"Voss", expr:"Stern",   text:"I imagined you had."},
+    {who:"Raze", expr:"Neutral", text:"Return A-01."},
+    {who:"Raze", expr:"Neutral", text:"No one else needs to die."},
+    {who:"Astra", expr:"Stern", text:"..."},
+    {who:"Astra", expr:"Stern", text:"My name..."},
+    {who:"Astra", expr:"Stern", text:"...is Astra."},
+    {narr:"Raze smiles politely."},
+    {who:"Raze", expr:"Smile", text:"Names."},
+    {who:"Raze", expr:"Smile", text:"Interesting."},
+    {who:"Raze", expr:"Cold",  text:"We never gave them names."},
+    {narr:"Transmission ends. Astra's expression changes — for the first time, she's angry."},
+    {who:"Raze", expr:"Cold", text:"Disable StarGear."},
+    {who:"Raze", expr:"Cold", text:"Avoid damaging the prototype."},
+    {who:"Rex",  expr:"Angry", text:"I REALLY don't like that guy."},
+    {who:"Kael", expr:"Determined", text:"Focus."},
+    {who:"Astra", expr:"Angry", text:"I'm not property."},
+  ]},
+  { type:"combat", kind:"Story Battle 3", loc:"LOC07", title:"Factory Defence Fleet",
+    objective:"Boss battle — break through the Iron Forge's Factory Defence Fleet (Heavy Cruisers, Drone Carriers, Turret Platforms).",
+    recap:"Broke through the Iron Forge's Factory Defence Fleet.",
+    embed:"ep1_flight.html#mission&at=ironforge&enemies=5" },
+
+  // Scene 41 — The Door Opens
+  { type:"vn", scene:"Scene 41 · The Door Opens", steps:[
+    {bg:"BG_Bridge", clearCast:true},
+    {narr:"After the battle, the gigantic dry dock doors begin opening — kilometres wide. Ancient gears rotate. The station awakens."},
+    {who:"Tessa",  expr:"Shocked", text:"The station just powered itself up."},
+    {who:"Selyra", expr:"Shocked", text:"Impossible."},
+    {who:"Kael",   expr:"Determined", text:"No."},
+    {who:"Kael",   expr:"Determined", text:"They've been restoring it."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"LOC08", title:"Iron Forge — Command Dock",
+    objective:"Enter the Iron Forge.",
+    recap:"Entered the Iron Forge.",
+    embed:"ep1_flight.html#goto=ironforgedock" },
+
+  // Scenes 42–46 — Interior Dock / Assembly Hall (CG06) / Philosophy / A-17 / Final Offer
+  { type:"vn", scene:"Scenes 42–46 · The Assembly Line", steps:[
+    {bg:"BG_IronForge_CommandDock", clearCast:true, duoGuest:"Raze"},
+    {who:"Raze", expr:"Neutral", text:"Welcome."},
+    {who:"Raze", expr:"Neutral", text:"I built this place."},
+    {who:"Raze", expr:"Neutral", text:"Or..."},
+    {who:"Raze", expr:"Neutral", text:"Rebuilt it."},
+    {narr:"He walks between inactive androids, running his hand across one."},
+    {who:"Raze", expr:"Cold", text:"They abandoned perfection."},
+    {who:"Raze", expr:"Cold", text:"I refused."},
+    {who:"Voss", expr:"Stern", text:"You call this perfection?"},
+    {who:"Raze", expr:"Neutral", text:"I call it potential."},
+    {cg:"CG06"},
+    {narr:"Thousands of identical A-Series androids stand silent within towering storage racks. Every one wears Astra's face."},
+    {pause:1400},
+    {who:"Astra", expr:"Shocked", text:"..."},
+    {who:"Astra", expr:"Shocked", text:"...They're all..."},
+    {who:"Astra", expr:"Shocked", text:"...me."},
+    {who:"Raze",  expr:"Neutral", text:"No."},
+    {who:"Raze",  expr:"Neutral", text:"You are them."},
+    {who:"Raze", expr:"Cold", text:"Do you know why humanity fears machines?"},
+    {narr:"Nobody answers."},
+    {who:"Raze", expr:"Cold", text:"They expect us to fail."},
+    {who:"Raze", expr:"Cold", text:"They build us."},
+    {who:"Raze", expr:"Cold", text:"They command us."},
+    {who:"Raze", expr:"Cold", text:"And then..."},
+    {who:"Raze", expr:"Cold", text:"They blame us."},
+    {narr:"He gestures toward the rows of androids."},
+    {who:"Raze", expr:"Neutral", text:"They were never monsters."},
+    {who:"Raze", expr:"Neutral", text:"They simply followed orders."},
+    {narr:"Astra looks shaken."},
+    {who:"Astra", expr:"Shocked", text:"...Then why use pirates?"},
+    {narr:"Raze laughs."},
+    {who:"Raze", expr:"Smile", text:"Because pirates pay."},
+    {who:"Raze", expr:"Smile", text:"They don't ask questions."},
+    {who:"Raze", expr:"Smile", text:"They don't care..."},
+    {who:"Raze", expr:"Smile", text:"...what they're buying."},
+    {cg:null, duoGuest:["Raze","A17"]},
+    {narr:"Lights activate. One pod opens. Footsteps echo. Slowly, A-17 walks forward — exactly Astra's height, exactly Astra's face. Expressionless. Everyone falls silent."},
+    {who:"Rex",    expr:"Shocked", text:"..."},
+    {who:"Rex",    expr:"Shocked", text:"...That's creepy."},
+    {who:"Tessa",  expr:"Shocked", text:"It's..."},
+    {who:"Tessa",  expr:"Shocked", text:"It's Astra."},
+    {who:"Selyra", expr:"Neutral", text:"No."},
+    {who:"Selyra", expr:"Neutral", text:"It is what Astra..."},
+    {who:"Selyra", expr:"Neutral", text:"...could have become."},
+    {narr:"A-17 stops. Looks at Astra."},
+    {who:"A17", expr:"Neutral", text:"Designation."},
+    {who:"A17", expr:"Neutral", text:"A-01."},
+    {who:"A17", expr:"Neutral", text:"Return."},
+    {narr:"Silence."},
+    {who:"Astra", expr:"Stern", text:"My name..."},
+    {who:"Astra", expr:"Stern", text:"...is Astra."},
+    {narr:"A-17 tilts her head. Processing."},
+    {who:"A17", expr:"Stern", text:"...Statement."},
+    {who:"A17", expr:"Stern", text:"Invalid."},
+    {narr:"Raze steps forward — not threatening, almost sympathetic."},
+    {who:"Raze", expr:"Neutral", text:"You've experienced something remarkable."},
+    {who:"Raze", expr:"Neutral", text:"You've become..."},
+    {who:"Raze", expr:"Neutral", text:"Unpredictable."},
+    {who:"Raze", expr:"Neutral", text:"I'd like to study that."},
+    {who:"Raze", expr:"Neutral", text:"I can restore your memories."},
+    {who:"Raze", expr:"Neutral", text:"I can tell you everything."},
+    {who:"Raze", expr:"Neutral", text:"All you have to do..."},
+    {who:"Raze", expr:"Neutral", text:"...is come home."},
+    {pause:1600},
+    {narr:"Astra looks at the endless rows of inactive androids. Then back at her friends — Rex, smiling confidently; Tessa, trying not to cry; Kael, standing ready; Selyra, watching quietly. Finally, Captain Voss, who says nothing. He doesn't tell her what to choose."},
+    {narr:"Astra smiles. The same warm, slightly awkward smile players have known since Episode 0."},
+    {who:"Astra", expr:"Smile", text:"I already am."},
+    {narr:"Silence. Raze closes his eyes, almost disappointed."},
+    {who:"Raze", expr:"Neutral", text:"I hoped..."},
+    {who:"Raze", expr:"Neutral", text:"...you'd say that."},
+    {narr:"He presses a control switch. Red warning lights flood the chamber. Hundreds of dormant systems begin powering up."},
+    {who:"Raze", expr:"Cold", text:"Then allow me..."},
+    {who:"Raze", expr:"Cold", text:"...to demonstrate why you were created."},
+    {narr:"Klaxons blare. The factory shakes. Outside, pirate fleets launch from every dock. A-17 steps into a combat stance."},
+    {who:"Raze", expr:"Cold", text:"A-17."},
+    {who:"Raze", expr:"Cold", text:"Eliminate all hostiles."},
+    {who:"Raze", expr:"Cold", text:"Recover A-01 intact."},
+    {who:"A17",  expr:"Stern", text:"Affirmative."},
+    {who:"Voss", expr:"Stern", text:"All hands."},
+    {who:"Voss", expr:"Stern", text:"Protect each other."},
+    {who:"Astra", expr:"Stern", text:"...I'm ready."},
+  ]},
+
+  // ---- Part 6 — A Choice of Her Own ----
+  { type:"combat", kind:"Story Battle 4 — Final Boss", loc:"LOC08", title:"Captain Raze & A-17",
+    objective:"Three-phase final battle — Captain Raze, A-17, and the Iron Forge's Factory Defence Fleet. Survive.",
+    recap:"Defeated Captain Raze and A-17 at the Iron Forge.",
+    embed:"ep1_flight.html#mission&at=ironforgedock&boss=raze" },
+
+  // Scenes 47–49 — Raze Defeated / A-17 / Medical Bay
+  { type:"vn", scene:"Scenes 47–49 · Second Chances", steps:[
+    {bg:"BG_Bridge", clearCast:true, duoGuest:"Raze"},
+    {narr:"The bridge of Raze's flagship. Smoke. Sparks. Emergency lighting. Transmission opens — Raze is injured. He looks tired. Not evil. Just defeated."},
+    {who:"Raze", expr:"Neutral", text:"..."},
+    {who:"Raze", expr:"Neutral", text:"I spent thirty years..."},
+    {who:"Raze", expr:"Neutral", text:"...trying to build the perfect soldier."},
+    {narr:"He looks at Astra."},
+    {who:"Raze", expr:"Neutral", text:"I never considered..."},
+    {who:"Raze", expr:"Neutral", text:"...building a person."},
+    {pause:1200},
+    {narr:"He smiles. A sad smile."},
+    {who:"Raze", expr:"Smile", text:"I suppose..."},
+    {who:"Raze", expr:"Smile", text:"...that's why I failed."},
+    {narr:"Transmission cuts. His ship begins evacuating — he escapes aboard an emergency shuttle.", duoGuest:null},
+    {narr:"Sensors detect A-17 — still operational, floating, power almost gone. She cannot move. StarGear weapons lock automatically."},
+    {who:"Kael", expr:"Determined", text:"Captain."},
+    {who:"Kael", expr:"Determined", text:"Awaiting orders."},
+    {narr:"Everyone waits. Voss looks to Astra — not the tactical display, not Kael. To Astra."},
+    {who:"Voss", expr:"Concerned", text:"It's your decision."},
+    {narr:"Silence. The player expects revenge. Instead..."},
+    {who:"Astra", expr:"Stern", text:"Bring her aboard."},
+    {narr:"Everyone looks surprised."},
+    {who:"Kael", expr:"Shocked", text:"..."},
+    {who:"Kael", expr:"Shocked", text:"Captain?"},
+    {narr:"Voss smiles."},
+    {who:"Voss", expr:"Warmsmile", text:"You heard her."},
+    {cg:"CG07"},
+    {narr:"Inside the medical bay, Astra kneels beside the heavily damaged A-17, gently holding her hand."},
+    {cg:null, bg:"BG_MedicalBay"},
+    {who:"Tessa", expr:"Concerned", text:"She's..."},
+    {who:"Tessa", expr:"Concerned", text:"...completely wiped."},
+    {who:"Tessa", expr:"Concerned", text:"No memories."},
+    {who:"Tessa", expr:"Concerned", text:"No identity."},
+    {narr:"Astra quietly sits beside her."},
+    {who:"Astra", expr:"Warmsmile", text:"Then..."},
+    {who:"Astra", expr:"Warmsmile", text:"...she gets to choose too."},
+    {narr:"Voss smiles. No dialogue. Just music."},
+  ]},
+
+  // Scenes 50–52 — Return to Cogwheel / Goodbye / Bridge
+  { type:"vn", scene:"Scenes 50–52 · Homeward", steps:[
+    {bg:"BG_Cogwheel_Concourse", clearCast:true, duoGuest:"Rowan"},
+    {narr:"The atmosphere is different. People still notice Astra, but they don't recoil — a few nod politely. The fear hasn't vanished overnight, but something has changed."},
+    {narr:"Chief Rowan approaches. He hands Astra a small metal badge shaped like the station's emblem."},
+    {who:"Rowan", expr:"Neutral", text:"Temporary Security Deputy."},
+    {narr:"Everyone looks confused. Rowan almost smiles."},
+    {who:"Rowan", expr:"Neutral", text:"Don't let it go to your head."},
+    {narr:"Rex laughs.", duoGuest:"Quinn"},
+    {who:"Quinn", expr:"Grateful", text:"Word travels fast."},
+    {who:"Quinn", expr:"Grateful", text:"They'll remember what you did."},
+    {narr:"She looks at Astra."},
+    {who:"Quinn", expr:"Grateful", text:"They'll remember who did it."},
+    {narr:"She leaves."},
+    {bg:"BG_Bridge", duoGuest:null},
+    {who:"Rex", expr:"Smirk", text:"So..."},
+    {who:"Rex", expr:"Smirk", text:"What do we call the new one?"},
+    {narr:"Everyone looks at Astra. She smiles."},
+    {who:"Astra", expr:"Smile", text:"..."},
+    {who:"Astra", expr:"Smile", text:"Let's wait."},
+    {who:"Astra", expr:"Smile", text:"I think..."},
+    {who:"Astra", expr:"Smile", text:"...she should choose her own name."},
+    {narr:"Voss nods."},
+    {who:"Voss", expr:"Warmsmile", text:"I agree."},
+    {narr:"The camera pans to A-17's inactive body in the medical bay. One finger twitches almost imperceptibly."},
+  ]},
+
+  // ---- Part 7 — Epilogue ----
+
+  // Scenes 53–57 — Crew Lounge / Medical Bay / Captain's Log / CG08 / Post-Credits
+  { type:"vn", scene:"Scenes 53–57 · Epilogue", steps:[
+    {bg:"BG_Crew_Lounge", clearCast:true},
+    {who:"Rex",   expr:"Smirk", text:"So..."},
+    {who:"Rex",   expr:"Smirk", text:"Anyone else starving?"},
+    {who:"Tessa", expr:"Smirk", text:"You're always starving."},
+    {who:"Rex",   expr:"Smirk", text:"It's called being prepared."},
+    {who:"Kael",  expr:"Deadpan", text:"It's called eating everyone else's rations."},
+    {narr:"Everyone laughs. Astra quietly watches, smiling. Voss notices."},
+    {who:"Voss",  expr:"Neutral", text:"What?"},
+    {who:"Astra", expr:"Smile", text:"...Nothing."},
+    {who:"Astra", expr:"Smile", text:"I just..."},
+    {who:"Astra", expr:"Smile", text:"I'm happy."},
+    {narr:"Nobody says anything. It doesn't need more."},
+    {bg:"BG_MedicalBay", quiet:true},
+    {narr:"Astra visits A-17 alone. Only ambient ship sounds. A-17 remains inactive."},
+    {narr:"Astra places a small mechanical flower — gifted to her by the little girl on Cogwheel Station — beside A-17's repair bed."},
+    {who:"Astra", expr:"Warmsmile", text:"When you wake up..."},
+    {who:"Astra", expr:"Warmsmile", text:"...I hope nobody tells you who you're supposed to be."},
+    {narr:"She smiles softly and leaves. The camera lingers — one tiny indicator light on A-17's chest changes from red to amber."},
+    {bg:"BG_CaptainQuarters", quiet:true},
+    {narr:"Voss records his log."},
+    {who:"Voss", expr:"Thinking", text:"Captain's Log."},
+    {who:"Voss", expr:"Thinking", text:"Helios Reach has begun rebuilding."},
+    {who:"Voss", expr:"Thinking", text:"The pirate fleet has scattered."},
+    {who:"Voss", expr:"Thinking", text:"The GearWorks facility has been secured."},
+    {who:"Voss", expr:"Thinking", text:"One question has been answered."},
+    {who:"Voss", expr:"Thinking", text:"Many more remain."},
+    {narr:"He pauses, looking toward a photograph of the StarGear crew."},
+    {who:"Voss", expr:"Warmsmile", text:"The greatest discoveries are rarely new worlds."},
+    {who:"Voss", expr:"Warmsmile", text:"Sometimes..."},
+    {who:"Voss", expr:"Warmsmile", text:"...they're the people beside you."},
+    {narr:"Log ends."},
+    {cg:"CG08"},
+    {narr:"The StarGear sails gracefully away from Cogwheel Station into the vastness of space."},
+    {pause:1500},
+    {narr:"Roll credits."},
+    {cg:null, bg:"BG_DarkCommand", quiet:true},
+    {narr:"AFTER CREDITS. A cavernous command room deep inside an unknown installation. A lone figure stands before a holographic map. Only their silhouette is visible."},
+    {narr:"A subordinate enters."},
+    {who:"Subordinate", text:"The Iron Forge has fallen."},
+    {narr:"Silence."},
+    {who:"Mystery", text:"And A-01?"},
+    {who:"Subordinate", text:"Still active."},
+    {narr:"Another pause. The figure studies the star map. Several sectors are highlighted. One glows brighter than the others."},
+    {who:"Mystery", text:"So..."},
+    {who:"Mystery", text:"Captain Voss finally found her."},
+    {narr:"The subordinate looks confused."},
+    {who:"Subordinate", text:"Your orders?"},
+    {narr:"The figure smiles faintly."},
+    {who:"Mystery", text:"Do nothing."},
+    {who:"Mystery", text:"Not yet."},
+    {who:"Mystery", text:"They've only just started turning the gears."},
+    {narr:"The holographic map slowly zooms out. Instead of one sector, it reveals dozens. Hundreds. The StarGear's journey has barely begun."},
+    {pause:1500},
+    {narr:"The journey continues in Episode 2..."},
+  ]},
+];
+
+// ============================================================
+// STANDALONE SCENES — VN scenes played ON DEMAND (not part of the linear EP1
+// index), triggered by the flight game posting {type:"playScene", id}. Same
+// step format as EP1. None yet for Episode 1 (Episode 0's Crimson Nova
+// encounter doesn't carry over — he isn't part of this script). Add entries
+// here the same way Episode 0 did if a free-roam encounter is designed later.
+// ============================================================
+const SCENES = {};
+// Per-scene VO, keyed "who|exact line text" — see SCENE_VO usage in showLine.
+// Empty until a standalone scene exists to voice.
+const SCENE_VO = {};
+
+// ============================================================
+// ELEMENTS
+// ============================================================
+const $ = id => document.getElementById(id);
+const bgImg=$("bgImg"), bgPh=$("bgPh");
+const castEl=$("cast");
+const cgEl=$("cg"), cgImg=$("cgImg"), cgPh=$("cgPh");
+const bar=$("bar"), nameplate=$("nameplate"), textEl=$("text");
+const epScene=$("epScene"), beatBar=$("beatBar");
+const gameplay=$("gameplay"), gpKind=$("gpKind"), gpTitle=$("gpTitle"), gpObj=$("gpObj"),
+      gpFrame=$("gpFrame"), gpStatus=$("gpStatus"), gpSkip=$("gpSkip");
+const startOverlay=$("startOverlay"), endOverlay=$("endOverlay");
+const voMuteBtn=$("voMute"), autoBtn=$("autoPlay"), skipBtn=$("skipVN");
+const root=document.documentElement;
+
+let beatIdx=-1, stepIdx=-1, started=false;
+// A standalone scene (SCENES[...]) can drive the same sequencer without being part of
+// the linear EP1 index. While one runs, the step machinery reads from activeScene.steps
+// instead of EP1[beatIdx].steps, and finishing hands control back to the flight iframe.
+let sceneMode=false, activeScene=null;
+function curSteps(){ return sceneMode ? activeScene.steps : (EP1[beatIdx] ? EP1[beatIdx].steps : []); }
+function inVN(){ return sceneMode || (beatIdx>=0 && EP1[beatIdx] && EP1[beatIdx].type==="vn"); }
+let lastPos=null;   // carried-over sector position so each segment resumes where the last ended
+let typing=false, fullText="", typeTimer=null;
+// auto-play: advance VN dialogue on its own once the line's text + voice finish
+let autoPlay=false, autoTimer=null, lineClip=null, lineClipDone=true;
+let pausing=false, pauseTimer=null;      // silent directorial beat between lines
+let lineHold=null;                       // per-line auto-play hold override (ms)
+let present=[], exprOf={}, cardOf={};
+
+// ============================================================
+// ASSET HELPERS — try the real file, fall back to a labelled placeholder.
+// ============================================================
+// warm the browser cache with every real BG/CG file so they're decoded before use
+// (kills the placeholder flash the first time a background/CG is shown).
+const imgCache = {};
+function preloadImg(src){ if(!imgCache[src]){ const im=new Image(); im.src=src; imgCache[src]=im; } return imgCache[src]; }
+function preloadImages(){
+  for(const id in BG_OVERRIDE) preloadImg(BG_OVERRIDE[id]);
+  for(const id in CG_OVERRIDE) preloadImg(CG_OVERRIDE[id]);
+  // every character expression, so speaker sprites are decoded before their first line
+  for(const name in CHAR_ART) for(const base of CHAR_ART[name]) preloadImg(`Assets/char/${name}/${base}.png`);
+}
+let curBg = "BG01";                       // last background set — travels with a save so a load re-stages the scene
+function setBackground(id){
+  curBg = id;
+  const name = BACKGROUNDS[id] || id;
+  bgPh.querySelector(".id").textContent = id;
+  bgPh.querySelector(".nm").textContent = name;
+  bgImg.onload  = ()=>{ bgImg.hidden=false; bgPh.style.display="none"; };
+  bgImg.onerror = ()=>{ bgImg.hidden=true;  bgPh.style.display="flex"; };
+  bgImg.src = bgFile(id);
+  // if it's already cached, reveal immediately — don't flash the placeholder
+  if(bgImg.complete && bgImg.naturalWidth){ bgImg.hidden=false; bgPh.style.display="none"; }
+  else { bgImg.hidden=true; bgPh.style.display="flex"; }
+}
+let curCG = null;
+function setCG(id){
+  const hud = document.getElementById("hud");
+  if(id===null || id===undefined){ curCG=null; cgEl.classList.remove("show"); if(hud) hud.style.display=""; stopCGAudio(); return; }
+  curCG = id;
+  startStatic(id);                            // quiet looping static bed (no-op if this CG has none)
+  const [name,desc] = CGS[id] || [id,""];
+  cgPh.querySelector(".id").textContent = id;
+  cgPh.querySelector(".nm").textContent = name;
+  cgPh.querySelector(".desc").textContent = desc;
+  cgImg.onload  = ()=>{ cgImg.hidden=false; cgPh.style.display="none"; };
+  cgImg.onerror = ()=>{ cgImg.hidden=true;  cgPh.style.display="flex"; };
+  cgImg.src = cgFile(id);
+  // cached CG → show it at once so the placeholder never flashes in first
+  if(cgImg.complete && cgImg.naturalWidth){ cgImg.hidden=false; cgPh.style.display="none"; }
+  else { cgImg.hidden=true; cgPh.style.display="flex"; }
+  cgEl.classList.add("show");
+  if(hud) hud.style.display="none";          // a full-screen CG owns the frame
+}
+
+// ---- cast ----
+function buildCard(who){
+  const c = CHARS[who] || {color:"#46c7ff", i:"?"};
+  const el = document.createElement("div");
+  el.className = "char"; el.dataset.who = who;
+  el.style.setProperty("--c", c.color);
+  el.innerHTML =
+    `<img class="cimg" alt="${who}" hidden>` +
+    `<div class="cph"><span class="i">${c.i}</span><span class="n">${c.label || who}</span>` +
+    `<span class="x"></span><span class="note">Assets/char/${who.toUpperCase()}/*.png</span></div>`;
+  castEl.appendChild(el);
+  cardOf[who] = el;
+  return el;
+}
+function rebuildCast(){
+  castEl.innerHTML = ""; cardOf = {};
+  castEl.dataset.n = present.length;    // drives the crowded-stage overlap CSS
+  present.forEach(buildCard);
+  present.forEach(updateCard);
+}
+function setCast(list){ present = list.slice(); rebuildCast(); }
+function ensurePresent(who){
+  if(CHARS[who] && CHARS[who].voiceOnly) return;
+  if(!present.includes(who)){ present.push(who); rebuildCast(); }
+}
+function updateCard(who){
+  const el = cardOf[who]; if(!el) return;
+  const expr = exprOf[who] || "Neutral";
+  const img = el.querySelector(".cimg"), ph = el.querySelector(".cph");
+  el.querySelector(".x").textContent = expr;
+  img.onload  = ()=>{ img.hidden=false; ph.style.display="none"; };
+  img.onerror = ()=>{ img.hidden=true;  ph.style.display="flex"; };
+  img.src = charFile(who, expr);
+  // cached sprite → show immediately so the placeholder never flashes in first
+  if(img.complete && img.naturalWidth){ img.hidden=false; ph.style.display="none"; }
+  else { img.hidden=true; ph.style.display="flex"; }
+}
+function setActive(who){
+  for(const name in cardOf) cardOf[name].classList.toggle("active", name===who);
+}
+// Speaker shows their expression; every other staged character reverts to Neutral.
+function faceSpeaker(speaker, expr){
+  for(const who of present){
+    const want = (who===speaker) ? (expr || exprOf[who] || "Neutral") : "Neutral";
+    if(exprOf[who] !== want){ exprOf[who] = want; updateCard(who); }
+  }
+}
+
+// ============================================================
+// DIALOGUE
+// ============================================================
+// ---- per-line voice-over ----
+let voMuted = false, curVO = null;
+const voCache = {};
+function getVO(src){ if(!voCache[src]){ const a=new Audio(src); a.preload="auto"; voCache[src]=a; } return voCache[src]; }
+function stopVO(){ if(curVO){ try{ curVO.pause(); curVO.currentTime=0; }catch(e){} curVO=null; } }
+function playVO(src){
+  stopVO();
+  const a=getVO(src); a.muted=voMuted; try{ a.currentTime=0; }catch(e){}
+  curVO=a; a.play().catch(()=>{});       // ignore autoplay rejections (user gesture starts the episode)
+  return a;
+}
+
+// ---- CG transmission layer: a quiet looping static bed + an intercom voice
+// (which carries the transmission's spoken dialogue) played over the top. ----
+const CG_STATIC = {
+  // Empty until Episode 1 has its own transmission/recording SFX — a static
+  // bed here would suit Scene 18's black-box recording once that audio exists.
+};
+let cgStatic=null, cgVoice=null;
+function startStatic(id){
+  stopStatic();
+  const s = CG_STATIC[id]; if(!s) return;
+  const a = new Audio(s.src); a.loop=true; a.volume=s.vol; a.muted=voMuted;
+  a.play().catch(()=>{}); cgStatic=a;
+}
+function stopStatic(){ if(cgStatic){ try{ cgStatic.pause(); }catch(e){} cgStatic=null; } }
+function playTransmit(src){
+  stopTransmit();
+  const a = new Audio(src); a.muted=voMuted; a.play().catch(()=>{}); cgVoice=a;
+}
+function stopTransmit(){ if(cgVoice){ try{ cgVoice.pause(); }catch(e){} cgVoice=null; } }
+function stopCGAudio(){ stopStatic(); stopTransmit(); }
+// ---- one-shot sound effect (own channel, layers over dialogue/VO) ----
+let sfxAudio=null;
+function playSfx(src){
+  stopSfx();
+  const a=new Audio(src); a.muted=voMuted; a.volume=0.7; a.play().catch(()=>{}); sfxAudio=a;
+  return a;
+}
+function stopSfx(){ if(sfxAudio){ try{ sfxAudio.pause(); }catch(e){} sfxAudio=null; } }
+// per-line voice map: "who|exact line text" -> clip, cut from the Episode 1
+// keeper masters (audio/Episode1/<Name>_ep1.mp3) via a whisper.cpp word-level
+// alignment pass. Only lines whose current script wording still matches the
+// recorded audio are here — the masters were recorded against an earlier
+// script draft, so a meaningful fraction of current lines have no match and
+// simply play without a clip (same as before). Lines whose exact text repeats
+// elsewhere for the same character (e.g. Kael's four "Captain."s) are left out
+// of this map, since a "who|text" key can't tell the repeats apart; where one
+// of those repeats did get a confident match anyway, that step got its own
+// `vo:` field set directly instead (see e.g. Rex's "...Okay." at L730).
+const VO_MAP = {
+  // Astra
+  "Astra|I wonder what everyone here is like.": "audio/Episode1/vo/astra_L621.mp3",
+  "Astra|Was it something I said?": "audio/Episode1/vo/astra_L661.mp3",
+  "Astra|Maybe my hair looked funny.": "audio/Episode1/vo/astra_L684.mp3",
+  "Astra|...Prototype?": "audio/Episode1/vo/astra_L722.mp3",
+  "Astra|I've never seen him before.": "audio/Episode1/vo/astra_L746.mp3",
+  "Astra|Do you think...": "audio/Episode1/vo/astra_L774.mp3",
+  "Astra|...I really look like someone?": "audio/Episode1/vo/astra_L775.mp3",
+  "Astra|...Have you ever wondered...": "audio/Episode1/vo/astra_L819.mp3",
+  "Astra|...where I came from?": "audio/Episode1/vo/astra_L820.mp3",
+  "Astra|...Who am I?": "audio/Episode1/vo/astra_L875.mp3",
+  "Astra|I don't remember anything.": "audio/Episode1/vo/astra_L878.mp3",
+  "Astra|I don't even know...": "audio/Episode1/vo/astra_L879.mp3",
+  "Astra|...if my memories are real.": "audio/Episode1/vo/astra_L880.mp3",
+  "Astra|Do you know me?": "audio/Episode1/vo/astra_L915.mp3",
+  "Astra|...First?": "audio/Episode1/vo/astra_L924.mp3",
+  "Astra|I don't belong to anyone!": "audio/Episode1/vo/astra_L971.mp3",
+  "Astra|I don't even know who I am.": "audio/Episode1/vo/astra_L988.mp3",
+  "Astra|Bring her aboard.": "audio/Episode1/vo/astra_L1293.mp3",
+  "Astra|Then...": "audio/Episode1/vo/astra_L1307.mp3",
+  "Astra|...she gets to choose too.": "audio/Episode1/vo/astra_L1308.mp3",
+  "Astra|I think...": "audio/Episode1/vo/astra_L1332.mp3",
+  "Astra|...she should choose her own name.": "audio/Episode1/vo/astra_L1333.mp3",
+  "Astra|When you wake up...": "audio/Episode1/vo/astra_L1358.mp3",
+  "Astra|...I hope nobody tells you who you're supposed to be.": "audio/Episode1/vo/astra_L1359.mp3",
+  // Kael
+  "Kael|He called you 'Prototype'.": "audio/Episode1/vo/kael_L747.mp3",
+  "Kael|You know something.": "audio/Episode1/vo/kael_L833.mp3",
+  "Kael|I won't ask again.": "audio/Episode1/vo/kael_L836.mp3",
+  "Kael|How much do you know?": "audio/Episode1/vo/kael_L894.mp3",
+  "Kael|I still believe the crew should have known.": "audio/Episode1/vo/kael_L1081.mp3",
+  "Kael|I understand.": "audio/Episode1/vo/kael_L1087.mp3",
+  "Kael|They're surrounding us.": "audio/Episode1/vo/kael_L1106.mp3",
+  "Kael|Focus.": "audio/Episode1/vo/kael_L1159.mp3",
+  "Kael|No.": "audio/Episode1/vo/kael_L1173.mp3",
+  // Rex
+  "Rex|So this is Helios Reach!": "audio/Episode1/vo/rex_L615.mp3",
+  "Rex|And look! Actual stations!": "audio/Episode1/vo/rex_L617.mp3",
+  "Rex|No haunted ghost fleets?": "audio/Episode1/vo/rex_L626.mp3",
+  "Rex|We're getting famous.": "audio/Episode1/vo/rex_L645.mp3",
+  "Rex|I call food first!": "audio/Episode1/vo/rex_L654.mp3",
+  "Rex|Didn't you notice?": "audio/Episode1/vo/rex_L678.mp3",
+  "Rex|They kept staring.": "audio/Episode1/vo/rex_L679.mp3",
+  "Rex|They stared at Astra.": "audio/Episode1/vo/rex_L682.mp3",
+  "Rex|Can somebody explain what just happened?": "audio/Episode1/vo/rex_L743.mp3",
+  "Rex|Lots of people have doubles.": "audio/Episode1/vo/rex_L776.mp3",
+  "Rex|Sorry.": "audio/Episode1/vo/rex_L780.mp3",
+  "Rex|That thing...": "audio/Episode1/vo/rex_L888.mp3",
+  "Rex|It looked exactly like Astra.": "audio/Episode1/vo/rex_L889.mp3",
+  "Rex|...all this time?": "audio/Episode1/vo/rex_L1045.mp3",
+  "Rex|I don't care what you were built as.": "audio/Episode1/vo/rex_L1069.mp3",
+  "Rex|A fair fight.": "audio/Episode1/vo/rex_L1108.mp3",
+  "Rex|So we punch through.": "audio/Episode1/vo/rex_L1125.mp3",
+  "Rex|I REALLY don't like that guy.": "audio/Episode1/vo/rex_L1158.mp3",
+  "Rex|What do we call the new one?": "audio/Episode1/vo/rex_L1328.mp3",
+  "Rex|Anyone else starving?": "audio/Episode1/vo/rex_L1345.mp3",
+  "Rex|It's called being prepared.": "audio/Episode1/vo/rex_L1347.mp3",
+  // Selyra
+  "Selyra|Perhaps identical appearance serves a tactical purpose.": "audio/Episode1/vo/selyra_L892.mp3",
+  "Selyra|A designation.": "audio/Episode1/vo/selyra_L956.mp3",
+  "Selyra|Their formation leaves only one escape vector.": "audio/Episode1/vo/selyra_L1128.mp3",
+  "Selyra|It is what Astra...": "audio/Episode1/vo/selyra_L1225.mp3",
+  "Selyra|...could have become.": "audio/Episode1/vo/selyra_L1226.mp3",
+  // Tessa
+  "Tessa|I'm finding the engineer.": "audio/Episode1/vo/tessa_L655.mp3",
+  "Tessa|This transmission predates the pirate raids.": "audio/Episode1/vo/tessa_L847.mp3",
+  "Tessa|It wasn't just similar.": "audio/Episode1/vo/tessa_L890.mp3",
+  "Tessa|It was identical.": "audio/Episode1/vo/tessa_L891.mp3",
+  "Tessa|He kept mentioning...": "audio/Episode1/vo/tessa_L954.mp3",
+  "Tessa|The First.": "audio/Episode1/vo/tessa_L955.mp3",
+  "Tessa|And who asks me to fix things...": "audio/Episode1/vo/tessa_L1072.mp3",
+  "Tessa|...that aren't broken.": "audio/Episode1/vo/tessa_L1073.mp3",
+  "Tessa|Three pirate fleets...": "audio/Episode1/vo/tessa_L1122.mp3",
+  "Tessa|...all converging on our position.": "audio/Episode1/vo/tessa_L1123.mp3",
+  "Tessa|They want us to.": "audio/Episode1/vo/tessa_L1126.mp3",
+  "Tessa|The station just powered itself up.": "audio/Episode1/vo/tessa_L1171.mp3",
+  "Tessa|...completely wiped.": "audio/Episode1/vo/tessa_L1303.mp3",
+  "Tessa|No memories.": "audio/Episode1/vo/tessa_L1304.mp3",
+  "Tessa|No identity.": "audio/Episode1/vo/tessa_L1305.mp3",
+  // Voss
+  "Voss|Our contract begins at Cogwheel Station.": "audio/Episode1/vo/voss_L623.mp3",
+  "Voss|We're escorting civilian shipping while we're in the sector.": "audio/Episode1/vo/voss_L624.mp3",
+  "Voss|I certainly hope not.": "audio/Episode1/vo/voss_L627.mp3",
+  "Voss|I wouldn't worry.": "audio/Episode1/vo/voss_L662.mp3",
+  "Voss|People are cautious around strangers.": "audio/Episode1/vo/voss_L663.mp3",
+  "Voss|Our priority is the convoy.": "audio/Episode1/vo/voss_L749.mp3",
+  "Voss|We'll discuss this later.": "audio/Episode1/vo/voss_L750.mp3",
+  "Voss|I'm just glad everyone made it.": "audio/Episode1/vo/voss_L761.mp3",
+  "Voss|Yes?": "audio/Episode1/vo/voss_L832.mp3",
+  "Voss|Nine years ago...": "audio/Episode1/vo/voss_L1018.mp3",
+  "Voss|...I accepted an escort contract.": "audio/Episode1/vo/voss_L1019.mp3",
+  "Voss|It should have been routine.": "audio/Episode1/vo/voss_L1020.mp3",
+  "Voss|There were no survivors.": "audio/Episode1/vo/voss_L1023.mp3",
+  "Voss|I was preparing to leave.": "audio/Episode1/vo/voss_L1024.mp3",
+  "Voss|Then...": "audio/Episode1/vo/voss_L1025.mp3",
+  "Voss|I found one escape pod.": "audio/Episode1/vo/voss_L1026.mp3",
+  "Voss|I knew exactly what she was.": "audio/Episode1/vo/voss_L1040.mp3",
+  "Voss|I also knew...": "audio/Episode1/vo/voss_L1041.mp3",
+  "Voss|...she was afraid.": "audio/Episode1/vo/voss_L1042.mp3",
+  "Voss|So I brought her home.": "audio/Episode1/vo/voss_L1043.mp3",
+  "Voss|Because it wasn't my story to tell.": "audio/Episode1/vo/voss_L1049.mp3",
+  "Voss|If Astra ever remembered...": "audio/Episode1/vo/voss_L1051.mp3",
+  "Voss|...I wanted it to come from her.": "audio/Episode1/vo/voss_L1052.mp3",
+  "Voss|I wasn't protecting myself.": "audio/Episode1/vo/voss_L1053.mp3",
+  "Voss|I was protecting her chance...": "audio/Episode1/vo/voss_L1054.mp3",
+  "Voss|...to simply be Astra.": "audio/Episode1/vo/voss_L1055.mp3",
+  "Voss|It is.": "audio/Episode1/vo/voss_L1062.mp3",
+  "Voss|I gave you that name.": "audio/Episode1/vo/voss_L1064.mp3",
+  "Voss|You accepted it.": "audio/Episode1/vo/voss_L1065.mp3",
+  "Voss|You've answered to it every day since.": "audio/Episode1/vo/voss_L1066.mp3",
+  "Voss|It became yours.": "audio/Episode1/vo/voss_L1067.mp3",
+  "Voss|So do I.": "audio/Episode1/vo/voss_L1083.mp3",
+  "Voss|I simply wasn't ready to take that choice away from her.": "audio/Episode1/vo/voss_L1085.mp3",
+  "Voss|Battle stations.": "audio/Episode1/vo/voss_L1112.mp3",
+  "Voss|Let's remind them...": "audio/Episode1/vo/voss_L1113.mp3",
+  "Voss|...why this ship is called StarGear.": "audio/Episode1/vo/voss_L1114.mp3",
+  "Voss|They're forcing us somewhere.": "audio/Episode1/vo/voss_L1130.mp3",
+  "Voss|I imagined you had.": "audio/Episode1/vo/voss_L1145.mp3",
+  "Voss|You call this perfection?": "audio/Episode1/vo/voss_L1191.mp3",
+  "Voss|Protect each other.": "audio/Episode1/vo/voss_L1262.mp3",
+  "Voss|It's your decision.": "audio/Episode1/vo/voss_L1291.mp3",
+  "Voss|You heard her.": "audio/Episode1/vo/voss_L1298.mp3",
+  "Voss|Helios Reach has begun rebuilding.": "audio/Episode1/vo/voss_L1364.mp3",
+  "Voss|The pirate fleet has scattered.": "audio/Episode1/vo/voss_L1365.mp3",
+  "Voss|The GearWorks facility has been secured.": "audio/Episode1/vo/voss_L1366.mp3",
+  "Voss|One question has been answered.": "audio/Episode1/vo/voss_L1367.mp3",
+  "Voss|Many more remain.": "audio/Episode1/vo/voss_L1368.mp3",
+  "Voss|The greatest discoveries are rarely new worlds.": "audio/Episode1/vo/voss_L1370.mp3",
+  "Voss|Sometimes...": "audio/Episode1/vo/voss_L1371.mp3",
+  "Voss|...they're the people beside you.": "audio/Episode1/vo/voss_L1372.mp3",
+};
+function preloadVO(){
+  for(const b of EP1){ if(b.steps) for(const s of b.steps){ if(s.vo) getVO(s.vo); } }
+  for(const k in VO_MAP) getVO(VO_MAP[k]);
+}
+
+function typeLine(str, speed){
+  typing=true; fullText=str; textEl.textContent="";
+  let i=0;
+  const cursor=document.createElement("span"); cursor.className="cursor"; cursor.textContent="▍";
+  clearInterval(typeTimer);
+  typeTimer=setInterval(()=>{
+    textEl.textContent = str.slice(0,i); textEl.appendChild(cursor); i++;
+    if(i>str.length){ clearInterval(typeTimer); typing=false; textEl.textContent=str; }
+  }, speed||20);
+}
+function finishTyping(){ clearInterval(typeTimer); textEl.textContent=fullText; typing=false; }
+
+// ---- auto-play engine ----
+// Each line records the clip it should wait on (per-line VO or the SIGNAL
+// intercom). When auto-play is on, autoTick polls until the text has finished
+// typing AND that clip has ended, then advances after a short readable hold.
+function clearAuto(){ if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; } }
+function waitOn(a){                       // mark this line's voice as the thing to wait for
+  lineClip=a; lineClipDone=false;
+  const done=()=>{ if(lineClip===a) lineClipDone=true; };
+  a.addEventListener("ended", done, {once:true});
+  a.addEventListener("error", done, {once:true});
+  setTimeout(done, 9000);                 // safety: never wait forever on a stuck clip
+}
+function armAuto(){ clearAuto(); if(autoPlay) autoTimer=setTimeout(autoTick, 200); }
+function autoTick(){
+  autoTimer=null;
+  if(!autoPlay || !inVN()) return;                                            // gameplay drives itself
+  if(typing || !lineClipDone){ autoTimer=setTimeout(autoTick, 150); return; } // still speaking/typing
+  const holdMs = lineHold!=null ? lineHold
+               : lineClip ? Math.max(1200, Math.min(2600, 32*(fullText||"").length))
+                          : Math.min(4600, 1400 + 55*(fullText||"").length);
+  autoTimer=setTimeout(()=>{
+    autoTimer=null;
+    if(autoPlay && inVN()) nextStep();
+  }, holdMs);
+}
+function toggleAuto(){
+  autoPlay=!autoPlay;
+  autoBtn.classList.toggle("on", autoPlay);
+  autoBtn.textContent = autoPlay ? "⏸ AUTO" : "▶ AUTO";
+  autoBtn.title = autoPlay ? "Auto-play on — click to stop" : "Auto-play off — click to play the story automatically";
+  clearAuto();
+  if(autoPlay) autoTick();                // start advancing from wherever we are
+}
+
+function showLine(s){
+  textEl.className = "";
+  stopVO();                              // halt any previous line's voice
+  clearAuto(); lineClip=null; lineClipDone=true;   // reset auto-play wait-state
+  lineHold = (s.hold!=null) ? s.hold : null;       // optional explicit auto-play hold for this line
+  bar.classList.toggle("overCg", !!curCG);   // caption-over-image whenever a CG is showing
+  if(s.narr!==undefined){
+    nameplate.classList.add("hidden");
+    bar.classList.remove("speaking");
+    textEl.classList.add("narr");
+    typeLine(s.narr, 16);
+    armAuto();
+    return;
+  }
+  const who=s.who, c=CHARS[who]||{color:"#46c7ff"};
+  root.style.setProperty("--accent", c.color);
+  nameplate.classList.remove("hidden");
+  nameplate.textContent = c.label || who;
+  bar.classList.add("speaking");
+  if(c.style) textEl.classList.add(c.style);
+  if(!c.voiceOnly){
+    const guests = duoGuestList();
+    if(guests.length) sceneStageDuo(who, guests);   // NPC(s) pinned right, 2 crew left
+    else ensurePresent(who);
+    faceSpeaker(who, s.expr);     // speaker emotes; others go Neutral
+    setActive(who);
+  } else {
+    faceSpeaker(null, null);      // transmission: nobody's speaking → all Neutral
+    setActive("__none__");        // and dim all staged cast
+  }
+  // intercom transmission: this SIGNAL line's own spoken clip, played over the
+  // looping static on a separate channel. Each of the three lines has its own
+  // clip, so advancing swaps to the next (playTransmit stops the prior); the
+  // static keeps looping until the CG clears (stopCGAudio).
+  if(s.transmit){ playTransmit(s.transmit); if(s.hold==null) waitOn(cgVoice); }
+  // voiced lines pace the typewriter to the clip; otherwise a steady default
+  let speed = 20;
+  const src = s.vo || VO_MAP[s.who + "|" + s.text] || SCENE_VO[s.who + "|" + s.text];
+  if(src){
+    const a = playVO(src), dur = a.duration;
+    if(dur && isFinite(dur) && dur>0 && s.text.length)
+      speed = Math.min(55, Math.max(14, (dur*1000*0.9)/s.text.length));
+    waitOn(a);
+  }
+  typeLine(s.text, speed);
+  armAuto();
+}
+
+// ============================================================
+// SEQUENCER
+// ============================================================
+function updateProgress(){ beatBar.style.width = ((beatIdx)/EP1.length*100)+"%"; }
+
+function runBeat(i){
+  beatIdx=i; stepIdx=-1;
+  updateProgress();
+  writeStoryProgress();               // so an in-game SAVE captures where the story is
+  if(i>=EP1.length){ hideGameplay(); endEpisode(); return; }
+  const b=EP1[i];
+  if(b.type==="vn"){
+    hideGameplay();                    // tear down the flight game behind the dialogue
+    epScene.textContent = b.scene || "";
+    bar.classList.remove("hidden");
+    curDuoGuest=null; castEl.classList.remove("duo");   // each beat starts full-cast; a step's duoGuest turns it on
+    nextStep();
+  } else {
+    // gameplay beat — showGameplay sets a fresh (cache-busted) src directly. We
+    // deliberately do NOT hideGameplay() first: when one gameplay beat follows
+    // another (e.g. travel → combat), an about:blank reset would race the new
+    // src assignment and the iframe could stick on about:blank (blank screen).
+    epScene.textContent = `${b.loc} · ${b.title}`;
+    bar.classList.add("hidden");
+    showGameplay(b);
+  }
+}
+function nextStep(){
+  const steps=curSteps();
+  stepIdx++;
+  if(stepIdx>=steps.length){ if(sceneMode){ endScene(); return; } runBeat(beatIdx+1); return; }
+  const s=steps[stepIdx];
+  if(s.bg!==undefined) setBackground(s.bg);
+  if(s.cg!==undefined) setCG(s.cg);
+  if(s.clearCast){ present=[]; rebuildCast(); }
+  // who's staged as the pinned-right "guest" from here on — see sceneStageDuo. A step
+  // sets `duoGuest:"Elias"` (or `["Raze","A17"]` for more than one) to start a duo
+  // conversation, and `duoGuest:null` to return to normal full-cast crew staging.
+  // Switching modes always clears the stage first — otherwise whoever was staged
+  // under the OLD mode (the NPC, or the 1-2 rotating crew slots) just lingers, since
+  // normal staging (ensurePresent) only ever ADDS people, never removes them. Runs
+  // before `s.cast` below so an explicit `cast:[...]` on the same step still wins.
+  if(s.duoGuest !== undefined){
+    curDuoGuest = s.duoGuest;
+    castEl.classList.toggle("duo", !!curDuoGuest);
+    _duoSlots=[null,null]; _lastCrew=null;
+    present=[]; rebuildCast();
+  }
+  if(s.cast) setCast(s.cast);
+  if(s.sfx) playSfx(s.sfx);                              // one-shot cue (e.g. the dreadnought)
+  // `quiet` also drops the dialogue bar for the hold, so an opening pause shows the
+  // bare background rather than an empty text box.
+  if(s.pause!==undefined){ doPause(s.pause, !!s.quiet); return; }
+  if(s.laugh!==undefined){ doGroupLaugh(s.laugh); return; }   // whole crew laughs together
+  if(s.text!==undefined || s.narr!==undefined) showLine(s);
+  else nextStep();          // pure directive — keep going
+}
+// hold on the current frame for `ms` with no dialogue, then continue. Works in
+// both manual and auto-play; clicking/Space during the hold skips it.
+let pauseQuiet=false;                    // this hold hid the dialogue bar — restore it on the way out
+function doPause(ms, quiet){
+  clearAuto(); clearPause();
+  pausing=true; pauseQuiet=!!quiet;
+  if(pauseQuiet) bar.classList.add("hidden");
+  pauseTimer=setTimeout(()=>{ pauseTimer=null; clearPause(); nextStep(); }, ms||900);
+}
+// also the "skip this hold" path (click / Space), so a skipped quiet pause still
+// brings the dialogue box back
+function clearPause(){
+  if(pauseTimer){ clearTimeout(pauseTimer); pauseTimer=null; }
+  pausing=false;
+  if(pauseQuiet){ pauseQuiet=false; bar.classList.remove("hidden"); }
+}
+// Skip button: jump straight to the end of the CURRENT vn beat or standalone scene —
+// not just the current line (that's already what click/Space does). Reuses nextStep's
+// own end-of-section branch (endScene / runBeat(beatIdx+1)) by landing stepIdx one short
+// of it, rather than duplicating that logic here.
+function skipVNSection(){
+  if(!inVN()) return;
+  stopVO(); stopCGAudio(); stopSfx(); clearAuto(); clearPause();
+  if(typing) finishTyping();
+  stepIdx = curSteps().length - 1;
+  nextStep();
+}
+// every staged character switches to their Laughing sprite and brightens (all
+// active, nobody dimmed); the group-laugh clip plays and we hold until it ends.
+function doGroupLaugh(src){
+  clearAuto(); clearPause();
+  for(const who of present){ exprOf[who]="Laughing"; updateCard(who); }
+  for(const name in cardOf) cardOf[name].classList.add("active");   // highlight the whole cast
+  bar.classList.remove("speaking");
+  nameplate.classList.add("hidden");
+  textEl.className=""; textEl.textContent="";
+  pausing=true;
+  const go = ()=>{ if(!pausing) return; if(pauseTimer){ clearTimeout(pauseTimer); pauseTimer=null; } pausing=false; nextStep(); };
+  let a=null;
+  if(src){ try{ a=playVO(src); a.addEventListener("ended", go, {once:true}); }catch(e){} }
+  const safety = (a && isFinite(a.duration) && a.duration>0) ? a.duration*1000+400 : 5000;
+  pauseTimer=setTimeout(go, safety);
+}
+function advance(){
+  if(!started && !sceneMode) return;
+  if(!inVN()) return;                                 // gameplay beats don't advance on click
+  if(typing){ finishTyping(); return; }
+  if(pausing){ stopVO(); clearPause(); nextStep(); return; }   // skip a pause / group laugh on click
+  nextStep();
+}
+
+// ---- gameplay beats ----
+function showGameplay(b){
+  gpKind.textContent = b.kind || (b.type==="combat" ? "Combat" : "Flight");
+  gpTitle.textContent = `${b.loc} — ${b.title}`;
+  gpObj.textContent = b.objective || "";
+  gpStatus.textContent = b.type==="combat" ? "Defeat the hostiles to continue…" : "Reach the objective to continue…";
+  gpStatus.style.color = "#9fc0ff";
+  stopVO(); stopCGAudio(); stopSfx(); clearAuto(); clearPause();
+  voMuteBtn.style.display = "none"; autoBtn.style.display = "none"; skipBtn.style.display = "none";   // no VN voice/static/auto/skip during gameplay
+  // focus the flight game as soon as it loads so keys work without clicking first
+  gpFrame.onload = ()=>{ try{ gpFrame.focus(); gpFrame.contentWindow.focus(); }catch(err){} };
+  gpFrame.src = bustCache(embedWithPos(b.embed));
+  gameplay.classList.remove("hidden");
+}
+// Append the carried-over position so the flight game resumes there instead of
+// snapping back to the rim spawn each segment. (iso reads it from the hash.)
+function embedWithPos(embed){
+  if(!lastPos) return embed;                       // first segment: use the default spawn
+  const sep = embed.indexOf("#") < 0 ? "#" : "&";
+  let out = embed + sep + "start=" + lastPos.ax + "," + lastPos.ay;
+  // One-shot: only the embed launched straight from the title's LOAD carries this,
+  // so a later segment reload doesn't re-load the slot over the live run.
+  if(pendingLoadSlot >= 0){ out += "&load=" + pendingLoadSlot; pendingLoadSlot = -1; }
+  return out;
+}
+// Two consecutive embeds can differ only by URL fragment (e.g. "#goto=convoy"
+// → "#mission"), which the browser treats as in-page navigation and will NOT
+// reload — so the flight game never re-inits into the new mode. Inserting a
+// unique query before the hash makes every embed a distinct URL, forcing a
+// full reload. The iso game reads location.hash (not the query), so adding
+// "?n=…" leaves "#mission" / "#goto=…" intact.
+function bustCache(url){
+  const h = url.indexOf("#");
+  const path = h < 0 ? url : url.slice(0, h);
+  const hash = h < 0 ? "" : url.slice(h);
+  return path + (path.indexOf("?") < 0 ? "?" : "&") + "n=" + Date.now() + hash;
+}
+function hideGameplay(){
+  voMuteBtn.style.display = ""; autoBtn.style.display = ""; skipBtn.style.display = "";   // VN is back — show voice + auto + skip toggles
+  if(!gameplay.classList.contains("hidden")){
+    gameplay.classList.add("hidden");
+    gpFrame.onload=null; gpFrame.src="about:blank";   // don't let the blank load grab focus
+    try{ window.focus(); }catch(e){}                   // return focus to the VN (Space to advance)
+  }
+}
+// Like hideGameplay, but the flight iframe stays MOUNTED (src untouched) so the live
+// iso keeps its state — used when a standalone VN scene plays over the running game and
+// then hands control straight back to it. (Setting src=about:blank would wipe the iso.)
+function hideGameplayKeep(){
+  voMuteBtn.style.display = ""; autoBtn.style.display = ""; skipBtn.style.display = "";
+  gameplay.classList.add("hidden");
+  stopSfx();
+  try{ window.focus(); }catch(e){}
+}
+// "duo" staging: whenever the crew are talking WITH an NPC (not just among
+// themselves), the NPC(s) stay pinned right (CSS `.guest`) and only the CURRENT and
+// PREVIOUS crew speaker are shown on the left. Two fixed slots keep positions stable
+// — a new crew speaker evicts whichever slot ISN'T the immediately-previous speaker.
+// Which guest(s), if any, is data: a `duoGuest` field on any VN step (string, array
+// of strings, or null to turn it off) — see nextStep(). Works the same whether the
+// steps belong to a regular EP1 beat or a standalone SCENES entry.
+let curDuoGuest = null;              // null | string | string[]
+function duoGuestList(){ return curDuoGuest ? (Array.isArray(curDuoGuest) ? curDuoGuest : [curDuoGuest]) : []; }
+let _duoSlots = [null, null], _lastCrew = null;
+function sceneStageDuo(who, guests){
+  if(!guests.includes(who)){
+    if(!_duoSlots.includes(who)){
+      let idx = _duoSlots.indexOf(null);
+      if(idx < 0) idx = (_duoSlots[0] === _lastCrew) ? 1 : 0;   // keep last speaker, evict the older
+      _duoSlots[idx] = who;
+    }
+    _lastCrew = who;
+  }
+  const want = [..._duoSlots.filter(Boolean), ...guests];
+  if(want.join("|") !== present.join("|")) setCast(want);
+  for(const g of guests) if(cardOf[g]) cardOf[g].classList.add("guest");
+}
+// Play a standalone scene (SCENES[id]) over the still-live flight game, then resume it.
+// If the iso asks for a scene that doesn't exist here (e.g. Episode 0's Crimson Nova
+// hangar, whose dockable object is still on the Episode 1 map but has no matching
+// SCENES entry), immediately hand control back instead of leaving the iso's sim
+// paused forever waiting for a sceneDone that would never come.
+function startScene(id){
+  const sc=SCENES[id];
+  if(!sc){ if(!sceneMode) gpFrame.contentWindow.postMessage({type:"sceneDone", id}, "*"); return; }
+  if(sceneMode) return;
+  hideGameplayKeep();
+  sceneMode=true; activeScene={ id, steps:sc.steps, scene:sc.scene||"" };
+  curDuoGuest=null; castEl.classList.remove("duo");   // a step's own duoGuest field turns it on
+  epScene.textContent = sc.scene || "";
+  bar.classList.remove("hidden");
+  present=[]; exprOf={}; rebuildCast();     // clean stage before the scene's opening directive
+  stepIdx=-1;
+  nextStep();
+}
+function endScene(){
+  const id = activeScene ? activeScene.id : null;
+  sceneMode=false; activeScene=null; stepIdx=-1;
+  stopVO(); clearAuto(); clearPause();
+  bar.classList.add("hidden");
+  setCG(null);
+  curDuoGuest=null; castEl.classList.remove("duo");
+  present=[]; exprOf={}; rebuildCast();      // clear the VN stage
+  voMuteBtn.style.display = "none"; autoBtn.style.display = "none"; skipBtn.style.display = "none";   // hideGameplayKeep showed these for the scene; gameplay's back, hide them again
+  gameplay.classList.remove("hidden");       // reveal the still-mounted flight game
+  try{ gpFrame.contentWindow.focus(); }catch(e){}
+  try{ gpFrame.contentWindow.postMessage({ type:"sceneDone", id }, "*"); }catch(e){}
+}
+// Gameplay can't be skipped — the only way forward is the embedded game telling us
+// the battle was won (combat) or the objective waypoint was reached (travel).
+// Build the mission log shown in the flight game's pause menu: every gameplay
+// segment up to and including the current one (earlier = complete, current =
+// active). Future segments are withheld to avoid spoilers.
+function buildMissionLog(){
+  const items=[]; let active=0;
+  EP1.forEach((b,i)=>{
+    if((b.type==="travel"||b.type==="combat") && (freePlay || i<=beatIdx)){
+      const status = (!freePlay && i===beatIdx) ? "active" : "done";
+      if(status==="active") active=items.length;
+      items.push({
+        title: `${b.loc} — ${b.title}`,
+        kind:  b.kind || (b.type==="combat" ? "Combat" : "Flight"),
+        status,
+        text:  status==="active" ? (b.objective||"") : (b.recap || b.objective || "")
+      });
+    }
+  });
+  // Free play — post-credits, or a loaded free-roam save — runs outside the beat
+  // list, so `i<=beatIdx` used to return NOTHING and the STORY tab sat empty.
+  // The whole episode is behind you at that point: show it as the completed log,
+  // topped with the open-sector entry as the active line.
+  if(freePlay){
+    active = items.length;
+    items.push({ title:"Open Sector — Free Play", kind:"Free Play", status:"active",
+                 text:"Episode 1 complete. The sector stays open — bounties, side jobs and trade are all still live." });
+  }
+  return { items, active };
+}
+window.addEventListener("message", (e)=>{
+  if(!e.data) return;
+  if(e.data.type==="requestMissions"){
+    try{ gpFrame.contentWindow.postMessage({type:"missions", log:buildMissionLog()}, "*"); }catch(err){}
+    return;
+  }
+  if(e.data.type==="pos" && typeof e.data.ax==="number"){ lastPos={ax:e.data.ax, ay:e.data.ay}; return; }
+  if(e.data.type==="defeated"){ gameOver(); return; }     // ship destroyed → game-over screen
+  // the flight game reached a scripted encounter (Crimson Nova's hangar) and wants a VN
+  // scene played over it — works whenever the iso is embedded (story leg or free play);
+  // startScene/endScene never touch beatIdx, so a story beat resumes intact afterwards.
+  if(e.data.type==="playScene"){ if(!sceneMode) startScene(e.data.id); return; }
+  const b = beatIdx>=0 ? EP1[beatIdx] : null;
+  if(!b) return;
+  if(e.data.type==="missionComplete" && b.type==="combat"){
+    gpStatus.textContent = "Mission complete ✓"; gpStatus.style.color = "#7ee787";
+    setTimeout(()=>{ if(EP1[beatIdx]===b) runBeat(beatIdx+1); }, 1500);
+  } else if(e.data.type==="reachedObjective" && b.type==="travel"){
+    gpStatus.textContent = "Objective reached ✓"; gpStatus.style.color = "#7ee787";
+    setTimeout(()=>{ if(EP1[beatIdx]===b) runBeat(beatIdx+1); }, 1200);
+  }
+});
+
+// ============================================================
+// FLOW
+// ============================================================
+// ---- opening narration --------------------------------------------------
+// Title -> fade to black -> "Journey Begins" narration over the VO clip -> title
+// card -> Scene 1. Each shot pairs one narration line with one still.
+//
+// SYNC: shots are driven off the VO's own `currentTime`, not off timers started
+// alongside it. `at` is the second the line is spoken. An earlier version spaced
+// the shots with setTimeout by word count, which drifted badly — the timers and
+// the audio ran on independent clocks, so any delay in play() (buffering, decode,
+// a backgrounded tab) offset them permanently, and word count is a poor proxy for
+// how long a line actually takes to speak. Reading currentTime each frame instead
+// means the text cannot drift: it re-derives the correct shot continuously and
+// self-corrects after a stall.
+//
+// `at` values are specific to audio/Intro/Speech_v3.mp3 — **a re-recorded VO needs
+// them re-measured**. Open ep1.html?cuetune=1 and tap Space on each line as
+// you hear it; the tuner prints a ready-to-paste table to the console.
+//
+// `img` is a file under Assets/intro/ — a shot whose still is missing plays black
+// and the line still reads, so the sequence works before the art lands.
+// `motion` picks a Ken Burns keyframe (see the kb* rules in the stylesheet).
+const PROLOGUE_SHOTS = [
+  {at: 0.00, text:"Out here…",                                     img:"1.png",  motion:"kbZoomIn"},
+  {at: 1.94, text:"It's easy to believe we're alone.",             img:"2.png",  motion:"kbZoomOut"},
+  {at: 4.70, text:"Just one ship drifting through an endless sea of stars.", img:"3.png", motion:"kbOrbit"},
+  {at: 8.14, text:"But space isn't empty.",                        img:"4.png",  motion:"kbPanR"},
+  {at:10.16, text:"It's alive.",                                   img:"5.png",  motion:"kbPanL"},
+  {at:11.30, text:"Every star…",                                   img:"6.png",  motion:"kbZoomIn"},
+  {at:12.62, text:"Every world…",                                  img:"7.png",  motion:"kbPanR"},
+  {at:14.10, text:"Every life…",                                   img:"8.png",  motion:"kbZoomIn"},
+  {at:15.56, text:"They're all connected…",                        img:"9.png",  motion:"kbPanL"},
+  {at:17.04, text:"…turning together like gears in a machine…",    img:"10.png", motion:"kbOrbit"},
+  {at:19.92, text:"Sometimes a single choice…",                    img:"11.png", motion:"kbZoomIn"},
+  {at:21.14, text:"…is enough to set that machine in motion.",     img:"12.png", motion:"kbRush"},
+];
+const PROLOGUE_IMG_DIR = "Assets/intro/";
+const PROLOGUE_SRC = "audio/Intro/Speech_v3.mp3";
+const PROLOGUE_FALLBACK = 24.66;     // clip length, used if the audio never loads
+const PROLOGUE_CARD_HOLD = 4000;     // how long the STARGEAR title card sits before Scene 1
+// `at` is the moment the line is *spoken*; the swap costs 300ms of fade-out before
+// the new text appears, so cue the shot slightly early and the words are on screen
+// as the voice reaches them rather than trailing it.
+const PROLOGUE_TEXT_LEAD = 0.35;
+// A beat of stars before the first word — "Black screen. Stars slowly fade into
+// view." The VO leaves ~1.9s after "Out here…" so the opening line can carry
+// itself; this is just the runway in front of it.
+const PROLOGUE_LEAD_IN = 1.2;
+const CUE_TUNE = /[?&]cuetune=1/.test(location.search);   // dev: re-measure `at` by ear
+let prologueActive=false, prologueCarding=false, prologueAudio=null, prologueTimers=[];
+let plShotFlip=false, plShotIdx=-1, plRaf=0, plStartedAt=0, plTuned=[];
+function clearPrologueTimers(){ prologueTimers.forEach(clearTimeout); prologueTimers=[]; }
+
+function startPrologue(){
+  prologueActive=true;
+  const fb=document.getElementById("fadeBlack");
+  fb.classList.add("on");
+  setTimeout(()=>{
+    if(!prologueActive) return;
+    startOverlay.classList.add("hidden");
+    const pl=document.getElementById("prologue"), txt=document.getElementById("plText");
+    txt.textContent=""; txt.classList.remove("on");
+    document.getElementById("plCard").classList.remove("on");
+    ["plShotA","plShotB"].forEach(id=>{
+      const s=document.getElementById(id);
+      s.classList.remove("on"); s.style.backgroundImage=""; s.style.animation="";
+    });
+    plShotFlip=false; plShotIdx=-1; plTuned=[];
+    pl.classList.remove("hidden","fading");
+    fb.classList.remove("on");                       // the prologue is itself black
+
+    prologueAudio=new Audio(PROLOGUE_SRC);
+    prologueAudio.muted=voMuted;
+    prologueAudio.addEventListener("ended", ()=>endPrologue(false));  // ran its course -> title card
+    plStartedAt=performance.now();
+    const leadUntil=plStartedAt + PROLOGUE_LEAD_IN*1000;
+    prologueTimers.push(setTimeout(()=>{
+      if(prologueActive && prologueAudio) prologueAudio.play().catch(()=>{});
+    }, PROLOGUE_LEAD_IN*1000));
+
+    // Wall clock only stands in when the audio genuinely isn't running (during the
+    // lead-in, or if the file is missing / autoplay is blocked) — once it is
+    // playing, the VO's own clock is the only source of truth.
+    const tick=()=>{
+      if(!prologueActive) return;
+      plRaf=requestAnimationFrame(tick);
+      const a=prologueAudio, live=a && !a.paused && a.currentTime>0;
+      const now=performance.now();
+      // hold at t=0 through the lead-in so shot 1 gets a beat to itself
+      const t = live ? a.currentTime
+              : now < leadUntil ? 0
+              : (now-leadUntil)/1000;
+      // last shot whose cue has passed — recomputed every frame, so it re-syncs
+      // itself after a stall instead of accumulating error
+      let i=0; while(i+1<PROLOGUE_SHOTS.length && PROLOGUE_SHOTS[i+1].at-PROLOGUE_TEXT_LEAD<=t) i++;
+      if(i!==plShotIdx){
+        plShotIdx=i;
+        const next=PROLOGUE_SHOTS[i+1];
+        const dur=(a && a.duration>1) ? a.duration : PROLOGUE_FALLBACK;
+        showPrologueShot(PROLOGUE_SHOTS[i], (next ? next.at : dur) - PROLOGUE_SHOTS[i].at);
+      }
+      if(!live && t > PROLOGUE_FALLBACK + 1.2) endPrologue();   // audio never played
+    };
+    plRaf=requestAnimationFrame(tick);
+    if(CUE_TUNE) startCueTuner();
+  }, 500);
+}
+// Cross the incoming still onto the idle layer, then fade the line in under it.
+// `hold` (seconds) drives the Ken Burns duration so the drift spans the whole shot.
+function showPrologueShot(shot, hold){
+  const txt=document.getElementById("plText");
+  txt.classList.remove("on");
+  if(shot.img){
+    plShotFlip=!plShotFlip;
+    const incoming=document.getElementById(plShotFlip?"plShotB":"plShotA");
+    const outgoing=document.getElementById(plShotFlip?"plShotA":"plShotB");
+    const url=shot.img.includes("/") ? shot.img : PROLOGUE_IMG_DIR+shot.img;   // "/" = path from the project root
+    // Preload so a missing still leaves the layer black instead of flashing a broken box.
+    const probe=new Image();
+    probe.onload=()=>{
+      if(!prologueActive) return;
+      incoming.style.backgroundImage=`url("${url}")`;
+      // restart the animation even when the same keyframe name repeats
+      incoming.style.animation="none"; void incoming.offsetWidth;
+      incoming.style.animation=`${shot.motion} ${(hold+1.6).toFixed(2)}s linear forwards`;
+      incoming.classList.add("on");
+      outgoing.classList.remove("on");
+    };
+    probe.src=url;
+  }
+  setTimeout(()=>{ txt.textContent=shot.text; txt.classList.add("on"); }, 300);
+}
+// Finished (or skipped) — hold the title card, then drop into Scene 1.
+// Skipping goes straight through; only a full playthrough earns the card.
+function endPrologue(skipped){
+  if(!prologueActive) return;
+  clearPrologueTimers();
+  cancelAnimationFrame(plRaf);
+  prologueActive=false;
+  if(CUE_TUNE) reportCues();
+  if(!skipped){
+    if(prologueAudio){ try{ prologueAudio.pause(); }catch(e){} prologueAudio=null; }
+    prologueCarding=true;                            // Space/click still skips the card
+    const txt=document.getElementById("plText");
+    txt.classList.remove("on");
+    // let the last shot keep drifting under the card, then fade card -> black -> Scene 1
+    prologueTimers.push(setTimeout(()=>document.getElementById("plCard").classList.add("on"), 500));
+    prologueTimers.push(setTimeout(finishPrologue, PROLOGUE_CARD_HOLD));
+    return;
+  }
+  finishPrologue();
+}
+function finishPrologue(){
+  prologueCarding=false;
+  clearPrologueTimers();
+  if(prologueAudio){ try{ prologueAudio.pause(); }catch(e){} prologueAudio=null; }
+  document.getElementById("plCard").classList.remove("on");
+  // Hold black across the handoff: fadeBlack comes up under the (still black)
+  // prologue, so hiding it reveals black rather than the bare bridge background,
+  // and startEpisode's own fade-in takes it from there.
+  document.getElementById("fadeBlack").classList.add("on");
+  const pl=document.getElementById("prologue");
+  const txt=document.getElementById("plText");
+  txt.classList.remove("on");
+  setTimeout(()=>{ pl.classList.add("hidden"); startEpisode(); }, 600);
+}
+// ---- cue tuner (dev only, ep1.html?cuetune=1) -----------------------
+// The `at` values above can't be derived from the text — only heard. Run the
+// prologue with ?cuetune=1, listen, and tap Space the instant each line starts.
+// Every tap stamps the audio's real currentTime; at the end the exact
+// `at:` column is printed to the console, ready to paste over PROLOGUE_SHOTS.
+// Nothing here runs in a normal playthrough.
+function startCueTuner(){
+  reportCues.done=false;
+  const old=document.getElementById("cueHud"); if(old) old.remove();   // re-runs are fine
+  const hud=document.createElement("div");
+  hud.id="cueHud";
+  hud.style.cssText="position:absolute;z-index:5;top:2vh;left:50%;transform:translateX(-50%);"+
+    "font:13px/1.7 monospace;color:#8dffb0;background:rgba(0,0,0,0.8);padding:.7rem 1.1rem;"+
+    "border:1px solid rgba(141,255,176,0.4);border-radius:8px;text-align:center;white-space:pre;";
+  document.getElementById("prologue").appendChild(hud);
+  const paint=()=>{
+    if(!prologueActive){ return; }
+    const t=prologueAudio ? prologueAudio.currentTime : 0;
+    const nextIdx=plTuned.length;
+    hud.textContent =
+      `CUE TUNER  ${t.toFixed(2)}s   tapped ${nextIdx}/${PROLOGUE_SHOTS.length}\n` +
+      (nextIdx<PROLOGUE_SHOTS.length
+        ? `SPACE when you hear:  "${PROLOGUE_SHOTS[nextIdx].text}"`
+        : `done — cues printed to the console`);
+    requestAnimationFrame(paint);
+  };
+  requestAnimationFrame(paint);
+}
+// Called by the keyboard handler while tuning, instead of skipping the prologue.
+function tapCue(){
+  if(plTuned.length>=PROLOGUE_SHOTS.length) return;
+  plTuned.push(prologueAudio ? +prologueAudio.currentTime.toFixed(2) : 0);
+  if(plTuned.length===PROLOGUE_SHOTS.length) reportCues();
+}
+function reportCues(){
+  if(!plTuned.length || reportCues.done) return;
+  reportCues.done=true;
+  const lines=PROLOGUE_SHOTS.map((s,i)=>{
+    const at=(plTuned[i]!==undefined ? plTuned[i] : s.at).toFixed(2).padStart(5);
+    return `  {at:${at}, text:${JSON.stringify(s.text)}, img:"${s.img}", motion:"${s.motion}"},`;
+  });
+  console.log("Measured cues — paste over PROLOGUE_SHOTS:\n\nconst PROLOGUE_SHOTS = [\n"+
+              lines.join("\n")+"\n];\n");
+}
+// Abandon the narration without starting the episode (used by the title reset).
+function cancelPrologue(){
+  prologueActive=false; prologueCarding=false;
+  clearPrologueTimers();
+  cancelAnimationFrame(plRaf);
+  if(prologueAudio){ try{ prologueAudio.pause(); }catch(e){} prologueAudio=null; }
+  const pl=document.getElementById("prologue");
+  pl.classList.add("hidden"); pl.classList.remove("fading");
+  document.getElementById("plCard").classList.remove("on");
+}
+
+function startEpisode(){
+  started=true;
+  lastPos=null;                       // fresh playthrough starts at the rim spawn
+  try{ localStorage.removeItem("stargear_ep1_fog_v1"); }catch(e){}  // clear the iso's saved fog (FOG_KEY)
+  try{ localStorage.removeItem("stargear_ep1_done"); }catch(e){} // and the "episode finished" achievement flag
+  document.getElementById("endAchToast").classList.remove("on");
+  endOverlay.classList.add("hidden");
+  present=[]; exprOf={}; rebuildCast();
+  // fade the title to black (0.5s), build Scene 1 behind the black, then fade into it
+  const fb=document.getElementById("fadeBlack");
+  fb.classList.add("on");
+  setTimeout(()=>{
+    startOverlay.classList.add("hidden");
+    runBeat(0);                                    // Scene 1 renders under the black
+    requestAnimationFrame(()=>fb.classList.remove("on"));   // then fade black -> scene
+  }, 500);
+}
+function endEpisode(){
+  // Flag the completion for the iso game's "The Ghost Signal" achievement. The iso
+  // isn't running at this point (the END beat is a VN scene, so its iframe is torn
+  // down), so this is a shared-localStorage handshake it reads at its next boot.
+  try{ localStorage.setItem("stargear_ep1_done","1"); }catch(e){}
+  // Also unlock it directly, right here, in the same achievements list the iso reads
+  // (stargear_ep1_ach_v1) — waiting for the player to separately click into free roam
+  // meant the award never visibly "popped" for anyone who just watched the ending
+  // (Steve, 2026-07-26 playtest). The end screen shows its own toast to match.
+  try{
+    const raw = localStorage.getItem("stargear_ep1_ach_v1");
+    const unlocked = new Set(raw ? JSON.parse(raw) : []);
+    if(!unlocked.has("ep1_complete")){
+      unlocked.add("ep1_complete");
+      localStorage.setItem("stargear_ep1_ach_v1", JSON.stringify([...unlocked]));
+      requestAnimationFrame(()=>document.getElementById("endAchToast").classList.add("on"));
+    }
+  }catch(e){}
+  bar.classList.add("hidden"); hideGameplay(); stopVO();
+  setCG(null);
+  beatBar.style.width="100%";
+  endOverlay.classList.remove("defeat");                  // victory → thanks-for-playing screen
+  endOverlay.classList.remove("hidden");
+}
+// Ship destroyed — show the thanks-for-playing screen; clicking it resets to the
+// title (toStartMenu, same as the episode-complete overlay).
+function gameOver(){
+  bar.classList.add("hidden"); hideGameplay(); stopVO(); stopSfx();
+  setCG(null);
+  endOverlay.classList.add("defeat");                     // swap to the DEFEAT.png screen
+  endOverlay.classList.remove("hidden");
+}
+// FREE PLAY — beating the story doesn't end the run. This drops the player back
+// into the sector in plain free-roam: no story waypoint, no mission, nothing to
+// advance past. Everything they earned carries over (scrap/coin, ship loadout,
+// codex, achievements, charted map) because the iso restores that state whenever
+// the embed carries a `start=` position, which `embedWithPos` supplies.
+let freePlay=false;
+// `status` overrides the footer line — the title screen's LOAD reuses this whole
+// path (a loaded save always resumes in free roam) and says so instead.
+function startFreePlay(status){
+  freePlay=true;
+  writeStoryProgress();               // a save taken in free roam should load back into free roam
+  endOverlay.classList.add("hidden");
+  bar.classList.add("hidden");
+  stopVO(); stopCGAudio(); stopSfx(); clearAuto(); clearPause();
+  setCG(null);
+  // A `start=` position is what tells the iso this is a CONTINUATION rather than a
+  // fresh game — without it, it wipes fog, codex, loadout and economy on boot. So
+  // free play always carries one, falling back to the hub if we never got a `pos`.
+  if(!lastPos) lastPos={ax:0, ay:0};
+  showGameplay({ type:"travel", kind:"Free Play", loc:"Open Sector", title:"Free Play",
+                 objective:"Take on bounties and side missions — M for the ship menu.",
+                 embed:"ep1_flight.html" });
+  gpStatus.textContent = status || "Free play — the story is complete.";
+  gpStatus.style.color = "#7ee787";
+  document.getElementById("gpExit").classList.remove("hidden");
+}
+// ---- story progress -> the iso's save snapshot ------------------------------
+// The iso owns the save slots, but it can't see where the STORY is — so the VN
+// publishes its position to a shared localStorage key on every beat, and the
+// iso's saveSnapshot() folds that key into the slot. Loading reads it back out
+// and resumes the episode at that beat instead of dumping you into free roam.
+const STORY_KEY = "stargear_ep1_story_v1";
+function writeStoryProgress(){
+  try{
+    localStorage.setItem(STORY_KEY, JSON.stringify({
+      // `episode` marks this as a native Episode 1 save, so importSaveFile()
+      // can tell it apart from an Episode 0 (or earlier) save, whose story.beat
+      // would index a completely different scene list.
+      beat: beatIdx, bg: curBg, freePlay, started, episode:"ep1",
+    }));
+  }catch(e){}
+}
+// ---- title-screen LOAD GAME ------------------------------------------------
+// The iso owns the save slots; this only reads them to build the picker and then
+// hands the chosen index to the embed as `load=<n>`. Slot format is the iso's
+// saveSnapshot() — keep SAVE_KEY in step with it there.
+// NOTE: a save carries economy/ship/codex/map but not a story beat, so loading
+// always resumes in FREE ROAM, even if the run was saved mid-episode.
+const SAVE_SLOT_COUNT = 3;
+// "f" is the import slot: a save loaded from a downloaded file lands here rather
+// than overwriting one of the player's three slots. The iso understands `load=f`.
+const SAVE_KEY = i => i === "f" ? "stargear_ep1_save_file" : "stargear_ep1_save_" + i;
+let pendingLoadSlot = -1;                 // consumed by embedWithPos on the next embed
+function readSaveSlot(i){
+  try{ const raw = localStorage.getItem(SAVE_KEY(i)); return raw ? JSON.parse(raw) : null; }
+  catch(e){ return null; }
+}
+// LOAD GAME is always on the title screen, even with no slots filled — otherwise
+// there'd be no way in to "load from file" on a fresh browser / new machine.
+function refreshLoadBtn(){
+  document.getElementById("loadBtn").classList.remove("hidden");
+}
+function slotSummary(s){
+  const d = new Date(s.at || 0);
+  const coin = s.econ ? s.econ.coin : 0, scrap = s.econ ? s.econ.scrap : 0;
+  const where = s.story && !s.story.freePlay && (s.story.beat|0) >= 0
+    ? (EP1[s.story.beat] ? (EP1[s.story.beat].scene || EP1[s.story.beat].title || "In story") : "In story")
+    : "Free roam";
+  return { when: `${d.toLocaleDateString()} ${d.toLocaleTimeString()}`,
+           sub: `${where} · ${coin} coin · ${scrap} scrap · ${(s.dex||[]).length} scanned · ` +
+                `${(s.ach||[]).length} achievements · at (${s.ax|0}, ${s.ay|0})` };
+}
+function buildLoadPanel(){
+  const host = document.getElementById("loadSlots");
+  host.innerHTML = "";
+  for(let i=0;i<SAVE_SLOT_COUNT;i++){
+    const s = readSaveSlot(i);
+    const row = document.createElement("div");
+    row.className = "lpRow";
+    const b = document.createElement("button");
+    b.className = "lpSlot";
+    if(!s){
+      b.disabled = true;
+      b.innerHTML = `<div class="lpMain">Slot ${i+1} — empty</div>`;
+    }else{
+      const info = slotSummary(s);
+      b.innerHTML = `<div class="lpMain">Slot ${i+1} — ${info.when}</div>` +
+                    `<div class="lpSub">${info.sub}</div>`;
+      b.addEventListener("click", ()=> startLoadedGame(i));
+    }
+    row.appendChild(b);
+    if(s){                                        // download this slot as a .sgsave file
+      const dl = document.createElement("button");
+      dl.className = "lpDl"; dl.title = "Download this save to a file";
+      dl.textContent = "⤓";
+      dl.addEventListener("click", (ev)=>{ ev.stopPropagation(); downloadSlot(i); });
+      row.appendChild(dl);
+    }
+    host.appendChild(row);
+  }
+}
+// ---- save files ------------------------------------------------------------
+// A save is just the iso's snapshot JSON, so a downloaded file can be re-imported
+// here or in the in-game SAVE / LOAD screen — same format either way.
+function saveFileName(s){
+  const d = new Date((s && s.at) || Date.now());
+  const p = n => String(n).padStart(2,"0");
+  return `stargear-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.sgsave`;
+}
+function downloadSlot(i){
+  const s = readSaveSlot(i); if(!s) return;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(s)], { type:"application/json" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = saveFileName(s);
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  setLoadMsg("Downloaded slot " + (i+1) + ".");
+}
+function setLoadMsg(t, bad){
+  const el = document.getElementById("lpMsg");
+  if(!el) return;
+  el.textContent = t || "";
+  el.style.color = bad ? "#ff9a8a" : "#7ee787";
+}
+// Fields that mean the same thing regardless of which episode produced them —
+// crew loadouts, owned/broken ships, the current ship fit, the scanned-ship
+// codex, and the coin/scrap/cargo wallet. Position, fog, station stock/intel,
+// bounties/side jobs, POIs, waypoint/pin and achievements are all tied to the
+// old episode's own map and are deliberately left out, so Episode 1 generates
+// its own fresh versions of all of that on first load.
+const CARRY_OVER_FIELDS = ["creweq","owned","broken","loadout","dex","econ"];
+function carryOverSnapshot(s){
+  const out = { at: Date.now(), ax: 0, ay: 0, carryOver: true };  // ax/ay match ep1_flight.html's SPAWN default
+  for(const f of CARRY_OVER_FIELDS) if(s[f] !== undefined) out[f] = s[f];
+  return out;
+}
+function importSaveFile(file){
+  if(!file) return;
+  const rd = new FileReader();
+  rd.onload = ()=>{
+    let s = null;
+    try{ s = JSON.parse(rd.result); }catch(e){}
+    // a save always carries a position and a timestamp — anything else isn't one
+    if(!s || typeof s !== "object" || s.ax === undefined || s.ay === undefined){
+      setLoadMsg("That file isn't a StarGear save.", true); return;
+    }
+    // A native Episode 1 save (story.episode === "ep1") resumes exactly where
+    // it left off. Anything else — an Episode 0 save, or any earlier episode —
+    // can't be resumed in-place, so it's treated as a character carry-over:
+    // see carryOverSnapshot().
+    const toStore = (s.story && s.story.episode === "ep1") ? s : carryOverSnapshot(s);
+    try{ localStorage.setItem(SAVE_KEY("f"), JSON.stringify(toStore)); }
+    catch(e){ setLoadMsg("Couldn't store that save — browser storage is full.", true); return; }
+    startLoadedGame("f");
+  };
+  rd.onerror = ()=> setLoadMsg("Couldn't read that file.", true);
+  rd.readAsText(file);
+}
+function openLoadPanel(){
+  buildLoadPanel();
+  setLoadMsg("");
+  document.getElementById("loadPanel").classList.remove("hidden");
+  document.getElementById("startMenu").classList.add("hidden");
+}
+function closeLoadPanel(){
+  document.getElementById("loadPanel").classList.add("hidden");
+  document.getElementById("startMenu").classList.remove("hidden");
+}
+function startLoadedGame(i){
+  const s = readSaveSlot(i); if(!s) return;
+  pendingLoadSlot = i;
+  lastPos = { ax: s.ax|0, ay: s.ay|0 };    // also the continuation signal the iso needs
+  closeLoadPanel();
+  const label = s.carryOver ? "Imported Episode 0 save — starting Episode 1 with your carried-over crew and ship."
+              : i === "f" ? "Loaded save file." : "Loaded slot " + (i+1) + ".";
+  // A save taken mid-episode carries the story beat it was taken on, so it resumes
+  // the episode there; one taken after the credits (or with no story record at all,
+  // i.e. an older save) drops into free roam. A carry-over import (see
+  // carryOverSnapshot()) is neither — it always begins Episode 1 from Scene 1.
+  const st = s.story || null;
+  const resumeBeat = (!s.carryOver && st && !st.freePlay && st.started && (st.beat|0) >= 0 && (st.beat|0) < EP1.length)
+    ? (st.beat|0) : -1;
+  // Same fade-to-black handoff as Start. startFreePlay() is normally entered from the
+  // end screen, where the title overlay is already down — coming from the title it has
+  // to be dismissed here or it sits on top of the running game.
+  const fb = document.getElementById("fadeBlack");
+  fb.classList.add("on");
+  setTimeout(()=>{
+    startOverlay.classList.add("hidden");
+    if(resumeBeat >= 0){
+      started = true; freePlay = false;
+      endOverlay.classList.add("hidden");
+      present=[]; exprOf={}; rebuildCast();
+      setBackground(st.bg || "BG01");
+      runBeat(resumeBeat);               // replays the beat it was saved on, from its first line
+    }else if(s.carryOver){
+      started = true; freePlay = false;
+      endOverlay.classList.add("hidden");
+      present=[]; exprOf={}; rebuildCast();
+      setBackground("BG01");
+      runBeat(0);                        // begin Episode 1 proper, crew/ship carried over
+    }else{
+      startFreePlay(label);
+    }
+    requestAnimationFrame(()=>fb.classList.remove("on"));
+  }, 500);
+}
+
+// Return to the title screen and reset the game (advancing past "To Be Continued").
+function toStartMenu(){
+  started=false; freePlay=false; beatIdx=-1; stepIdx=-1;
+  cancelPrologue();   // never leave the narration (or its audio) running behind the title
+  document.getElementById("gpExit").classList.add("hidden");
+  bar.classList.add("hidden"); hideGameplay(); stopVO();
+  setCG(null); present=[]; exprOf={}; rebuildCast();
+  setBackground("BG01");
+  beatBar.style.width="0%";
+  endOverlay.classList.add("hidden");
+  document.getElementById("fadeBlack").classList.remove("on");
+  startOverlay.classList.remove("hidden","fading");
+  closeLoadPanel();   // never come back to the title with the picker still up
+  refreshLoadBtn();   // a run just ended — it may have written its first save
+}
+
+// ============================================================
+// INPUT
+// ============================================================
+document.addEventListener("keydown",(e)=>{
+  const advanceKey = e.code==="Space" || e.code==="ArrowRight" || e.code==="Enter";
+  // the opening narration owns the keyboard while it runs — any advance key skips it
+  if(prologueActive || prologueCarding){
+    // while tuning, Space stamps a cue instead of skipping (Esc still exits)
+    if(CUE_TUNE && prologueActive && advanceKey){ e.preventDefault(); tapCue(); return; }
+    if(advanceKey || e.code==="Escape"){
+      e.preventDefault();
+      prologueCarding ? finishPrologue() : endPrologue(true);
+    }
+    return;
+  }
+  // A standalone scene (Crimson Nova) plays over free-roam — it owns the keyboard so
+  // Space advances the dialogue instead of the free-play handler swallowing it.
+  if(sceneMode){
+    if(e.code==="Space" || e.code==="ArrowRight" || e.code==="Enter"){ e.preventDefault(); advance(); }
+    else if(e.code==="KeyA"){ e.preventDefault(); toggleAuto(); }
+    return;
+  }
+  // The load picker owns the keyboard while it's up, or Space would start a new game
+  // behind it. Esc backs out.
+  if(!document.getElementById("loadPanel").classList.contains("hidden")){
+    if(e.code==="Escape" || e.code==="KeyQ"){ e.preventDefault(); closeLoadPanel(); }
+    return;
+  }
+  // free play has no story left to advance — Q / Esc is the way out, back to the title
+  if(freePlay){ if(e.code==="Escape" || e.code==="KeyQ"){ e.preventDefault(); toStartMenu(); } return; }
+  if(!endOverlay.classList.contains("hidden")){           // thanks-for-playing / "To Be Continued"
+    // No keyboard dismissal — the screen is returned from by clicking the backdrop
+    // only, so a reflexive Space (from advancing dialogue) can't skip past it. Keys
+    // are still swallowed here so Space doesn't fall through and call advance() on a
+    // finished episode.
+    e.preventDefault();
+    return;
+  }
+  if(e.code==="KeyA" && started && gameplay.classList.contains("hidden")){
+    e.preventDefault(); toggleAuto(); return;              // A toggles auto-play during dialogue
+  }
+  if(advanceKey){
+    if(!gameplay.classList.contains("hidden")) return;     // don't steal keys from the flight game
+    e.preventDefault();
+    if(!started) startEpisode(); else advance();
+  }
+});
+// Episode 1 skips the old Episode 0 opening cinematic (PROLOGUE_SHOTS/Speech_v3.mp3 —
+// that VO and those stills are "Fleet Seven..." from the Ghost Signal, wrong episode
+// entirely) and goes straight into Scene 1, which has its own black-screen cold open.
+// The cinematic machinery (whisper-cue sync, ?cuetune=1) is left in place, dormant,
+// in case Episode 1 gets its own cinematic later — see startPrologue() below.
+document.getElementById("startBtn").addEventListener("click", startEpisode);
+document.getElementById("prologue").addEventListener("click", ()=>{
+  if(CUE_TUNE && prologueActive){ tapCue(); return; }   // clicking also stamps a cue
+  prologueCarding ? finishPrologue() : endPrologue(true);
+});
+document.getElementById("loadBtn").addEventListener("click", (e)=>{ e.stopPropagation(); openLoadPanel(); });
+document.getElementById("loadCancel").addEventListener("click", (e)=>{ e.stopPropagation(); closeLoadPanel(); });
+document.getElementById("loadFileBtn").addEventListener("click", (e)=>{
+  e.stopPropagation();
+  const inp = document.getElementById("loadFileInput");
+  inp.value = "";                   // so picking the same file twice still fires change
+  inp.click();
+});
+document.getElementById("loadFileInput").addEventListener("change", (e)=>{
+  importSaveFile(e.target.files && e.target.files[0]);
+});
+refreshLoadBtn();   // LOAD is always on the title (file import needs a way in)
+document.getElementById("freePlayBtn").addEventListener("click", (e)=>{ e.stopPropagation(); startFreePlay(); });
+document.getElementById("gpExit").addEventListener("click", toStartMenu);
+endOverlay.addEventListener("click", toStartMenu);
+bar.addEventListener("click", advance);
+// TESTING ONLY — remove before release: jump past the current gameplay segment.
+gpSkip.addEventListener("click", ()=>{
+  const b = beatIdx>=0 ? EP1[beatIdx] : null;
+  if(b && b.type!=="vn") runBeat(beatIdx+1);
+});
+autoBtn.addEventListener("click", toggleAuto);
+skipBtn.addEventListener("click", skipVNSection);
+voMuteBtn.addEventListener("click", ()=>{
+  voMuted = !voMuted;
+  if(curVO) curVO.muted = voMuted;
+  if(cgStatic) cgStatic.muted = voMuted;
+  if(cgVoice)  cgVoice.muted  = voMuted;
+  if(prologueAudio) prologueAudio.muted = voMuted;
+  if(sfxAudio) sfxAudio.muted = voMuted;
+  voMuteBtn.textContent = voMuted ? "🔇" : "🔊";
+  voMuteBtn.classList.toggle("muted", voMuted);
+});
+
+// boot: show the bridge placeholder behind the start overlay
+setBackground("BG01");
+preloadVO();          // warm the voice clips so the typewriter can pace to them
+preloadImages();      // warm the BG/CG art so it never flashes a placeholder first
+
+// TESTING ONLY (remove before release): ep1.html?freeplay=1 boots straight into
+// free roam so the Crimson Nova hangar (and other free-play content) can be tested
+// without playing/skipping the whole story.
+if(/[?&]freeplay=1/.test(location.search)){
+  startOverlay.classList.add("hidden");
+  started = true;
+  startFreePlay("Dev free play — testing");
+}
+
+</script>
+</body>
+</html>

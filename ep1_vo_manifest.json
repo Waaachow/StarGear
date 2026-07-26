@@ -1,0 +1,1262 @@
+[
+ {
+  "char": "Voss",
+  "line_no": 623,
+  "text": "Our contract begins at Cogwheel Station.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L623.mp3",
+  "start": 1.0550000000000002,
+  "end": 4.25,
+  "ratio": 0.8333333333333334
+ },
+ {
+  "char": "Voss",
+  "line_no": 624,
+  "text": "We're escorting civilian shipping while we're in the sector.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L624.mp3",
+  "start": 4.97,
+  "end": 7.3149999999999995,
+  "ratio": 0.6666666666666666
+ },
+ {
+  "char": "Voss",
+  "line_no": 627,
+  "text": "I certainly hope not.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L627.mp3",
+  "start": 7.3149999999999995,
+  "end": 9.5,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 761,
+  "text": "I'm just glad everyone made it.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L761.mp3",
+  "start": 13.860000000000001,
+  "end": 15.84,
+  "ratio": 0.8333333333333334
+ },
+ {
+  "char": "Voss",
+  "line_no": 749,
+  "text": "Our priority is the convoy.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L749.mp3",
+  "start": 15.84,
+  "end": 17.87,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 750,
+  "text": "We'll discuss this later.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L750.mp3",
+  "start": 18.77,
+  "end": 19.865000000000002,
+  "ratio": 0.75
+ },
+ {
+  "char": "Voss",
+  "line_no": 662,
+  "text": "I wouldn't worry.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L662.mp3",
+  "start": 19.865000000000002,
+  "end": 21.5,
+  "ratio": 0.6666666666666666
+ },
+ {
+  "char": "Voss",
+  "line_no": 663,
+  "text": "People are cautious around strangers.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L663.mp3",
+  "start": 21.869999999999997,
+  "end": 24.16,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1018,
+  "text": "Nine years ago...",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1018.mp3",
+  "start": 24.509999999999998,
+  "end": 25.505000000000003,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1019,
+  "text": "...I accepted an escort contract.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1019.mp3",
+  "start": 25.505000000000003,
+  "end": 27.845,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1020,
+  "text": "It should have been routine.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1020.mp3",
+  "start": 27.845,
+  "end": 29.9,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1023,
+  "text": "There were no survivors.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1023.mp3",
+  "start": 30.68,
+  "end": 32.43,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1024,
+  "text": "I was preparing to leave.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1024.mp3",
+  "start": 32.43,
+  "end": 34.25,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1025,
+  "text": "Then...",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1025.mp3",
+  "start": 34.25,
+  "end": 35.295,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1026,
+  "text": "I found one escape pod.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1026.mp3",
+  "start": 35.35,
+  "end": 37.415,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1040,
+  "text": "I knew exactly what she was.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1040.mp3",
+  "start": 37.415,
+  "end": 39.43,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1041,
+  "text": "I also knew...",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1041.mp3",
+  "start": 39.43,
+  "end": 40.815,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1042,
+  "text": "...she was afraid.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1042.mp3",
+  "start": 40.815,
+  "end": 42.445,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1043,
+  "text": "So I brought her home.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1043.mp3",
+  "start": 42.445,
+  "end": 44.21,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 832,
+  "text": "Yes?",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L832.mp3",
+  "start": 44.52,
+  "end": 45.004999999999995,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1049,
+  "text": "Because it wasn't my story to tell.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1049.mp3",
+  "start": 45.004999999999995,
+  "end": 46.96,
+  "ratio": 0.8571428571428571
+ },
+ {
+  "char": "Voss",
+  "line_no": 1051,
+  "text": "If Astra ever remembered...",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1051.mp3",
+  "start": 47.07,
+  "end": 49.2,
+  "ratio": 0.75
+ },
+ {
+  "char": "Voss",
+  "line_no": 1052,
+  "text": "...I wanted it to come from her.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1052.mp3",
+  "start": 49.2,
+  "end": 51.150000000000006,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1053,
+  "text": "I wasn't protecting myself.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1053.mp3",
+  "start": 51.230000000000004,
+  "end": 53.42,
+  "ratio": 0.75
+ },
+ {
+  "char": "Voss",
+  "line_no": 1054,
+  "text": "I was protecting her chance...",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1054.mp3",
+  "start": 53.42,
+  "end": 55.56,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1055,
+  "text": "...to simply be Astra.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1055.mp3",
+  "start": 55.56,
+  "end": 57.14,
+  "ratio": 0.75
+ },
+ {
+  "char": "Voss",
+  "line_no": 1062,
+  "text": "It is.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1062.mp3",
+  "start": 58.29,
+  "end": 59.435,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1064,
+  "text": "I gave you that name.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1064.mp3",
+  "start": 59.435,
+  "end": 60.945,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1065,
+  "text": "You accepted it.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1065.mp3",
+  "start": 60.980000000000004,
+  "end": 62.6,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1066,
+  "text": "You've answered to it every day since.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1066.mp3",
+  "start": 63.11,
+  "end": 64.53,
+  "ratio": 0.8571428571428571
+ },
+ {
+  "char": "Voss",
+  "line_no": 1067,
+  "text": "It became yours.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1067.mp3",
+  "start": 64.53,
+  "end": 66.85000000000001,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1083,
+  "text": "So do I.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1083.mp3",
+  "start": 67.36999999999999,
+  "end": 68.13499999999999,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1085,
+  "text": "I simply wasn't ready to take that choice away from her.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1085.mp3",
+  "start": 68.13499999999999,
+  "end": 71.91,
+  "ratio": 0.9090909090909091
+ },
+ {
+  "char": "Voss",
+  "line_no": 1112,
+  "text": "Battle stations.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1112.mp3",
+  "start": 74.86,
+  "end": 75.97,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1113,
+  "text": "Let's remind them...",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1113.mp3",
+  "start": 76.74,
+  "end": 77.63499999999999,
+  "ratio": 0.6666666666666666
+ },
+ {
+  "char": "Voss",
+  "line_no": 1114,
+  "text": "...why this ship is called StarGear.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1114.mp3",
+  "start": 77.63499999999999,
+  "end": 79.59,
+  "ratio": 0.8333333333333334
+ },
+ {
+  "char": "Voss",
+  "line_no": 1130,
+  "text": "They're forcing us somewhere.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1130.mp3",
+  "start": 81.19999999999999,
+  "end": 82.30000000000001,
+  "ratio": 0.75
+ },
+ {
+  "char": "Voss",
+  "line_no": 1145,
+  "text": "I imagined you had.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1145.mp3",
+  "start": 82.30000000000001,
+  "end": 84.22,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1191,
+  "text": "You call this perfection?",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1191.mp3",
+  "start": 88.16,
+  "end": 91.06,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1262,
+  "text": "Protect each other.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1262.mp3",
+  "start": 91.39,
+  "end": 92.44,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1291,
+  "text": "It's your decision.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1291.mp3",
+  "start": 94.5,
+  "end": 95.71000000000001,
+  "ratio": 0.6666666666666666
+ },
+ {
+  "char": "Voss",
+  "line_no": 1298,
+  "text": "You heard her.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1298.mp3",
+  "start": 95.94,
+  "end": 96.8,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1364,
+  "text": "Helios Reach has begun rebuilding.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1364.mp3",
+  "start": 98.61999999999999,
+  "end": 100.19,
+  "ratio": 0.8
+ },
+ {
+  "char": "Voss",
+  "line_no": 1365,
+  "text": "The pirate fleet has scattered.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1365.mp3",
+  "start": 100.19999999999999,
+  "end": 102.63,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1366,
+  "text": "The GearWorks facility has been secured.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1366.mp3",
+  "start": 102.63,
+  "end": 105.245,
+  "ratio": 0.8333333333333334
+ },
+ {
+  "char": "Voss",
+  "line_no": 1367,
+  "text": "One question has been answered.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1367.mp3",
+  "start": 105.245,
+  "end": 107.22,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1368,
+  "text": "Many more remain.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1368.mp3",
+  "start": 107.31,
+  "end": 109.025,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1370,
+  "text": "The greatest discoveries are rarely new worlds.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1370.mp3",
+  "start": 109.025,
+  "end": 112.85000000000001,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1371,
+  "text": "Sometimes...",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1371.mp3",
+  "start": 113.38,
+  "end": 113.94,
+  "ratio": 1.0
+ },
+ {
+  "char": "Voss",
+  "line_no": 1372,
+  "text": "...they're the people beside you.",
+  "unique": true,
+  "path": "audio/Episode1/vo/voss_L1372.mp3",
+  "start": 114.69999999999999,
+  "end": 116.66,
+  "ratio": 0.8
+ },
+ {
+  "char": "Rex",
+  "line_no": 615,
+  "text": "So this is Helios Reach!",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L615.mp3",
+  "start": 0.13,
+  "end": 2.355,
+  "ratio": 0.8
+ },
+ {
+  "char": "Rex",
+  "line_no": 617,
+  "text": "And look! Actual stations!",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L617.mp3",
+  "start": 2.355,
+  "end": 5.41,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 645,
+  "text": "We're getting famous.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L645.mp3",
+  "start": 5.66,
+  "end": 7.55,
+  "ratio": 0.6666666666666666
+ },
+ {
+  "char": "Rex",
+  "line_no": 730,
+  "text": "...Okay.",
+  "unique": false,
+  "path": "audio/Episode1/vo/rex_L730.mp3",
+  "start": 8.56,
+  "end": 9.155000000000001,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 743,
+  "text": "Can somebody explain what just happened?",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L743.mp3",
+  "start": 9.155000000000001,
+  "end": 11.739999999999998,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 678,
+  "text": "Didn't you notice?",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L678.mp3",
+  "start": 14.05,
+  "end": 14.79,
+  "ratio": 0.6666666666666666
+ },
+ {
+  "char": "Rex",
+  "line_no": 679,
+  "text": "They kept staring.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L679.mp3",
+  "start": 14.79,
+  "end": 16.75,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 682,
+  "text": "They stared at Astra.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L682.mp3",
+  "start": 17.93,
+  "end": 19.18,
+  "ratio": 0.75
+ },
+ {
+  "char": "Rex",
+  "line_no": 626,
+  "text": "No haunted ghost fleets?",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L626.mp3",
+  "start": 20.119999999999997,
+  "end": 21.79,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 1045,
+  "text": "...all this time?",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L1045.mp3",
+  "start": 21.79,
+  "end": 22.490000000000002,
+  "ratio": 0.6666666666666666
+ },
+ {
+  "char": "Rex",
+  "line_no": 654,
+  "text": "I call food first!",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L654.mp3",
+  "start": 22.490000000000002,
+  "end": 24.58,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 776,
+  "text": "Lots of people have doubles.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L776.mp3",
+  "start": 24.58,
+  "end": 26.8,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 780,
+  "text": "Sorry.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L780.mp3",
+  "start": 27.86,
+  "end": 29.259999999999998,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 888,
+  "text": "That thing...",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L888.mp3",
+  "start": 29.459999999999997,
+  "end": 31.075,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 889,
+  "text": "It looked exactly like Astra.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L889.mp3",
+  "start": 31.075,
+  "end": 32.84,
+  "ratio": 0.8
+ },
+ {
+  "char": "Rex",
+  "line_no": 1125,
+  "text": "So we punch through.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L1125.mp3",
+  "start": 33.1,
+  "end": 34.845,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 1158,
+  "text": "I REALLY don't like that guy.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L1158.mp3",
+  "start": 34.845,
+  "end": 37.040000000000006,
+  "ratio": 0.8333333333333334
+ },
+ {
+  "char": "Rex",
+  "line_no": 1108,
+  "text": "A fair fight.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L1108.mp3",
+  "start": 37.99,
+  "end": 40.09,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 1069,
+  "text": "I don't care what you were built as.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L1069.mp3",
+  "start": 42.910000000000004,
+  "end": 44.980000000000004,
+  "ratio": 0.875
+ },
+ {
+  "char": "Rex",
+  "line_no": 1328,
+  "text": "What do we call the new one?",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L1328.mp3",
+  "start": 56.71,
+  "end": 58.760000000000005,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 1345,
+  "text": "Anyone else starving?",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L1345.mp3",
+  "start": 59.2,
+  "end": 60.64,
+  "ratio": 1.0
+ },
+ {
+  "char": "Rex",
+  "line_no": 1347,
+  "text": "It's called being prepared.",
+  "unique": true,
+  "path": "audio/Episode1/vo/rex_L1347.mp3",
+  "start": 61.03,
+  "end": 62.650000000000006,
+  "ratio": 0.75
+ },
+ {
+  "char": "Astra",
+  "line_no": 621,
+  "text": "I wonder what everyone here is like.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L621.mp3",
+  "start": 1.9,
+  "end": 4.515000000000001,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 661,
+  "text": "Was it something I said?",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L661.mp3",
+  "start": 4.515000000000001,
+  "end": 6.46,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 684,
+  "text": "Maybe my hair looked funny.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L684.mp3",
+  "start": 7.1,
+  "end": 8.959999999999999,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 746,
+  "text": "I've never seen him before.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L746.mp3",
+  "start": 9.360000000000001,
+  "end": 10.969999999999999,
+  "ratio": 0.8
+ },
+ {
+  "char": "Astra",
+  "line_no": 722,
+  "text": "...Prototype?",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L722.mp3",
+  "start": 11.72,
+  "end": 12.83,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 774,
+  "text": "Do you think...",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L774.mp3",
+  "start": 16.169999999999998,
+  "end": 17.564999999999998,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 775,
+  "text": "...I really look like someone?",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L775.mp3",
+  "start": 17.564999999999998,
+  "end": 19.77,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 819,
+  "text": "...Have you ever wondered...",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L819.mp3",
+  "start": 24.169999999999998,
+  "end": 26.18,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 820,
+  "text": "...where I came from?",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L820.mp3",
+  "start": 26.54,
+  "end": 27.81,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 878,
+  "text": "I don't remember anything.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L878.mp3",
+  "start": 28.52,
+  "end": 30.665,
+  "ratio": 0.75
+ },
+ {
+  "char": "Astra",
+  "line_no": 879,
+  "text": "I don't even know...",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L879.mp3",
+  "start": 30.665,
+  "end": 32.345,
+  "ratio": 0.75
+ },
+ {
+  "char": "Astra",
+  "line_no": 880,
+  "text": "...if my memories are real.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L880.mp3",
+  "start": 32.345,
+  "end": 34.550000000000004,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 875,
+  "text": "...Who am I?",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L875.mp3",
+  "start": 34.89,
+  "end": 35.745000000000005,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 915,
+  "text": "Do you know me?",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L915.mp3",
+  "start": 35.745000000000005,
+  "end": 37.155,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 924,
+  "text": "...First?",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L924.mp3",
+  "start": 37.155,
+  "end": 38.14,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 1058,
+  "text": "My name...",
+  "unique": false,
+  "path": "audio/Episode1/vo/astra_L1058.mp3",
+  "start": 38.260000000000005,
+  "end": 39.24,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 971,
+  "text": "I don't belong to anyone!",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L971.mp3",
+  "start": 40.690000000000005,
+  "end": 43.03,
+  "ratio": 0.8
+ },
+ {
+  "char": "Astra",
+  "line_no": 988,
+  "text": "I don't even know who I am.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L988.mp3",
+  "start": 43.03,
+  "end": 44.730000000000004,
+  "ratio": 0.8571428571428571
+ },
+ {
+  "char": "Astra",
+  "line_no": 1293,
+  "text": "Bring her aboard.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L1293.mp3",
+  "start": 84.97999999999999,
+  "end": 86.22,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 1307,
+  "text": "Then...",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L1307.mp3",
+  "start": 93.64999999999999,
+  "end": 94.07000000000001,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 1308,
+  "text": "...she gets to choose too.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L1308.mp3",
+  "start": 94.22,
+  "end": 96.24000000000001,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 1358,
+  "text": "When you wake up...",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L1358.mp3",
+  "start": 96.49,
+  "end": 98.235,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 1359,
+  "text": "...I hope nobody tells you who you're supposed to be.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L1359.mp3",
+  "start": 98.235,
+  "end": 103.13000000000001,
+  "ratio": 0.9
+ },
+ {
+  "char": "Astra",
+  "line_no": 1332,
+  "text": "I think...",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L1332.mp3",
+  "start": 104.52,
+  "end": 106.10499999999999,
+  "ratio": 1.0
+ },
+ {
+  "char": "Astra",
+  "line_no": 1333,
+  "text": "...she should choose her own name.",
+  "unique": true,
+  "path": "audio/Episode1/vo/astra_L1333.mp3",
+  "start": 106.10499999999999,
+  "end": 108.994467,
+  "ratio": 1.0
+ },
+ {
+  "char": "Kael",
+  "line_no": 747,
+  "text": "He called you 'Prototype'.",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L747.mp3",
+  "start": 8.040000000000001,
+  "end": 9.239999999999998,
+  "ratio": 0.75
+ },
+ {
+  "char": "Kael",
+  "line_no": 894,
+  "text": "How much do you know?",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L894.mp3",
+  "start": 11.370000000000001,
+  "end": 12.925,
+  "ratio": 1.0
+ },
+ {
+  "char": "Kael",
+  "line_no": 833,
+  "text": "You know something.",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L833.mp3",
+  "start": 12.925,
+  "end": 14.524999999999999,
+  "ratio": 1.0
+ },
+ {
+  "char": "Kael",
+  "line_no": 836,
+  "text": "I won't ask again.",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L836.mp3",
+  "start": 14.524999999999999,
+  "end": 16.38,
+  "ratio": 0.75
+ },
+ {
+  "char": "Kael",
+  "line_no": 1081,
+  "text": "I still believe the crew should have known.",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L1081.mp3",
+  "start": 30.99,
+  "end": 33.595,
+  "ratio": 1.0
+ },
+ {
+  "char": "Kael",
+  "line_no": 1087,
+  "text": "I understand.",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L1087.mp3",
+  "start": 33.595,
+  "end": 34.71,
+  "ratio": 1.0
+ },
+ {
+  "char": "Kael",
+  "line_no": 1106,
+  "text": "They're surrounding us.",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L1106.mp3",
+  "start": 36.95,
+  "end": 38.220000000000006,
+  "ratio": 0.6666666666666666
+ },
+ {
+  "char": "Kael",
+  "line_no": 1173,
+  "text": "No.",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L1173.mp3",
+  "start": 39.910000000000004,
+  "end": 40.49,
+  "ratio": 1.0
+ },
+ {
+  "char": "Kael",
+  "line_no": 1159,
+  "text": "Focus.",
+  "unique": true,
+  "path": "audio/Episode1/vo/kael_L1159.mp3",
+  "start": 45.050000000000004,
+  "end": 45.980000000000004,
+  "ratio": 1.0
+ },
+ {
+  "char": "Selyra",
+  "line_no": 892,
+  "text": "Perhaps identical appearance serves a tactical purpose.",
+  "unique": true,
+  "path": "audio/Episode1/vo/selyra_L892.mp3",
+  "start": 22.16,
+  "end": 26.21,
+  "ratio": 1.0
+ },
+ {
+  "char": "Selyra",
+  "line_no": 956,
+  "text": "A designation.",
+  "unique": true,
+  "path": "audio/Episode1/vo/selyra_L956.mp3",
+  "start": 28.419999999999998,
+  "end": 29.96,
+  "ratio": 1.0
+ },
+ {
+  "char": "Selyra",
+  "line_no": 1128,
+  "text": "Their formation leaves only one escape vector.",
+  "unique": true,
+  "path": "audio/Episode1/vo/selyra_L1128.mp3",
+  "start": 31.47,
+  "end": 35.43,
+  "ratio": 0.8571428571428571
+ },
+ {
+  "char": "Selyra",
+  "line_no": 1225,
+  "text": "It is what Astra...",
+  "unique": true,
+  "path": "audio/Episode1/vo/selyra_L1225.mp3",
+  "start": 60.940000000000005,
+  "end": 62.470000000000006,
+  "ratio": 0.75
+ },
+ {
+  "char": "Selyra",
+  "line_no": 1226,
+  "text": "...could have become.",
+  "unique": true,
+  "path": "audio/Episode1/vo/selyra_L1226.mp3",
+  "start": 62.92,
+  "end": 65.24000000000001,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 655,
+  "text": "I'm finding the engineer.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L655.mp3",
+  "start": 0.020000000000000018,
+  "end": 1.22,
+  "ratio": 0.75
+ },
+ {
+  "char": "Tessa",
+  "line_no": 890,
+  "text": "It wasn't just similar.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L890.mp3",
+  "start": 2.92,
+  "end": 5.0649999999999995,
+  "ratio": 0.75
+ },
+ {
+  "char": "Tessa",
+  "line_no": 891,
+  "text": "It was identical.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L891.mp3",
+  "start": 5.0649999999999995,
+  "end": 7.035,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 847,
+  "text": "This transmission predates the pirate raids.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L847.mp3",
+  "start": 7.035,
+  "end": 10.51,
+  "ratio": 0.8333333333333334
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1171,
+  "text": "The station just powered itself up.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1171.mp3",
+  "start": 12.81,
+  "end": 15.889999999999999,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 954,
+  "text": "He kept mentioning...",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L954.mp3",
+  "start": 18.529999999999998,
+  "end": 21.02,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 955,
+  "text": "The First.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L955.mp3",
+  "start": 21.02,
+  "end": 21.75,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1122,
+  "text": "Three pirate fleets...",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1122.mp3",
+  "start": 22.38,
+  "end": 23.445,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1123,
+  "text": "...all converging on our position.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1123.mp3",
+  "start": 23.445,
+  "end": 25.175,
+  "ratio": 0.8
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1126,
+  "text": "They want us to.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1126.mp3",
+  "start": 25.175,
+  "end": 26.939999999999998,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1303,
+  "text": "...completely wiped.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1303.mp3",
+  "start": 30.119999999999997,
+  "end": 31.945,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1304,
+  "text": "No memories.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1304.mp3",
+  "start": 31.999999999999996,
+  "end": 33.66,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1305,
+  "text": "No identity.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1305.mp3",
+  "start": 33.66,
+  "end": 35.215,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1072,
+  "text": "And who asks me to fix things...",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1072.mp3",
+  "start": 35.215,
+  "end": 37.72,
+  "ratio": 1.0
+ },
+ {
+  "char": "Tessa",
+  "line_no": 1073,
+  "text": "...that aren't broken.",
+  "unique": true,
+  "path": "audio/Episode1/vo/tessa_L1073.mp3",
+  "start": 37.72,
+  "end": 39.010000000000005,
+  "ratio": 0.6666666666666666
+ }
+]

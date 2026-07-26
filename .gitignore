@@ -16,3 +16,7 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+
+# VO pipeline scratch (whisper models, raw word-level transcripts) — regenerate
+# via extract_ep1_lines.py / align_ep1.py; only the final manifest is committed.
+ep1_vo_work/

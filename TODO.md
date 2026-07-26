@@ -568,4 +568,56 @@ Previously restricted/unlisted. Launch materials built same day (not part of the
 **"Star Gear Odyssey"** (with a Japanese subtitle) while every in-fiction UI element (the VN header,
 the Field Manual) says **"STARGEAR"**. Pick one and fix the mismatch before the next release.
 
+---
+
+## Episode 1 "Echoes of Steel" — new launchable started 2026-07-26
+
+Real Episode 1 (not to be confused with `episode1.html`, which is Episode 0 — see the naming note in
+`episode-numbering`). Own files, own itch.io page, own save namespace: **`ep1.html`** (VN shell,
+forked from `episode1.html`) and **`ep1_flight.html`** (world/combat engine, forked from
+`iso_grid_prototype.html`). Source script: `Episode 1 Prep/Star_Gear_Ep1_Script.txt`, 57 scenes / 7
+parts. Full plan at the time of forking is `we-re-going-to-start-humming-hoare.md`.
+
+**Done this pass:**
+- **Save system**: `stargear_ep1_*` localStorage namespace (never collides with Episode 0, even
+  served from the same origin locally). Title screen's "Load from file…" auto-detects a native
+  Episode 1 save (`story.episode==="ep1"`, resumes in place) vs. an Episode 0 save (treated as a
+  **carry-over** — keeps crew/ships/wallet/scan-codex, drops everything tied to the old map, starts
+  Episode 1 fresh from Scene 1). Skips Episode 0's opening cinematic (wrong VO/stills) — goes
+  straight into Scene 1's own cold open.
+- **Full script authored** into `ep1.html`'s `EP1` array — 38 beats (26 dialogue / 8 travel / 4
+  combat) covering all 57 scenes. New cast (Elias Mercer, Elara Quinn, Chief Rowan, Captain Raze,
+  Dax, A-17) added to `CHARS`/`CHAR_ART`, placeholder-first (no art yet except CG01 "Burning Convoy,"
+  already-finished art copied into `Assets/CG/`). Bridge / Bridge Red Alert backgrounds reused from
+  Episode 0; every other background is still a labelled placeholder.
+- **Helios Reach world** built in `ep1_flight.html`: Cogwheel Station, the Mining Convoy, the Silent
+  Graveyard, GearWorks Relay and the Iron Forge are real, reachable zones (`REGION_NAME`/
+  `STORY_TARGETS` re-themed; the internal region enum/procedural map code untouched — zero risk to
+  Episode 0). Two new bosses registered via `registerBoss()`: `dax` (mid-boss, core + 2 escorts) and
+  `raze` (final boss — A-17 shields him until destroyed, then a reactor-overload race, mirroring
+  patterns already proven by Episode 0's bounty bosses). Story Battles 1 and 3 need no new code — the
+  existing generic multi-enemy combat path handles them.
+- **Old Episode 0 trade stations removed** (Steve: "we'll add new stations for this sector in
+  time") — Veil Anchorage / Quarry Station / Salvage Reach are gone from the map, along with their
+  three dependent side missions (would've been permanently uncompletable otherwise). Cogwheel Station
+  is the only dockable station in the sector for now.
+- **NPC "duo" staging generalized**: Episode 0's Crimson-Nova-only mechanism (NPC pinned right, only
+  the current + previous crew speaker on the left) now works for any NPC via a `duoGuest` field on VN
+  steps — applied to every Elias/Quinn/Rowan/Dax/Raze(+A-17) conversation in the script. Fixed a bug
+  found in the first local playtest: switching out of a duo conversation left the guest and rotating
+  crew stuck on stage (normal staging only ever adds people, never removes them) — duoGuest changes
+  now clear the stage first.
+- **Itch build verified**: `build_itch_ep1.ps1` (forked from `build_itch.ps1`) ran end-to-end —
+  526 files, 154.7 MB, `index.html` at zip root, zero backslash entries.
+- **First VO pass cut and wired**: 126 line clips in `audio/Episode1/vo/` (cut from the
+  `<Name>_ep1.mp3` keeper masters, now living in `audio/Episode1/` — `Yumi_ep1.mp3` corrected to
+  `Astra_ep1.mp3`, it was a misnamed file, not a new character), wired into `ep1.html`'s `VO_MAP`
+  (124 entries) plus 2 inline `vo:` overrides for lines whose text repeats elsewhere. Validated:
+  every `VO_MAP` key matches a real dialogue line, every referenced clip exists on disk.
+
+**Not done yet:** a real in-browser playtest (only static/syntax validation so far); art for the six
+new characters and the ~16 new backgrounds/remaining CGs; the rest of the line-by-line VO; new Helios
+Reach trade stations to replace the removed ones; a decision on what to do with the still-present,
+un-reskinned Crimson Nova hangar; boss balance for `dax`/`raze` (mechanics-first, not yet playtested).
+
 
