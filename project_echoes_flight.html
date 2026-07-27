@@ -1607,6 +1607,15 @@ function update(dt) {
   // a tip that fired while a Y/N prompt was up waits its turn here
   if (!tutorialOpen && !objectivePrompt && !dockPrompt && _tutQueue.length) showTutorial(_tutQueue.shift());
   if (menuOpen || mapOpen || objectivePrompt || dockPrompt || hangarPrompt || bountyPrompt || sceneActive || tutorialOpen) return;   // menu / star map / prompt / tutorial / VN scene up → game paused
+  // Part 2's "Rowan calls over comms" beat — fires once noteOptionalActivity() has seen
+  // enough free-roam activity, but only once nothing else has the sim paused (this line
+  // only runs once all of the above are already false, so combat is the one thing left
+  // to check for).
+  if (fleetCallPending && !combat) {
+    fleetCallPending = false; fleetCalled = true; saveFleetCalled();
+    const embedded = window.parent && window.parent !== window;
+    if (embedded) { sceneActive = true; window.parent.postMessage({ type: "playScene", id: "fleet_call" }, "*"); }
+  }
   // per-tile rise/drop
   for (let x = 0; x < GRID_SIZE; x++)
     for (let y = 0; y < GRID_SIZE; y++) tickTileAnim(world.grid[x][y], dt);
@@ -1690,15 +1699,31 @@ function update(dt) {
   }
 
   // story waypoint: in travel mode, reaching the objective offers to continue.
-  // Skipped for the "station" stage — that waypoint IS Cogwheel Station, so docking
+  // Skipped for "station"/"station2" — both waypoints ARE Cogwheel Station, so docking
   // (its own Y/N prompt, same coordinates) is the real confirm gate; a second
   // "progress the story?" popup on top of it would be redundant and would fire
-  // reachedObjective with nothing on the other end to receive it.
-  if (storyTarget && !MISSION_MODE && !objectiveReached && storyStage !== "station") {
+  // reachedObjective with nothing on the other end to receive it. Skipped for "station3"
+  // too, but for the opposite reason — that leg (the fleet's arrival) is deliberately NOT
+  // a confirm-first beat, see the proximity trigger just below.
+  if (storyTarget && !MISSION_MODE && !objectiveReached &&
+      storyStage !== "station" && storyStage !== "station2" && storyStage !== "station3") {
     const px = world.worldOriginX + CENTER, py = world.worldOriginY + CENTER;
     const within = Math.hypot(px - storyTarget.ax, py - storyTarget.ay) <= ARRIVE_DIST;
     if (within && !objectivePrompt && !objectiveDeclined) objectivePrompt = true;  // ask first
     if (!within) objectiveDeclined = false;                                         // re-arm after leaving
+  }
+
+  // Part 2's closing beat: "as the player approaches [Cogwheel Station], large ships
+  // begin dropping out of hyperspace... no dialogue, just the visual." Unlike every other
+  // story waypoint this one isn't a confirm-first prompt — it just happens, at a wider
+  // radius than ARRIVE_DIST so the player sees it coming rather than bumping into it.
+  if (storyStage === "station3" && storyTarget && !sceneActive && !MISSION_MODE) {
+    const px = world.worldOriginX + CENTER, py = world.worldOriginY + CENTER;
+    const within = Math.hypot(px - storyTarget.ax, py - storyTarget.ay) <= FLEET_ARRIVE_DIST;
+    if (within) {
+      const embedded = window.parent && window.parent !== window;
+      if (embedded) { sceneActive = true; window.parent.postMessage({ type: "playScene", id: "fleet_arrival" }, "*"); }
+    }
   }
 
   // Flying into an accepted bounty's target offers to engage that boss fight. Like the
@@ -3163,6 +3188,7 @@ function render() {
   drawPrimaryObjective();                 // pinned objective panel, top-left
   drawMiniMap();                          // corner radar: local charted space + contacts
   drawScanHint();                         // "F — SCAN" prompt, bottom-left
+  drawFleetCallHint();                    // Part 2 post-debrief progress counter, just above it
 
   // sector map overlay sits on top of the world; pause menu on top of everything
   if (mapOpen) drawMapView();
@@ -3753,6 +3779,11 @@ function doScan() {
   scanPulse = { t: 0, dur: 900, r: R };
   sfx("scan");
   showTutorial("scan");                     // first sweep → what a scan is for
+  // Part 2: any real sweep counts toward Rowan's call, not just one that turns up
+  // something — a find is only ~50% likely per sweep (see poiAt()'s density comment),
+  // so gating on a successful find made the "do 2 things" beat luck-dependent and,
+  // combined with no on-screen feedback, read as broken (Steve, first real playtest).
+  noteOptionalActivity();
   // a "scan at the marker" step only counts if we're actually at the marker
   { const st = activeSideStep();
     if (st && st.mark) { const mk = st.mark(); if (mk && nearPoint(mk.ax, mk.ay, 4)) _sideScanned = true; } }
@@ -3832,6 +3863,11 @@ function drawScan(dt) {
   }
 }
 // small always-on prompt so the verb is discoverable at all
+// Both bottom-left hints below need to clear the testing-mode SKIP button (drawn
+// later, on top, in the same bottom-left corner — see drawSkipButton()) when it's
+// showing, or it visually covers them (Steve caught this while verifying the wired-up
+// skip button). 44px clears the button's 34px height plus its own margin.
+function hudHintLift() { return testingMode ? 44 : 0; }
 function drawScanHint() {
   if (combat || menuOpen || mapOpen || objectivePrompt || dockPrompt || bountyPrompt || stationInRange()) return;
   const r = canvas.getBoundingClientRect();
@@ -3843,7 +3879,25 @@ function drawScanHint() {
   ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
   ctx.fillStyle = ready ? "rgba(91,227,196,0.85)" : "rgba(150,200,220,0.35)";
   ctx.fillText(ready ? "F — SCAN  (range " + scanRange() + ")"
-                     : "scanning… " + Math.ceil(scanCooldown / 1000) + "s", 16, visH - 18);
+                     : "scanning… " + Math.ceil(scanCooldown / 1000) + "s", 16, visH - 18 - hudHintLift());
+  ctx.restore();
+}
+// Part 2's post-debrief window has no waypoint/pin to show (there's nowhere specific
+// to go), which read as the game being stuck with zero on-screen feedback (Steve,
+// first real playtest — "nothing triggered"). A small persistent counter here is the
+// fix: it's visible the whole time this stage is active and counts up live.
+function drawFleetCallHint() {
+  if (!part2Debriefed || fleetCalled) return;
+  if (combat || menuOpen || mapOpen || objectivePrompt || dockPrompt || bountyPrompt || stationInRange()) return;
+  const r = canvas.getBoundingClientRect();
+  const clientH = document.documentElement.clientHeight || r.height;
+  let visH = clientH - r.top; if (!(visH > 200)) visH = r.height; visH = Math.min(visH, r.height);
+  ctx.save();
+  ctx.font = "11px Consolas, monospace";
+  ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = "rgba(242,193,78,0.85)";
+  ctx.fillText("Scan or fight to draw Rowan's fleet in  (" +
+    Math.min(part2Activity, PART2_ACTIVITY_NEEDED) + "/" + PART2_ACTIVITY_NEEDED + ")", 16, visH - 36 - hudHintLift());
   ctx.restore();
 }
 
@@ -3886,6 +3940,62 @@ function saveCrimsonHire() {
 const ROWAN_KEY = "echoes_rowan_briefed_v1";
 let rowanBriefed = false;
 function saveRowanBriefed() { try { localStorage.setItem(ROWAN_KEY, rowanBriefed ? "1" : "0"); } catch (e) {} }
+// Part 2 (Echoes/Echoes_Part2.txt) progress flags — same standalone "seen it" pattern as
+// ROWAN_KEY above. part2Debriefed: has Rowan's office scene (Scene 7) played? fleetCalled:
+// has Rowan's "we've got company" radio call fired? part2Activity counts qualifying
+// free-roam actions (a scan find, a non-mission combat win) taken during the optional
+// window between the debrief and the fleet call — see noteOptionalActivity()/
+// fleetCallPending (consumed in update()).
+const PART2_KEY = "echoes_part2_debriefed_v1";
+const PART2_ACT_KEY = "echoes_part2_activity_v1";
+const FLEET_CALLED_KEY = "echoes_fleet_called_v1";
+let part2Debriefed = false, fleetCalled = false, part2Activity = 0;
+let fleetCallPending = false;             // threshold met, waiting for a clear frame to play the scene
+const PART2_ACTIVITY_NEEDED = 2;          // "one or two optional activities" per the script
+function savePart2Debriefed() { try { localStorage.setItem(PART2_KEY, part2Debriefed ? "1" : "0"); } catch (e) {} }
+function saveFleetCalled() { try { localStorage.setItem(FLEET_CALLED_KEY, fleetCalled ? "1" : "0"); } catch (e) {} }
+function savePart2Activity() { try { localStorage.setItem(PART2_ACT_KEY, String(part2Activity)); } catch (e) {} }
+function noteOptionalActivity() {
+  if (!part2Debriefed || fleetCalled) return;
+  part2Activity++; savePart2Activity();
+  if (part2Activity >= PART2_ACTIVITY_NEEDED) fleetCallPending = true;
+}
+// Part 3 (Echoes/Echoes_Part3.txt) progress flags — same standalone "seen it" pattern.
+// truthBriefed: has the Scene 8-12 cutscene (Astra's origin, Raze's ultimatum, Crimson's
+// arrival, the evacuation order) played? evacWon: has the Evacuation Escort battle that
+// closes it been cleared? evacActive: that battle is currently in progress (transient —
+// not persisted, same as the rest of live combat state; see startEvacMission()).
+const TRUTH_KEY = "echoes_truth_briefed_v1";
+const EVAC_WON_KEY = "echoes_evac_won_v1";
+let truthBriefed = false, evacWon = false, evacActive = false;
+function saveTruthBriefed() { try { localStorage.setItem(TRUTH_KEY, truthBriefed ? "1" : "0"); } catch (e) {} }
+function saveEvacWon() { try { localStorage.setItem(EVAC_WON_KEY, evacWon ? "1" : "0"); } catch (e) {} }
+// The script's "Escort three civilian transports / destroy enemy interceptors / prevent
+// station damage" plays out as one real combat encounter — the actual escort/station-
+// damage tracking the script names has no system to hook into yet (same call Part 2 made
+// for its "optional activities": represent the beat with real gameplay that already
+// exists rather than building new subsystems for it). Crimson formally joins as an ally
+// from here on (not a paid hire) — that's the "AI support" the script calls for.
+function startEvacMission() {
+  crimsonHired = true; crimsonPos = null; saveCrimsonHire();
+  evacActive = true;
+  const px = playerAX(), py = playerAY();
+  // Guarantee a real wave regardless of what happened to be nearby when the cutscene
+  // ended — clear any stray hostiles close enough to blend into the count, then place
+  // a fresh cluster just outside the ship so startCombat()'s cluster-detection (which
+  // reads AGGRO_TILES) picks up all of them.
+  enemies = enemies.filter(e => !e.hostile || Math.hypot(e.ax - px, e.ay - py) > AGGRO_TILES);
+  let trigger = null;
+  for (let i = 0; i < 4; i++) {
+    const e = spawnEnemy(true);
+    const ang = Math.random() * 6.283, dist = 3 + Math.random() * 3;
+    e.ax = px + Math.cos(ang) * dist; e.ay = py + Math.sin(ang) * dist;
+    enemies.push(e);
+    if (!trigger) trigger = e;
+  }
+  startCombat(trigger);   // builds combat.log — clog() needs to run after this, not before
+  clog("MISSION: Defend Cogwheel Station — hold the interceptors off the evacuation.");
+}
 // Enter the hangar → ask the parent (episode1) to play the scene. Full scene the first
 // time, a short greeting after. If we're running standalone (no episode1 parent) there's
 // no VN engine, so just note it and don't soft-lock.
@@ -4043,6 +4153,21 @@ function acceptDock() {
   if (s && s.id === "main_station" && !rowanBriefed) {
     const embedded = window.parent && window.parent !== window;
     if (embedded) { sceneActive = true; window.parent.postMessage({ type: "playScene", id: "cogwheel_arrival" }, "*"); return; }
+  }
+  // Part 2 Scene 7 (Rowan's Office): the second Cogwheel Station dock, once the belt/relay
+  // leg is done and storyStage has advanced to "station2" — same hand-off pattern as above.
+  if (s && s.id === "main_station" && rowanBriefed && storyStage === "station2" && !part2Debriefed) {
+    const embedded = window.parent && window.parent !== window;
+    if (embedded) { sceneActive = true; window.parent.postMessage({ type: "playScene", id: "rowan_debrief" }, "*"); return; }
+  }
+  // Part 3 Scenes 8-12 (Astra's origin, Raze's ultimatum, Crimson's arrival, the
+  // evacuation order): the third Cogwheel Station dock, once the fleet has arrived
+  // (fleetCalled implies rowanBriefed/part2Debriefed already happened, in order) —
+  // same hand-off pattern again. Ends by dropping straight into the Evacuation Escort
+  // battle — see startEvacMission(), called from the sceneDone listener below.
+  if (s && s.id === "main_station" && fleetCalled && !truthBriefed) {
+    const embedded = window.parent && window.parent !== window;
+    if (embedded) { sceneActive = true; window.parent.postMessage({ type: "playScene", id: "the_truth" }, "*"); return; }
   }
   dockAt(s);
 }
@@ -4652,8 +4777,16 @@ const NEXUS_ARENA_CELL = { gx: 9, gy: 4 };   // grid cell the fortress centre ma
 // the current stage is a mutable variable advanced in place — see setStoryStage(),
 // called from the cogwheel_arrival sceneDone handler below.
 const STORY_TARGETS = {
-  station: { ax: MAIN_STATION_POS.ax, ay: MAIN_STATION_POS.ay, label: "Dock at Cogwheel Station" },
-  belt:    { ax: 0, ay: -55, label: "Investigate the Asteroid Belt" },
+  station:  { ax: MAIN_STATION_POS.ax, ay: MAIN_STATION_POS.ay, label: "Dock at Cogwheel Station" },
+  belt:     { ax: 0, ay: -55, label: "Investigate the Asteroid Belt" },
+  // Part 2 (Echoes/Echoes_Part2.txt): belt -> relay -> back to Cogwheel Station for the
+  // debrief -> (after the optional-activity window) back again for the fleet arrival.
+  // "station2"/"station3" are the same physical coordinates as "station" under a
+  // different id, so each leg gets its own dock/arrival gating (see setStoryStage callers
+  // and the objectivePrompt guard below) without colliding with the Part 1 stage.
+  relay:    { ax: COMMS_RELAY.ax, ay: COMMS_RELAY.ay, label: "Investigate the Communications Relay" },
+  station2: { ax: MAIN_STATION_POS.ax, ay: MAIN_STATION_POS.ay, label: "Report to Cogwheel Station" },
+  station3: { ax: MAIN_STATION_POS.ax, ay: MAIN_STATION_POS.ay, label: "Return to Cogwheel Station" },
 };
 const STORY_GOTO = (location.hash.match(/goto=([a-z]+)/i) || [])[1] || null;
 // Episode 0 always arrived via a fresh embed with the stage baked into the URL —
@@ -4668,6 +4801,7 @@ function setStoryStage(id) {
   objectivePrompt = false; objectiveDeclined = false;
 }
 const ARRIVE_DIST = 2;                    // tiles — how close counts as "arrived" (was 1: too tight, made players circle the marker hunting for the popup)
+const FLEET_ARRIVE_DIST = 14;             // tiles — Part 2's "station3" leg triggers wide, so the fleet is seen arriving rather than already there
 let objectiveReached = false;
 const BOUNTY_ARRIVE_DIST = 2;             // tiles — how close to the mark starts the boss fight
 let bountyDeclined = false;               // set after a bounty fight so it doesn't instantly re-trigger
@@ -4696,10 +4830,20 @@ function savePin() { try { localStorage.setItem(PIN_KEY, JSON.stringify(primaryO
 function setPin(kind, id) { primaryObjective = (kind === "story") ? { kind } : { kind, id }; savePin(); }
 function clearPin() { primaryObjective = null; savePin(); }
 function isPinned(kind, id) { const p = primaryObjective; return !!p && p.kind === kind && (kind === "story" || p.id === id); }
+// Part 2's free-roam window (between the debrief and the fleet call) has no
+// storyTarget — nowhere specific to send the player — but it's still a real, pinnable
+// story objective (Steve: "make sure the Explore and Investigate story mission gets
+// pinned"). Shared so primaryInfo()/normalizePin() agree on when it counts.
+function part2ExploreActive() { return part2Debriefed && !fleetCalled; }
 // Resolve the pin to { tint, label, count, target } for the HUD, or null if it's gone/finished.
 function primaryInfo() {
   const p = primaryObjective; if (!p) return null;
   if (p.kind === "story") {
+    if (part2ExploreActive()) {
+      return { tint: "126,231,135", label: "Explore & Investigate",
+        count: "(" + Math.min(part2Activity, PART2_ACTIVITY_NEEDED) + "/" + PART2_ACTIVITY_NEEDED + ")",
+        target: null };
+    }
     if (!storyTarget || objectiveReached) return null;
     return { tint: "126,231,135", label: storyTarget.label, count: "", target: storyTarget };
   }
@@ -4719,14 +4863,26 @@ function primaryInfo() {
 }
 function normalizePin() {                 // drop a pin whose objective no longer exists / is finished
   if (!primaryObjective) return;
-  if (primaryObjective.kind === "story") { if (!storyTarget) primaryObjective = null; return; }
+  if (primaryObjective.kind === "story") { if (!storyTarget && !part2ExploreActive()) primaryObjective = null; return; }
   if (!primaryInfo()) primaryObjective = null;
 }
 
+// Story stages whose "progress the story?" YES hands off to a standalone VN scene in
+// the parent — see the "reachedObjective" handler in project_echoes.html. Every other
+// stage (station/station2/station3) skips this Y/N entirely (docking or an automatic
+// proximity trigger is the real gate for those — see the guards above), so this list
+// only ever needs to cover the ones that actually reach here.
+const REACHED_OBJECTIVE_STAGES = new Set(["belt", "relay"]);
 function proceedObjective() {             // YES — continue the episode
   objectivePrompt = false; objectiveReached = true;
   saveFog();                             // capture this leg's exploration before the segment ends
-  try { window.parent.postMessage({ type: "reachedObjective" }, "*"); } catch (e) {}
+  // Part 2 (belt/relay legs): the parent maps `stage` to which standalone scene to play.
+  // sceneActive pauses the sim the same way acceptDock()/enterHangar() do while their
+  // scenes play — otherwise flight would keep simulating, unseen, behind the VN.
+  if (REACHED_OBJECTIVE_STAGES.has(storyStage)) {
+    const embedded = window.parent && window.parent !== window;
+    if (embedded) { sceneActive = true; window.parent.postMessage({ type: "reachedObjective", stage: storyStage }, "*"); }
+  }
 }
 function declineObjective() {             // NO — turn 180° and pull back three tiles
   objectivePrompt = false; objectiveDeclined = true;
@@ -6100,11 +6256,17 @@ function finishEnemyTurn() {
 }
 function winCombat() {
   const bounty = combat.bountyId ? BOUNTY_BY_ID[combat.bountyId] : null;
-  combat.banner = { text: bounty ? "BOUNTY DOWN" : MISSION_MODE ? "MISSION COMPLETE" : "ENEMIES DESTROYED",
+  const scripted = MISSION_MODE || evacActive;   // a story-mission-flavored win, not just a free-roam skirmish
+  combat.banner = { text: bounty ? "BOUNTY DOWN" : scripted ? "MISSION COMPLETE" : "ENEMIES DESTROYED",
                     kind: "info", t: 1400, dur: 1400 };
-  combat.phase = "won"; combat.endTimer = MISSION_MODE ? 1300 : 950;
+  combat.phase = "won"; combat.endTimer = scripted ? 1300 : 950;
   if (bounty) { completeBounty(bounty.id); combat.bountyId = null; }   // pays the coin + fires the achievement
   nexusAwake = false;                        // Nexus defeated → powers back down to dormant
+  if (!MISSION_MODE) noteOptionalActivity(); // Part 2: a free-roam kill counts toward Rowan's call (no-ops once fleetCalled)
+  if (evacActive) {                          // Part 3: the Evacuation Escort battle is cleared
+    evacActive = false; evacWon = true; saveEvacWon();
+    clog("The interceptor wave is down. The evacuation corridor holds — for now.");
+  }
   if (MISSION_MODE && !missionDone) {        // tell the episode orchestrator the fight is won
     missionDone = true;
     try { window.parent.postMessage({ type: "missionComplete" }, "*"); } catch (e) {}
@@ -7195,8 +7357,10 @@ function tickCombat(dt) {
       if (combat.phase === "lost") showTutorial("defeat");
       // A lost STORY fight restages instead of ending the run or dumping the player
       // into an empty free-roam they can't advance out of: same battle, same staging,
-      // but carrying the modules it just wrecked.
-      if (combat.phase === "lost" && MISSION_MODE) {
+      // but carrying the modules it just wrecked. evacActive gets the same treatment —
+      // the Evacuation Escort battle (Part 3) is just as unavoidable as a MISSION_MODE
+      // fight, it just isn't staged through that hash-driven system (see startEvacMission).
+      if (combat.phase === "lost" && (MISSION_MODE || evacActive)) {
         const trigger = combat.trigger || null;
         combat = null;
         startCombat(trigger);                              // rebuilds the same staged encounter
@@ -8091,10 +8255,61 @@ const CONFIRM_END_KEY = "echoes_confirmend_v1";
 let confirmEndOn = true;
 try { confirmEndOn = localStorage.getItem(CONFIRM_END_KEY) !== "0"; } catch (e) {}
 function setConfirmEndOn(on) { confirmEndOn = on; try { localStorage.setItem(CONFIRM_END_KEY, on ? "1" : "0"); } catch (e) {} }
-// jump past the current objective: win a fight, or mark a travel objective reached
+// jump past the current gate, one step per click, so a full test pass through the
+// story is clicks instead of minutes of flying. Episode 0's version of this
+// (iso_grid_prototype.html/episode1.html) only ever needed two cases — a storyTarget
+// arrival Y/N, and combat — because every Episode 0 story beat was a #goto=<id>
+// travel leg with no other kind of gate. Project Echoes' Part 1-3 chain adds gate
+// shapes Episode 0 never had (a dock triggering a cutscene, a wide-radius proximity
+// trigger with no Y/N, an activity-counter gate), so each of those gets a case too —
+// teleporting the ship in first when a gate needs the player somewhere specific,
+// otherwise just answering the prompt that's already up.
 function skipObjective() {
   if (combat) { if (combat.phase === "player" || combat.phase === "enemy") winCombat(); return; }
-  proceedObjective();
+  if (objectivePrompt) { proceedObjective(); return; }
+  if (dockPrompt) { acceptDock(); return; }
+  // Part 1/2's belt & relay legs: the normal arrival Y/N. Jump straight to the
+  // waypoint and answer it — proceedObjective() doesn't require objectivePrompt to
+  // already be showing, so this works from anywhere on the map.
+  if (storyTarget && REACHED_OBJECTIVE_STAGES.has(storyStage)) {
+    world.worldOriginX = storyTarget.ax - CENTER; world.worldOriginY = storyTarget.ay - CENTER;
+    proceedObjective();
+    return;
+  }
+  // Cogwheel Station dock-gated cutscenes — Part 1's briefing ("station") and Part
+  // 2's debrief ("station2"). Jump to the station, raise the dock prompt, accept it.
+  if (storyStage === "station" || storyStage === "station2") {
+    world.worldOriginX = MAIN_STATION_POS.ax - CENTER; world.worldOriginY = MAIN_STATION_POS.ay - CENTER;
+    dockPrompt = TRADE_BY_ID["main_station"];
+    acceptDock();
+    return;
+  }
+  // Part 2's free-roam "explore & investigate" window (see noteOptionalActivity()) —
+  // force the threshold instead of making a tester actually scan or fight twice.
+  // fleetCallPending is consumed by the very next update() tick, same as it would be
+  // for a real player who just hit the threshold naturally.
+  if (part2Debriefed && !fleetCalled) {
+    part2Activity = PART2_ACTIVITY_NEEDED; savePart2Activity();
+    fleetCallPending = true;
+    return;
+  }
+  // "station3" — the fleet-arrival close is a wide-radius proximity trigger with no
+  // Y/N (see the check in update()). Jump within range and let that fire naturally
+  // next tick, rather than duplicating its trigger here.
+  if (storyStage === "station3") {
+    world.worldOriginX = MAIN_STATION_POS.ax - CENTER; world.worldOriginY = MAIN_STATION_POS.ay - CENTER;
+    return;
+  }
+  // Part 3's dock into "the_truth" — same shape as the station/station2 case above,
+  // reached once the fleet has arrived but the player hasn't gone back in yet.
+  if (fleetCalled && !truthBriefed && !sceneActive) {
+    world.worldOriginX = MAIN_STATION_POS.ax - CENTER; world.worldOriginY = MAIN_STATION_POS.ay - CENTER;
+    dockPrompt = TRADE_BY_ID["main_station"];
+    acceptDock();
+    return;
+  }
+  // Nothing left to skip past yet — Part 3 (or the whole build) is as far as it goes.
+  setScanMsg("Nothing left to skip — you're caught up.");
 }
 // ============================================================
 // SHIP DATABASE (codex) — the Ship Database menu shows silhouettes of every
@@ -8300,7 +8515,18 @@ try {
     const rawCH = localStorage.getItem(CRIMSON_HIRE_KEY);
     if (rawCH) { try { const r = JSON.parse(rawCH); crimsonHired = !!r.h; crimsonFreeUsed = !!r.f; } catch (e) {} }
     rowanBriefed = localStorage.getItem(ROWAN_KEY) === "1";   // played the Part 1 briefing yet?
-    if (rowanBriefed) setStoryStage("belt");                  // already past the dock — resume on the belt leg
+    part2Debriefed = localStorage.getItem(PART2_KEY) === "1";       // played Rowan's Part 2 office scene yet?
+    fleetCalled = localStorage.getItem(FLEET_CALLED_KEY) === "1";   // has Rowan's "we've got company" call fired?
+    part2Activity = parseInt(localStorage.getItem(PART2_ACT_KEY), 10) || 0;
+    truthBriefed = localStorage.getItem(TRUTH_KEY) === "1";     // played Part 3's Scenes 8-12 yet?
+    evacWon = localStorage.getItem(EVAC_WON_KEY) === "1";       // cleared the Evacuation Escort battle?
+    // This coarse (non-save-slot) resume only tracks whether each named beat has fired
+    // yet, not exactly which waypoint a mid-leg save left off on — the in-game Save/Load
+    // menu (loadFromSlot) carries the precise storyStage instead and takes over from here.
+    if (truthBriefed) setStoryStage(null);                      // past Part 3's cutscene — no forced target yet
+    else if (fleetCalled) setStoryStage("station3");
+    else if (part2Debriefed) setStoryStage(null);              // between the debrief and the fleet call — no forced target
+    else if (rowanBriefed) setStoryStage("belt");               // already past the dock — resume on the belt leg
   } else {
     localStorage.removeItem(ECON_KEY); localStorage.removeItem(BROKEN_KEY);
     localStorage.removeItem(OWNED_KEY); localStorage.removeItem(BOUNTY_KEY);
@@ -8315,7 +8541,12 @@ try {
     localStorage.removeItem(CRIMSON_HIRE_KEY);   // ...and never hired him or spent the free battle
     crimsonHired = false; crimsonFreeUsed = false;
     localStorage.removeItem(ROWAN_KEY);          // ...and never had the Part 1 briefing
-    rowanBriefed = false; setStoryStage("station");
+    rowanBriefed = false;
+    localStorage.removeItem(PART2_KEY); localStorage.removeItem(FLEET_CALLED_KEY); localStorage.removeItem(PART2_ACT_KEY);
+    part2Debriefed = false; fleetCalled = false; part2Activity = 0;   // ...and never touched Part 2 either
+    localStorage.removeItem(TRUTH_KEY); localStorage.removeItem(EVAC_WON_KEY);
+    truthBriefed = false; evacWon = false;   // ...and never touched Part 3 either
+    setStoryStage("station");
     // Seed capital. Starting on 0 coin put the commodity market out of reach until you'd
     // fought and sold scrap, so most of a first session never saw the trade loop at all.
     // ~2 lots of ore: enough to learn the system, not enough to skip earning it.
@@ -8347,11 +8578,13 @@ function readStoryProgress() {
 }
 function saveSnapshot() {
   return {
-    v: 9, at: Date.now(),                // v3 econ.basis + intel; v4 crew swaps; v5 waypoint; v6 pinned objective; v7 met Crimson; v8 Crimson hire state + free-battle flag; v9 Part 1 story stage
+    v: 11, at: Date.now(),               // v3 econ.basis + intel; v4 crew swaps; v5 waypoint; v6 pinned objective; v7 met Crimson; v8 Crimson hire state + free-battle flag; v9 Part 1 story stage; v10 Part 2 story stage; v11 Part 3 story stage
     creweq: (() => { const m = {}; for (const c of CREW) m[c.name] = c.slot0.equipped; return m; })(),
     crimsonMet,                          // whether the Crimson Nova scene has played
     crimsonHired, crimsonFreeUsed,       // whether he's currently hired, and whether the free battle is spent
     rowanBriefed, storyStage,            // Part 1 progress — has the Cogwheel briefing played, and which story waypoint is live
+    part2Debriefed, fleetCalled, part2Activity,   // Part 2 progress — see the sceneDone handler + noteOptionalActivity()
+    truthBriefed, evacWon,               // Part 3 progress — see the sceneDone handler + startEvacMission()
 
     ax: world.worldOriginX + CENTER, ay: world.worldOriginY + CENTER,
     facing: world.shipFacing,
@@ -8477,6 +8710,13 @@ function loadFromSlot(i) {
   crimsonMet = !!s.crimsonMet; saveCrimson();         // pre-v7 saves → not yet met
   crimsonHired = !!s.crimsonHired; crimsonFreeUsed = !!s.crimsonFreeUsed; saveCrimsonHire();   // pre-v8 saves → not hired, free battle unused
   rowanBriefed = !!s.rowanBriefed; saveRowanBriefed();   // pre-v9 saves → not yet briefed
+  part2Debriefed = !!s.part2Debriefed; savePart2Debriefed();      // pre-v10 saves → not yet debriefed
+  fleetCalled = !!s.fleetCalled; saveFleetCalled();               // pre-v10 saves → not yet called
+  part2Activity = s.part2Activity | 0; savePart2Activity();       // pre-v10 saves → no activity logged
+  fleetCallPending = false;             // a save is a snapshot in time — never resume mid-trigger
+  truthBriefed = !!s.truthBriefed; saveTruthBriefed();            // pre-v11 saves → not yet briefed
+  evacWon = !!s.evacWon; saveEvacWon();                           // pre-v11 saves → not yet won
+  evacActive = false;                   // a save is a snapshot in time — never resume mid-battle
   setStoryStage(s.storyStage || (rowanBriefed ? "belt" : "station"));
   regenerateGrid();
   // crew action swaps: reset to defaults, then apply what the save carries
@@ -8527,7 +8767,18 @@ function menuItems() {
 
 let optSel = 0;                          // highlighted audio slider in Options
 let manSel = 0, manPage = 0, manScroll = 0;   // Field Manual: index row, open chapter, page scroll
-function requestMissions() { try { window.parent.postMessage({ type: "requestMissions" }, "*"); } catch (e) {} }
+// Sends the live story-progress flags along with the request so the parent's
+// buildMissionLog() (project_echoes.html) can build the STORY tab as a pure function
+// of canonical state — correct whether this is live scene playback or right after
+// loading a save slot, not dependent on which scenes happened to already play out
+// in the parent's own memory this session.
+function requestMissions() {
+  try {
+    window.parent.postMessage({ type: "requestMissions", flags: {
+      rowanBriefed, part2Debriefed, fleetCalled, truthBriefed, evacWon, storyStage
+    } }, "*");
+  } catch (e) {}
+}
 function openMenu()  { menuOpen = true; menuView = "root"; menuSel = 0; requestMissions(); }
 // the character sheet is where an ability is swapped for free — both routes in
 // (Enter on the roster, clicking a portrait) go through here so the tip can't be
@@ -8913,6 +9164,53 @@ window.addEventListener("message", (e) => {
       setStoryStage("belt");
       setPin("story");
       dockPrompt = null; dockDeclined = true;
+    }
+    // ---- Part 2 (Echoes/Echoes_Part2.txt) chain — each standalone scene hands the
+    // story on to the next waypoint the same way cogwheel_arrival does above. ----
+    // Scene 4+5 (wreckage, out at the belt) -> follow the energy trail to the relay.
+    if (e.data.id === "wreckage_scan") {
+      setStoryStage("relay");
+      setPin("story");
+    }
+    // Scene 6 (the dark relay, the transmission) -> head back to report to Rowan.
+    if (e.data.id === "comms_relay") {
+      setStoryStage("station2");
+      setPin("story");
+    }
+    // Scene 7 (Rowan's office) — same "don't auto-dock, don't instantly re-prompt"
+    // treatment as the Part 1 briefing above. Ends Part 2's forced leg: the player is
+    // free to roam (scan, fight) until enough of that activity calls Rowan back —
+    // see noteOptionalActivity()/fleetCallPending in update(). Still a real story pin
+    // even with no map target — see part2ExploreActive() in primaryInfo() (Steve:
+    // "make sure the Explore and Investigate story mission gets pinned").
+    if (e.data.id === "rowan_debrief" && !part2Debriefed) {
+      part2Debriefed = true; savePart2Debriefed();
+      setStoryStage(null);
+      setPin("story");
+      dockPrompt = null; dockDeclined = true;
+    }
+    // "Rowan (Radio): We've got company." -> fly back and watch the fleet arrive.
+    if (e.data.id === "fleet_call") {
+      setStoryStage("station3");
+      setPin("story");
+    }
+    // The fleet drops out of hyperspace. Part 2's content ends here — the next dock
+    // (once the player comes in to find out what's happening) picks up Part 3.
+    if (e.data.id === "fleet_arrival") {
+      setStoryStage(null);
+      clearPin();
+    }
+    // ---- Part 3 (Echoes/Echoes_Part3.txt) ----
+    // Scenes 8-12: Astra's origin, Raze's ultimatum, Crimson's arrival, the evacuation
+    // order. Ends by dropping straight into the Evacuation Escort battle, not another
+    // waypoint — this is the story's first real "you have to fight now" beat, so there's
+    // no free-roam gap to walk away in (script: "as the mission begins..."). Same
+    // "don't auto-dock, don't instantly re-prompt" treatment as the earlier briefings,
+    // even though the station UI was never opened this time (dockAt() never got called).
+    if (e.data.id === "the_truth" && !truthBriefed) {
+      truthBriefed = true; saveTruthBriefed();
+      dockPrompt = null; dockDeclined = true;
+      startEvacMission();
     }
   }
 });

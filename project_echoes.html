@@ -300,12 +300,25 @@ const BACKGROUNDS = {
   BG_BRIDGE:    "StarGear Bridge",
   BG_COGWHEEL:  "Cogwheel Station Dock",
   BG_OPSOFFICE: "Operations Office",
+  BG_RELAY:     "Abandoned Relay",
 };
 const CGS = {
   CG_CRIMSON_FLYBY: ["Crimson's Entrance",
     "His fighter streaks past the StarGear, spinning three unnecessary barrel rolls before flying upside down beside the bridge."],
   CG_SECTOR_MAP: ["The Sector Map",
     "A holographic display: several mining locations highlighted, a communications relay flashing amber, one patrol route ending abruptly."],
+  CG_SECURITY_FEED: ["The Security Feed",
+    "A distorted recording: several unknown androids walk through the relay's corridors. The feed cuts to static."],
+  CG_FLEET_ARRIVAL: ["Something Has Arrived",
+    "Ship after ship drops out of hyperspace above Cogwheel Station — far more than a patrol, far too many to be friendly."],
+  CG_ASTRA_ORIGIN: ["Aegis Transport — Wreckage",
+    "A damaged military transport drifts in silence. A younger Voss boards the wreck, flashlight cutting through the dark — rows of inactive battle androids fill the cargo bay. One pod stands open."],
+  CG_ASTRA_ORIGIN_2: ["A Frightened Face",
+    "A young Astra looks up at Voss from the open pod. Scared. Confused. No older than she looks now."],
+  CG_ENEMY_FLEET: ["The Fleet Reveals Itself",
+    "Dozens of enemy warships emerge from hyperspace, one after another. A gigantic carrier appears behind them — Cogwheel Station is dwarfed."],
+  CG_RAZE_REVEAL: ["Captain Raze",
+    "Elegant black armour. A white cape. Expressionless. The bridge behind him glows red."],
 };
 const CHARS = {
   Voss:  {color:"#46c7ff", i:"V"},
@@ -316,6 +329,8 @@ const CHARS = {
   Astra: {color:"#b481ff", i:"A"},
   Crimson:{color:"#ff5a4a", i:"C"},     // Crimson Nova — the frontier's self-appointed hero
   Rowan: {color:"#8a9bb0", i:"R"},      // Cogwheel Station's commander — no art yet, always the placeholder card
+  "???": {color:"#ff3b3b", i:"?"},      // Part 2's unknown transmission voice (Raze) — identity withheld from the player on purpose
+  Raze:  {color:"#8a1030", i:"Z"},      // Part 3's named reveal — same voice as "???", now on screen. Different initial from Rowan on purpose (both are "R" names)
 };
 // Real character art lives in Assets/char/<NAME>/<Expression>.png — folders are
 // UPPERCASE, basenames are per-character. Rowan has no entry (no art drawn yet), so
@@ -366,6 +381,10 @@ const EXPR_ALIAS = {
   happy:     ["Smile","Laughing","GentleSmile"],           // Tessa has no "Happy" pose
   serious:   ["Determined","Concerned","Stern","Deadpan"], // Kael has no "Serious" pose (Rex/Selyra do — exact match wins first)
   heropose:  ["Heroic_Pose","Sparkling_Confidence","Neutral"], // "Hero Pose" -> enorm "heropose", Crimson's file is Heroic_Pose
+  // Part 2 additions:
+  calm:      ["Stern","Neutral","Thinking"],               // Voss has no "Calm" pose
+  // Part 3 additions:
+  sad:       ["Injured","Concerned","Uneasy","Thinking"],  // nobody has a dedicated "Sad" pose
 };
 const CHAR_DIR = { CRIMSON: "Mercenaries/CRIMSON" };
 function charFile(who, expr){
@@ -487,6 +506,251 @@ const SCENES = {
     {who:"Rowan", expr:"Serious", text:"Call me before you shoot it."},
     {who:"Rex",   expr:"Smile",   text:"No promises."},
     {who:"Rowan", expr:"Serious", text:"...I was afraid you'd say that."},
+  ]},
+
+  // ------------------------------------------------------------------------
+  // PART 2 — Echoes/Echoes_Part2.txt. Triggered from the flight engine's story-
+  // waypoint/dock chain (see setStoryStage/acceptDock + the sceneDone handler in
+  // project_echoes_flight.html). wreckage_scan merges Scenes 4+5 the same way
+  // cogwheel_arrival merged 2+3 — no bg change, no gameplay gap between them.
+  // ------------------------------------------------------------------------
+  wreckage_scan: { scene:"Scene 4 · Strange Wreckage", steps:[
+    {bg:"BG_BRIDGE", clearCast:true, pause:400, quiet:true},
+    {who:"Tessa",  expr:"Focused",    text:"Approaching the mining coordinates."},
+    {who:"Kael",   expr:"Serious",    text:"No friendly transponders."},
+    {who:"Rex",    expr:"Thinking",   text:"Maybe Rowan got bad intel?"},
+    {who:"Selyra", expr:"Analytical", text:"I detect metallic debris."},
+    {who:"Selyra", expr:"Analytical", text:"...It does not match mining equipment."},
+    {who:"Voss",   expr:"Serious",    text:"Bring us in."},
+    {narr:"The wreck resolves on the scopes: a destroyed fighter, pirate markings."},
+    {narr:"No cargo aboard."},
+    {narr:"The damage is precision weapon fire — every shot exact."},
+    // Scene 5 · Scan Results — same bridge, same beat, no gap.
+    {who:"Tessa",  expr:"Concerned",  text:"That wasn't mining equipment..."},
+    {who:"Tessa",  expr:"Concerned",  text:"It was a pirate ship."},
+    {who:"Rex",    expr:"Confused",   text:"So... who destroyed the pirates?"},
+    {who:"Kael",   expr:"Serious",    text:"Someone efficient."},
+    {who:"Selyra", expr:"Analytical", text:"The damage pattern is unusual."},
+    {who:"Selyra", expr:"Analytical", text:"Every shot struck a critical system."},
+    {who:"Astra",  expr:"Thinking",   text:"..."},
+    {who:"Astra",  expr:"Thinking",   text:"I've seen firing patterns like this before."},
+    {narr:"Everyone looks at her."},
+    {who:"Astra",  expr:"Worried",    text:"..."},
+    {who:"Astra",  expr:"Worried",    text:"...I don't know where."},
+    {narr:"Silence."},
+    {who:"Voss",   expr:"Calm",       text:"Keep scanning."},
+  ]},
+
+  comms_relay: { scene:"Scene 6 · Communications Relay", steps:[
+    {bg:"BG_RELAY", clearCast:true, pause:400, quiet:true},
+    {narr:"The relay is dark."},
+    {narr:"Emergency lights flicker."},
+    {who:"Rex",    expr:"Concerned", text:"I don't like this."},
+    {who:"Kael",   expr:"Serious",   text:"Power's been cut."},
+    {who:"Tessa",  expr:"Thinking",  text:"...No."},
+    {who:"Tessa",  expr:"Thinking",  text:"Someone shut it down."},
+    {who:"Voss",   expr:"Neutral",   text:"Can we access the logs?"},
+    {who:"Tessa",  expr:"Smile",     text:"Already working on it."},
+    {cg:"CG_SECURITY_FEED"},
+    {narr:"Close-up of the relay computer. A distorted security recording plays."},
+    {narr:"Several unknown androids walk through the station. The feed cuts to static."},
+    {cg:null},
+    {who:"Rex",    expr:"Shocked",   text:"...Did anyone else see that?"},
+    {who:"Selyra", expr:"Analytical",text:"Humanoid."},
+    {who:"Selyra", expr:"Analytical",text:"Mechanical."},
+    {who:"Astra",  expr:"Shocked",   text:"..."},
+    {who:"Astra",  expr:"Shocked",   text:"..."},
+    {who:"Kael",   expr:"Serious",   text:"Astra?"},
+    {who:"Astra",  expr:"Worried",   text:"...I..."},
+    {who:"Astra",  expr:"Worried",   text:"I don't know."},
+    {who:"Tessa",  expr:"Focused",   text:"I've got another file."},
+    {narr:"A transmission begins."},
+    {who:"???", expr:"Neutral", text:"Recover the prototype."},
+    {who:"???", expr:"Neutral", text:"Leave no witnesses."},
+    {narr:"Transmission ends."},
+    {narr:"Silence."},
+    {who:"Rex",    expr:"Concerned", text:"...Prototype?"},
+    {who:"Voss",   expr:"Serious",   text:"Rowan needs to hear this."},
+  ]},
+
+  rowan_debrief: { scene:"Scene 7 · Rowan's Office", steps:[
+    {bg:"BG_OPSOFFICE", clearCast:true, pause:400, quiet:true},
+    {who:"Rowan", expr:"Serious", text:"That's not pirate equipment."},
+    {who:"Voss",  expr:"Neutral", text:"No."},
+    {who:"Rowan", expr:"Serious", text:"And that transmission?"},
+    {who:"Tessa", expr:"Thinking",text:"I couldn't identify the speaker."},
+    {who:"Rowan", expr:"Serious", text:"..."},
+    {who:"Rowan", expr:"Serious", text:"But they were looking for something."},
+    {who:"Rex",   expr:"Thinking",text:"You think it's cargo?"},
+    {narr:"Everyone looks at Astra."},
+    {who:"Rowan", expr:"Serious", text:"..."},
+    {who:"Rowan", expr:"Serious", text:"No."},
+    {who:"Rowan", expr:"Serious", text:"I think they're looking for someone."},
+    {narr:"Silence."},
+    {who:"Astra", expr:"Concerned", text:"...Me?"},
+    {narr:"Rowan doesn't answer immediately."},
+    {who:"Rowan", expr:"Serious", text:"...Captain."},
+    {who:"Rowan", expr:"Serious", text:"I think it's time you tell me what I just hired."},
+    {narr:"Everyone slowly turns to Voss."},
+    {who:"Voss",  expr:"Serious", text:"..."},
+    {narr:"Fade to black."},
+  ]},
+
+  // "Gameplay Between Part 2 & 3": the player returns to open space for optional
+  // activity (scans, fights) — see noteOptionalActivity() in the flight engine —
+  // before Rowan calls with the fleet warning. He's not physically present, so this
+  // reuses the Scene 1 hologram treatment for a radio cameo (see the `holo` field).
+  fleet_call: { scene:"Incoming Transmission", steps:[
+    {bg:"BG_BRIDGE", clearCast:true, pause:300, quiet:true},
+    {who:"Rowan", expr:"Serious",   text:"Captain.", holo:true},
+    {who:"Rowan", expr:"Serious",   text:"We've got company.", holo:true},
+    {who:"Tessa", expr:"Concerned", text:"Multiple hyperspace signatures."},
+    {who:"Kael",  expr:"Serious",   text:"...A fleet."},
+    {who:"Rowan", expr:"Serious",   text:"Get back here.", holo:true},
+  ]},
+
+  // "No dialogue. Just the visual." — no character speaks; only narration (mood text,
+  // not a voice) plays over the CG, which holds for a beat before clearing on its own.
+  fleet_arrival: { scene:"Cogwheel Station", steps:[
+    {bg:"BG_COGWHEEL", clearCast:true, cg:"CG_FLEET_ARRIVAL", pause:4200, quiet:true},
+    {narr:"Large ships drop out of hyperspace, one after another."},
+    {narr:"Something very bad has arrived."},
+    {cg:null},
+  ]},
+
+  // ------------------------------------------------------------------------
+  // PART 3 — Echoes/Echoes_Part3.txt. Scenes 8-12 play as one unbroken scene (same
+  // "no gameplay gap" merge cogwheel_arrival/rowan_debrief already used) — the whole
+  // arc is staged in Rowan's Operations Room with no travel between beats, ending on
+  // "Good luck" and handing straight off to the Evacuation Escort battle (see
+  // startEvacMission() in project_echoes_flight.html, called from its sceneDone
+  // listener once this scene ends — there's no separate confirm step, matching the
+  // script's own "as the mission begins..." immediacy).
+  // ------------------------------------------------------------------------
+  the_truth: { scene:"Part 3 · The Truth", steps:[
+    {bg:"BG_OPSOFFICE", clearCast:true, pause:400, quiet:true},
+    {narr:"Everyone is gathered around Rowan's briefing table. Nobody speaks."},
+    {who:"Rowan", expr:"Serious", text:"I asked what they were looking for."},
+    {who:"Rowan", expr:"Serious", text:"They weren't looking for cargo."},
+    {who:"Rowan", expr:"Serious", text:"They were looking for someone."},
+    {narr:"He looks directly at Astra."},
+    {who:"Rowan", expr:"Serious", text:"Was it her?"},
+    {narr:"Silence."},
+    {who:"Voss",  expr:"Serious", text:"...Yes."},
+    {narr:"Everyone turns."},
+    {who:"Rex",   expr:"Shocked", text:"Captain..."},
+    {who:"Voss",  expr:"Serious", text:"I should have told you sooner."},
+    {who:"Astra", expr:"Concerned", text:"..."},
+    {who:"Voss",  expr:"Serious", text:"Astra wasn't built."},
+    {who:"Voss",  expr:"Serious", text:"...She was manufactured."},
+    {narr:"Silence."},
+    {who:"Tessa", expr:"Shocked", text:"...What?"},
+    {who:"Voss",  expr:"Serious", text:"Years ago..."},
+    {who:"Voss",  expr:"Serious", text:"I found a transport under attack."},
+    {who:"Voss",  expr:"Serious", text:"It wasn't carrying cargo."},
+    {who:"Voss",  expr:"Serious", text:"It was carrying experimental battle androids."},
+    {cg:"CG_ASTRA_ORIGIN"},
+    {narr:"A damaged military transport drifting through space. Small explosions across the hull. Escape pods drifting away."},
+    {narr:"A younger Voss boards the wreck with a flashlight. Inside the cargo bay... rows of inactive androids."},
+    {narr:"One pod is open."},
+    {who:"Voss",  expr:"Neutral", text:"Every unit onboard was inactive..."},
+    {who:"Voss",  expr:"Neutral", text:"...except one."},
+    {cg:"CG_ASTRA_ORIGIN_2"},
+    {narr:"Young Astra looks up at Voss. Scared. Confused."},
+    {who:"Astra", expr:"Concerned", text:"...Are you here to recycle me?"},
+    {cg:null},
+    {who:"Rex",   expr:"Sad",       text:"..."},
+    {who:"Tessa", expr:"Concerned", text:"Captain..."},
+    {who:"Voss",  expr:"Serious",   text:"I couldn't leave her there."},
+    {who:"Voss",  expr:"Serious",   text:"So I didn't."},
+    {who:"Astra", expr:"Sad",       text:"..."},
+    {who:"Astra", expr:"Sad",       text:"I don't remember any of it."},
+    {who:"Voss",  expr:"Smile",     text:"I know."},
+    {who:"Voss",  expr:"Smile",     text:"You didn't have to."},
+
+    // Scene 9 · Interrupted — same room, no gap.
+    {narr:"Alarms blare. Red emergency lights sweep the room."},
+    {who:"Tessa", expr:"Shocked", text:"Incoming hyperspace signatures!"},
+    {who:"Kael",  expr:"Serious", text:"...Multiple."},
+    {who:"Rowan", expr:"Serious", text:"How many?"},
+    {who:"Tessa", expr:"Shocked", text:"..."},
+    {who:"Tessa", expr:"Shocked", text:"...Too many."},
+    {cg:"CG_ENEMY_FLEET"},
+    {narr:"Outside Cogwheel Station, dozens of enemy warships emerge from hyperspace, one after another."},
+    {narr:"A gigantic carrier appears behind them. The station is dwarfed."},
+    {cg:null},
+    {who:"Rex",   expr:"Shocked", text:"...That's..."},
+    {who:"Rex",   expr:"Shocked", text:"...not pirates."},
+    {who:"Rowan", expr:"Serious", text:"Battle stations."},
+
+    // Scene 10 · Captain Raze — same room, transmission screen activates.
+    {narr:"The transmission screen activates."},
+    {cg:"CG_RAZE_REVEAL"},
+    {narr:"Captain Raze appears. Elegant black armour. White cape. Expressionless. The bridge behind him glows red."},
+    {cg:null},
+    {who:"Raze",  expr:"Calm",    text:"Station Commander."},
+    {who:"Raze",  expr:"Calm",    text:"You are harbouring stolen military property."},
+    {who:"Rowan", expr:"Serious", text:"I don't take orders from trespassers."},
+    {who:"Raze",  expr:"Calm",    text:"I was not addressing you."},
+    {narr:"He looks directly at Astra."},
+    {who:"Raze",  expr:"Calm",    text:"Designation A-01."},
+    {who:"Raze",  expr:"Calm",    text:"Return."},
+    {narr:"Silence."},
+    {who:"Astra", expr:"Worried", text:"..."},
+    {who:"Astra", expr:"Worried", text:"I don't know you."},
+    {who:"Raze",  expr:"Calm",    text:"You are not required to."},
+    {who:"Raze",  expr:"Calm",    text:"You are required..."},
+    {who:"Raze",  expr:"Calm",    text:"...to obey."},
+    {who:"Astra", expr:"Worried", text:"..."},
+    {who:"Astra", expr:"Worried", text:"...No."},
+    {who:"Raze",  expr:"Calm",    text:"..."},
+    {who:"Raze",  expr:"Calm",    text:"...Curious."},
+    {who:"Raze",  expr:"Calm",    text:"The defect has progressed."},
+    {who:"Rex",   expr:"Angry",   text:"She's not defective!"},
+    {who:"Kael",  expr:"Serious", text:"Rex."},
+    {who:"Rex",   expr:"Angry",   text:"No!"},
+    {who:"Rex",   expr:"Angry",   text:"She's our friend!"},
+    {who:"Tessa", expr:"Determined", text:"And she's staying."},
+    {who:"Selyra",expr:"Gentle Smile", text:"I concur."},
+    {who:"Voss",  expr:"Determined", text:"You heard my crew."},
+    {who:"Voss",  expr:"Determined", text:"Astra made her choice years ago."},
+    {who:"Voss",  expr:"Determined", text:"She isn't yours."},
+    {who:"Raze",  expr:"Calm",    text:"..."},
+    {who:"Raze",  expr:"Calm",    text:"Incorrect."},
+    {who:"Raze",  expr:"Calm",    text:"Everything manufactured by Aegis Dynamics remains company property."},
+    {who:"Astra", expr:"Angry",   text:"I'm not property."},
+    {narr:"Silence. For the first time, Raze studies her."},
+    {who:"Raze",  expr:"Calm",    text:"..."},
+    {who:"Raze",  expr:"Calm",    text:"Interesting."},
+
+    // Scene 11 · Crimson Arrives — radio, same as his Scene 1 cameo (see the `holo` field).
+    {narr:"Radio crackles."},
+    {who:"Crimson", expr:"Hero Pose", text:"Captain!", holo:true},
+    {who:"Crimson", expr:"Hero Pose", text:"I've arrived!", holo:true},
+    {who:"Rex",      expr:"Happy",    text:"Perfect timing!"},
+    {who:"Crimson", expr:"Neutral",   text:"I brought dramatic music!", holo:true},
+    {narr:"Silence."},
+    {who:"Kael",     expr:"Deadpan",  text:"...How?"},
+    {who:"Crimson", expr:"Neutral",   text:"...", holo:true},
+    {who:"Crimson", expr:"Neutral",   text:"I have speakers.", holo:true},
+    {who:"Rex",      expr:"Laughing", text:"Hahaha!"},
+    {narr:"Even Astra smiles. The tension breaks for just a second."},
+    {who:"Crimson", expr:"Smile",     text:"So...", holo:true},
+    {who:"Crimson", expr:"Smile",     text:"...Who's the cape?", holo:true},
+    {who:"Raze",     expr:"Calm",     text:"..."},
+    {who:"Raze",     expr:"Calm",     text:"Irrelevant."},
+    {who:"Crimson", expr:"Neutral",   text:"Ouch.", holo:true},
+    {who:"Crimson", expr:"Neutral",   text:"I liked mine better.", holo:true},
+
+    // Scene 12 · Evacuation — same room, no gap. Ends the scene; the flight engine
+    // starts the Evacuation Escort battle the moment sceneDone fires.
+    {who:"Rowan", expr:"Serious", text:"Civilians first."},
+    {who:"Rowan", expr:"Serious", text:"I'll coordinate the evacuation."},
+    {who:"Kael",  expr:"Serious", text:"We'll buy you the time."},
+    {who:"Rowan", expr:"Serious", text:"You'll be heavily outnumbered."},
+    {who:"Voss",  expr:"Serious", text:"Then we'd better not waste any."},
+    {who:"Rowan", expr:"Serious", text:"..."},
+    {who:"Rowan", expr:"Serious", text:"Good luck."},
   ]},
 };
 
@@ -776,40 +1040,103 @@ function endScene(){
   autoBtn.style.display = "none"; skipBtn.style.display = "none";
   gameplay.classList.remove("hidden");
   try{ gpFrame.contentWindow.focus(); }catch(e){}
-  // Rowan's briefing ends the "explore Helios Reach" leg — the STORY tab's still-active
-  // beat 1 now describes the NEXT leg of the same chain (the flight engine's own pin
-  // advances station->belt independently; see setStoryStage in project_echoes_flight.html).
-  if(id==="cogwheel_arrival" && EP1[1]){
-    EP1[1].objective = "Investigate the Asteroid Belt.";
-    EP1[1].title = "Investigate the Asteroid Belt";
-  }
   try{ gpFrame.contentWindow.postMessage({ type:"sceneDone", id }, "*"); }catch(e){}
 }
-// Story log for the flight engine's Missions → STORY tab: every travel/combat beat
-// up to and including the current one (earlier = complete, current = active).
-// Future beats (Part 2+) are withheld to avoid spoilers. Mirrors episode1.html's
-// buildMissionLog().
-function buildMissionLog(){
-  const items=[]; let active=0;
-  EP1.forEach((b,i)=>{
-    if((b.type==="travel"||b.type==="combat") && i<=beatIdx){
-      const status = (i===beatIdx) ? "active" : "done";
-      if(status==="active") active=items.length;
-      items.push({
-        title: `${b.loc} — ${b.title}`,
-        kind:  b.kind || (b.type==="combat" ? "Combat" : "Flight"),
-        status,
-        text:  status==="active" ? (b.objective||"") : (b.recap || b.objective || "")
-      });
-    }
-  });
+// ============================================================
+// STORY LOG — the Missions → STORY tab. Mirrors episode1.html's buildMissionLog()
+// (Episode 0: a growing chain of "done" beats with a recap line, topped by one
+// "active" beat with the live objective — exactly the presentation Steve asked to
+// match), but built differently under the hood: Episode 0 advanced through real EP1
+// beats because every leg reloaded the flight iframe fresh. Project Echoes plays the
+// whole episode in ONE continuous flight session (no reload — see the foundation
+// notes), so there's no "beatIdx" to walk. Instead this is a pure function of the
+// flight engine's own persisted progress flags (rowanBriefed/part2Debriefed/
+// fleetCalled/truthBriefed/evacWon/storyStage — all already durable across a save/
+// load, see project_echoes_flight.html's saveSnapshot/loadFromSlot), requested fresh
+// each time the Missions menu opens (see the "requestMissions" handler below). Being
+// a pure function of that canonical state — rather than a log built by mutating text
+// as scenes happen to play — means it reads correctly even right after loading a save
+// slot, not just during live scene playback.
+function buildMissionLog(flags){
+  flags = flags || {};
+  const { rowanBriefed, part2Debriefed, fleetCalled, truthBriefed, evacWon, storyStage } = flags;
+  const items = []; let active = 0;
+  function leg(title, kind, isActive, activeText, doneText){
+    if(isActive) active = items.length;
+    items.push({ title, kind, status: isActive ? "active" : "done", text: isActive ? activeText : doneText });
+  }
+
+  // Leg 1 (Part 1, Scene 1) — arrive at Helios Reach and dock at Cogwheel Station.
+  leg("Helios Reach — Cogwheel Station", "Flight", !rowanBriefed,
+      "Explore Helios Reach. Dock at Cogwheel Station.",
+      "Arrived at Cogwheel Station and met with Commander Rowan.");
+  if(!rowanBriefed) return { items, active };
+
+  // Leg 2 (Part 2, Scenes 4-5) — the mining belt.
+  leg("Asteroid Mining Belt — Investigate the Wreckage", "Flight", storyStage==="belt",
+      "Investigate the Asteroid Belt for signs of the missing mining crews.",
+      "Found a destroyed pirate fighter — someone with precision weapons got there first.");
+  if(storyStage==="belt") return { items, active };
+
+  // Leg 3 (Part 2, Scene 6) — the Communications Relay.
+  leg("Communications Relay — Follow the Trail", "Flight", storyStage==="relay",
+      "Follow the energy trail to the Communications Relay.",
+      "Recovered a security feed of unknown androids and intercepted a transmission — Rowan needs to hear this.");
+  if(storyStage==="relay") return { items, active };
+
+  // Leg 4 (Part 2, Scene 7) — report back to Rowan.
+  leg("Cogwheel Station — Report to Rowan", "Flight", !part2Debriefed,
+      "Return to Cogwheel Station and report what you found.",
+      "Reported the wreckage, the relay footage, and the transmission to Rowan.");
+  if(!part2Debriefed) return { items, active };
+
+  // Leg 5 — the free-roam window before Rowan calls (Steve: players need an explicit
+  // "go explore / do side objectives" objective here, not just silence — see the
+  // matching HUD counter, drawFleetCallHint() in project_echoes_flight.html).
+  leg("Helios Reach — Explore & Investigate", "Flight", !fleetCalled,
+      "Explore the sector. Scan for salvage or clear out hostiles — draw Rowan's fleet in before he calls.",
+      "Drew enough attention — Rowan called: a fleet is inbound.");
+  if(!fleetCalled) return { items, active };
+
+  // Leg 6 — race back to Cogwheel Station.
+  leg("Cogwheel Station — Return At Once", "Flight", storyStage==="station3",
+      "Return to Cogwheel Station immediately.",
+      "Watched an entire fleet drop out of hyperspace above Cogwheel Station.");
+  if(storyStage==="station3") return { items, active };
+
+  // Leg 7 (Part 3 hand-off) — dock and find out what's happening.
+  leg("Cogwheel Station — Unknown Contacts", "Flight", !truthBriefed,
+      "Something has arrived at Cogwheel Station. Dock to find out what's happening.",
+      "Learned the truth about Astra's origin and faced Captain Raze's ultimatum.");
+  if(!truthBriefed) return { items, active };
+
+  // Leg 8 (Part 3, Scene 12 → Evacuation Escort) — the battle itself.
+  leg("Cogwheel Station — Defend the Evacuation", "Combat", !evacWon,
+      "Hold Cogwheel Station — defend the evacuation against Raze's interceptors.",
+      "Held the line against the first wave of interceptors.");
+  if(!evacWon) return { items, active };
+
+  // Leg 9 — holding pattern. Part 4 (Echoes_Part4.txt) isn't implemented yet, so this
+  // stays the active line with no further beat to withhold/spoil.
+  leg("Cogwheel Station — Hold the Line", "Flight", true,
+      "The interceptor wave is down, but Raze's fleet isn't finished. Stay alert.", "");
   return { items, active };
 }
+// Part 2's belt/relay legs proceed via the flight engine's ordinary "progress the
+// story?" Y/N (proceedObjective() in project_echoes_flight.html) rather than a dock —
+// it posts {type:"reachedObjective", stage} on YES. Map the stage that was just
+// confirmed to the scene that covers it.
+const REACHED_SCENE = { belt:"wreckage_scan", relay:"comms_relay" };
 window.addEventListener("message", (e)=>{
   if(!e.data) return;
   if(e.data.type==="playScene"){ if(!sceneMode) startScene(e.data.id); return; }
+  if(e.data.type==="reachedObjective"){
+    const id = REACHED_SCENE[e.data.stage];
+    if(id && !sceneMode) startScene(id);
+    return;
+  }
   if(e.data.type==="requestMissions"){
-    try{ gpFrame.contentWindow.postMessage({type:"missions", log:buildMissionLog()}, "*"); }catch(err){}
+    try{ gpFrame.contentWindow.postMessage({type:"missions", log:buildMissionLog(e.data.flags)}, "*"); }catch(err){}
     return;
   }
 });
