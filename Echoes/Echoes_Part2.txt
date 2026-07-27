@@ -1,0 +1,376 @@
+PART 2 – The Investigation
+Scene 4 – Strange Wreckage
+BG
+
+Bridge - StarGear
+
+Music
+
+BGM – Quiet Suspense
+
+Tessa
+
+Expression: Focused
+
+"Approaching the mining coordinates."
+
+Kael
+
+Expression: Serious
+
+"No friendly transponders."
+
+Rex
+
+Expression: Thinking
+
+"Maybe Rowan got bad intel?"
+
+Selyra
+
+Expression: Analytical
+
+"I detect metallic debris."
+
+"...It does not match mining equipment."
+
+Voss
+
+Expression: Serious
+
+"Bring us in."
+
+Gameplay
+Exploration
+
+Objective:
+
+Scan the wreckage.
+
+Player discovers:
+
+Destroyed pirate fighter.
+No cargo.
+Precision weapon damage.
+Scene 5 – Scan Results
+BG
+
+Bridge
+
+Music
+
+BGM – Mystery
+
+Tessa
+
+Expression: Concerned
+
+"That wasn't mining equipment..."
+
+"It was a pirate ship."
+
+Rex
+
+Expression: Confused
+
+"So... who destroyed the pirates?"
+
+Kael
+
+Expression: Serious
+
+"Someone efficient."
+
+Selyra
+
+Expression: Analytical
+
+"The damage pattern is unusual."
+
+"Every shot struck a critical system."
+
+Astra
+
+Expression: Thinking
+
+"..."
+
+"I've seen firing patterns like this before."
+
+Everyone looks at her.
+
+Astra
+
+Expression: Concerned
+
+"..."
+
+"...I don't know where."
+
+Silence.
+
+Voss
+
+Expression: Calm
+
+"Keep scanning."
+
+Gameplay
+
+New scan objective unlocked.
+
+Follow the energy trail.
+
+Scene 6 – Communications Relay
+BG
+
+Abandoned Relay
+
+Music
+
+BGM – Silent Station
+
+The relay is dark.
+
+Emergency lights flicker.
+
+Rex
+
+Expression: Concerned
+
+"I don't like this."
+
+Kael
+
+Expression: Serious
+
+"Power's been cut."
+
+Tessa
+
+Expression: Thinking
+
+"...No."
+
+"Someone shut it down."
+
+Voss
+
+"Can we access the logs?"
+
+Tessa
+
+Expression: Smile
+
+"Already working on it."
+
+SFX
+
+Computer beeps.
+
+CG EVENT
+
+Close-up of the relay computer.
+
+A distorted security recording plays.
+
+Several unknown androids walk through the station.
+
+The feed cuts to static.
+
+Rex
+
+Expression: Shocked
+
+"...Did anyone else see that?"
+
+Selyra
+
+Expression: Analytical
+
+"Humanoid."
+
+"Mechanical."
+
+Astra
+
+Expression: Shocked
+
+"..."
+
+"..."
+
+Kael
+
+Expression: Serious
+
+"Astra?"
+
+Astra
+
+Expression: Worried
+
+"...I..."
+
+"I don't know."
+
+Tessa
+
+Expression: Focused
+
+"I've got another file."
+
+A transmission begins.
+
+Unknown Voice (Raze)
+
+"Recover the prototype."
+
+"Leave no witnesses."
+
+Transmission ends.
+
+Silence.
+
+Rex
+
+Expression: Concerned
+
+"...Prototype?"
+
+Voss
+
+Expression: Serious
+
+"Rowan needs to hear this."
+
+Gameplay
+
+Return to Cogwheel Station.
+
+Random pirate ambush on the way.
+
+Scene 7 – Rowan's Office
+BG
+
+Operations Office
+
+Music
+
+BGM – Duty Calls
+
+Rowan
+
+Expression: Serious
+
+"That's not pirate equipment."
+
+Voss
+
+"No."
+
+Rowan
+
+"And that transmission?"
+
+Tessa
+
+"I couldn't identify the speaker."
+
+Rowan
+
+"..."
+
+"But they were looking for something."
+
+Rex
+
+"You think it's cargo?"
+
+Everyone looks at Astra.
+
+Rowan
+
+"..."
+
+"No."
+
+"I think they're looking for someone."
+
+Silence.
+
+Astra
+
+Expression: Concerned
+
+"...Me?"
+
+Rowan doesn't answer immediately.
+
+Rowan
+
+Expression: Serious
+
+"...Captain."
+
+"I think it's time you tell me what I just hired."
+
+Everyone slowly turns to Voss.
+
+Voss
+
+Expression: Serious
+
+"..."
+
+Fade to black.
+
+END PART 2
+Gameplay Between Part 2 & 3
+
+Instead of immediately revealing Astra's past, the player returns to space.
+
+They now have access to:
+
+Optional scans.
+Mercenary contracts.
+Merchant escort.
+Pirate cleanup missions.
+
+After completing one or two optional activities, Rowan calls over comms.
+
+Rowan (Radio)
+
+"Captain."
+
+"We've got company."
+
+Tessa
+
+"Multiple hyperspace signatures."
+
+Kael
+
+"...A fleet."
+
+Rowan
+
+"Get back here."
+
+Gameplay
+
+Fly back to Cogwheel Station.
+
+As the player approaches...
+
+Large ships begin dropping out of hyperspace one by one.
+
+No dialogue.
+
+Just the visual.
+
+The player already knows—
+
+Something very bad has arrived.
+
+I think this is much stronger than having Raze immediately appear after the relay. It gives the player a brief period to absorb the mystery, complete a couple of optional activities, and enjoy the sector before the mood shifts dramatically. When they finally return to Cogwheel Station and watch an enemy fleet emerge from hyperspace in real time during exploration, the transition into the next story chapter feels much more cinematic because the player witnesses the invasion rather than being told it has begun.

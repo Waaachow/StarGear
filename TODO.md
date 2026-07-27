@@ -570,7 +570,15 @@ the Field Manual) says **"STARGEAR"**. Pick one and fix the mismatch before the 
 
 ---
 
-## Episode 1 "Echoes of Steel" — new launchable started 2026-07-26
+## Episode 1 "Echoes of Steel" v1 — ARCHIVED 2026-07-27
+
+**Archived, not deleted.** Steve wants to try a different approach for Episode 1, so this whole
+attempt (below) has been moved to `_archive/Episode1-v1/` — same relative layout (`ep1.html`,
+`ep1_flight.html`, `ep1_vo_manifest.json`, the VO pipeline scripts, `audio/Episode1/`,
+`Episode 1 Prep/`, `ep1_vo_work/`, `Assets/CG/CG01 – Burning Convoy.png`). The regenerable build
+output (`dist/build_ep1/`) and itch upload zip were deleted rather than archived — rerun
+`_archive/Episode1-v1/build_itch_ep1.ps1` from the archived source if that packaged build is ever
+needed again. Nothing below reflects the current state of the project; kept for reference only.
 
 Real Episode 1 (not to be confused with `episode1.html`, which is Episode 0 — see the naming note in
 `episode-numbering`). Own files, own itch.io page, own save namespace: **`ep1.html`** (VN shell,
@@ -619,5 +627,68 @@ parts. Full plan at the time of forking is `we-re-going-to-start-humming-hoare.m
 new characters and the ~16 new backgrounds/remaining CGs; the rest of the line-by-line VO; new Helios
 Reach trade stations to replace the removed ones; a decision on what to do with the still-present,
 un-reskinned Crimson Nova hangar; boss balance for `dax`/`raze` (mechanics-first, not yet playtested).
+
+---
+
+## Project Echoes — the real Episode 1, started 2026-07-27 (Story Part 1 done)
+
+Own itch.io page, own files, own save namespace (`echoes_*`), forked cleanly from the Episode 0
+engine rather than continuing the archived v1 attempt above. **`project_echoes.html`** (title
+screen + VN engine, ported/trimmed from `episode1.html`) + **`project_echoes_flight.html`**
+(flight/combat/menu engine, forked from `iso_grid_prototype.html`). Source scripts live in
+`Echoes/` (`Echoes_Part1.txt` through `Part7.txt`, plus the sector world design doc and
+`ASSETS_NEEDED.md`). The foundation-build pattern is also saved as a reusable template at
+`_templates/story-foundation/` for whatever episode comes after this one.
+
+**Built so far:**
+- **Foundation**: title screen, flight/combat, the 6 crew, Ship Config, scanning, Ship Database,
+  Field Manual, save/load — all forked from Episode 0 and working, with every story/economy system
+  (stations, bounties, side jobs, achievements) deliberately left empty pending real content.
+- **Episode 1 sector world** (visual/spatial): the 7 named landmarks + Trade Lane from
+  `Episode 1 - Sector World Design.txt`, placed in `project_echoes_flight.html`'s `buildMap()`/
+  `ZONES`, all procedural-fallback until real art lands (tracked in `Echoes/ASSETS_NEEDED.md`).
+- **Story Part 1** (`Echoes_Part1.txt`, Scenes 1-3 — arrival at Helios Reach → dock at Cogwheel
+  Station → Rowan's briefing → mission pinned): fully implemented and Playwright-verified.
+  Scope was deliberately stopped at the mission handoff — see "Next: Part 2" below.
+
+**Key mechanisms Part 2 (and later parts) should reuse, not rebuild:**
+- **VN engine** lives entirely in `project_echoes.html`: `EP1` (the linear beat array — `vn`/
+  `travel`/`combat` beats) plus a `SCENES` object for on-demand cutscenes triggered by the flight
+  engine posting `{type:"playScene", id}` and handed back via `{type:"sceneDone", id}` (mirrors
+  Episode 0's Crimson Nova hangar encounter). `CHARS`/`CHAR_ART`/`EXPR_ALIAS`/`charFile()` resolve
+  a script's `expr:` label to real art with a labelled-placeholder fallback if none exists yet —
+  new characters (a Part 2 antagonist, say) need only a `CHARS` entry to render, art is optional.
+- **Cast staging is capped at 3**: up to 2 crew (by most-recent-speaker) plus one NPC "guest"
+  pinned to the rightmost slot, or up to 3 crew with no guest. Any name not in `CREW_NAMES` is
+  automatically treated as a guest — a new Part 2 NPC needs no extra staging code.
+- **Hologram render mode** (`holo:true` on a step) is available for any not-physically-present
+  speaker (radio/comms), not just Crimson — reuse it for future long-range transmissions.
+- **Story pin chain**: `STORY_TARGETS` in `project_echoes_flight.html` holds named waypoints
+  (`station`, `belt`); `setStoryStage(id)` advances the live pin in place (no iframe reload — Part 1
+  plays in one continuous flight session). The `"station"` stage deliberately skips the normal
+  arrival-confirm popup (docking is its own confirm gate); the `"belt"` stage uses Episode 0's
+  standard `objectivePrompt`/`reachedObjective` flow unmodified. Add new stages to `STORY_TARGETS`
+  and call `setStoryStage()` as the story moves through Part 2's locations.
+- **Cogwheel Station** is a real `TRADE_STATIONS` entry (`id:"main_station"`) — first dock plays
+  the Part 1 briefing cutscene (gated on `rowanBriefed`), later docks open the normal station UI.
+  No `keeper` yet (no dock-attendant art/lines written).
+- **Missions menu** is the full 4-tab Episode-0 screen (STORY/SIDE/BOUNTY/AWARDS), restored from
+  dead-but-ported code rather than rebuilt — `buildMissionLog()` in `project_echoes.html` answers
+  the flight engine's `requestMissions` handshake from `EP1`.
+
+**Next: Part 2** (`Echoes_Part2.txt`) — the 4-step "Investigate the Asteroid Belt" checklist (scan
+the wreckage, investigate the missing miners, visit the communications relay, return to Rowan).
+`STORY_TARGETS.belt` already exists and is pinned as the active objective the moment Part 1 ends,
+so Part 2 starts with a live waypoint and a HUD arrow already pointing at the belt — it just needs
+real content once the player arrives (currently nothing is wired to fire on arrival there).
+Likely shape: a `SCENES`-style cutscene chain or new `EP1` beats for each of the 4 steps, `Wreckage`/
+`Missing Miners`/`Comms Relay` locations added to the sector (or reused from the existing mining
+belt zone), and `setStoryStage()` calls to advance the pin through each step.
+
+**Not done / explicitly deferred:** every asset row in `Echoes/ASSETS_NEEDED.md` (Rowan's art, the
+3 new Part 1 backgrounds/CGs still on placeholders, Cogwheel's dock backdrop/keeper); Cogwheel's
+Shop/Upgrade/Guild tabs are reachable but empty (no items/jobs populated); BOUNTY/AWARDS tabs empty
+(no bounties/achievements defined for Echoes yet); no title-screen Load Game panel (Start is always
+a fresh game — see `project-echoes-foundation` session notes for why).
 
 

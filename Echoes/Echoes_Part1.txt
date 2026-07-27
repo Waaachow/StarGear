@@ -1,0 +1,359 @@
+EPISODE 1 – PART 1
+Scene 1 – Entering Helios Reach
+BG
+
+Space – Trade Lane
+
+Music
+
+BGM – New Horizons
+
+SFX
+
+Ship engines
+
+Rex
+
+Expression: Excited
+
+"Whoa..."
+
+"We've got actual traffic."
+
+Tessa
+
+Expression: Happy
+
+"And nobody's shooting at us."
+
+Kael
+
+Expression: Serious
+
+"Don't jinx it."
+
+Selyra
+
+Expression: Analytical
+
+"I'm detecting over two hundred civilian vessels."
+
+"Cargo ships."
+
+"Mining barges."
+
+"Passenger liners."
+
+Astra
+
+Expression: Smile
+
+"It's... peaceful."
+
+Voss
+
+Expression: Smile
+
+"Enjoy it."
+
+"It never lasts."
+
+Radio crackles.
+
+SFX
+
+Radio Static
+
+Crimson
+
+Expression: Hero Pose
+
+"Captain Voss!"
+
+"I sensed your arrival from several million kilometres away!"
+
+Rex
+
+Expression: Laughing
+
+"Haha!"
+
+"Crimson!"
+
+Kael
+
+Expression: Annoyed
+
+"...How?"
+
+Crimson
+
+"I saw you."
+
+"..."
+
+"...From several million kilometres away."
+
+Kael
+
+"That's not how space works."
+
+Crimson
+
+"It did today."
+
+CG EVENT
+
+Crimson's fighter streaks past the StarGear, spinning three unnecessary barrel rolls before flying upside down beside the bridge.
+
+Crimson
+
+Expression: Hero Pose
+
+"I welcome you..."
+
+"...to Helios Reach!"
+
+Rex
+
+Expression: Laughing
+
+"You've definitely been practicing."
+
+Crimson
+
+"Every."
+
+"Single."
+
+"Day."
+
+Kael
+
+Expression: Deadpan
+
+"I can tell."
+
+Voss
+
+Expression: Smile
+
+"It's good to see you again."
+
+Crimson
+
+Expression: Smile
+
+"You too, Captain."
+
+"Try not to leave before I can show you my latest spectacular entrance."
+
+Kael
+
+"I'm already worried."
+
+Gameplay Begins
+
+Explore Helios Reach.
+
+Scene 2 – Cogwheel Station
+BG
+
+Cogwheel Station Dock
+
+Music
+
+BGM – Frontier Life
+
+Crimson
+
+Expression: Hero Pose
+
+"And here we are!"
+
+"The finest station in the frontier!"
+
+"..."
+
+"...Please ignore Dock Seven."
+
+Tessa
+
+Expression: Thinking
+
+"Why?"
+
+Crimson
+
+"There was..."
+
+"...a fireworks incident."
+
+Kael
+
+Expression: Deadpan
+
+"You mean your fireworks incident."
+
+Crimson
+
+"I prefer..."
+
+"...'unexpected atmospheric celebration.'"
+
+Rex
+
+Expression: Laughing
+
+"I'm using that."
+
+Voss
+
+Expression: Smile
+
+"We'll catch up later."
+
+Crimson
+
+"Looking forward to it."
+
+Leaves.
+
+Gameplay
+
+Player free to:
+
+Shop
+Upgrade
+Guild
+Speak to NPCs
+Side quests
+Scene 3 – Commander Rowan
+BG
+
+Operations Office
+
+Music
+
+BGM – Duty Calls
+
+Rowan
+
+Expression: Serious
+
+"Captain Voss."
+
+"Good timing."
+
+Voss
+
+Expression: Neutral
+
+"What happened?"
+
+Rowan
+
+"We've had three mining crews disappear this week."
+
+Tessa
+
+Expression: Concerned
+
+"Pirates?"
+
+Rowan
+
+"Maybe."
+
+"They aren't stealing cargo."
+
+"They're taking ships."
+
+Kael
+
+Expression: Serious
+
+"Any distress calls?"
+
+Rowan
+
+"None."
+
+Selyra
+
+Expression: Analytical
+
+"Statistically improbable."
+
+Rowan
+
+"Exactly."
+
+He places a sector map onto the table.
+
+CG EVENT
+
+Holographic sector map.
+
+Several mining locations highlighted.
+
+A communications relay flashes amber.
+
+One patrol route ends abruptly.
+
+Rowan
+
+"I don't have enough evidence to send a fleet."
+
+"But I do have enough to hire you."
+
+Voss
+
+Expression: Smile
+
+"We'll take a look."
+
+Rowan
+
+"Start with the mining belt."
+
+"If you find anything..."
+
+"Call me before you shoot it."
+
+Rex
+
+Expression: Smile
+
+"No promises."
+
+Rowan
+
+"...I was afraid you'd say that."
+
+Gameplay Begins
+
+Mission:
+
+Investigate the Asteroid Belt
+
+Objectives:
+
+✓ Scan wreckage
+
+✓ Investigate missing miners
+
+✓ Visit communications relay
+
+✓ Return to Rowan
+
+Why this works better
+
+Notice how almost nothing is narrated. The player learns everything organically:
+
+Helios Reach is peaceful because the crew reacts to bustling traffic.
+Crimson is a returning friend because everyone already knows how to respond to him.
+Rowan is competent because he lays out evidence instead of a narrator explaining the situation.
+The investigation is motivated by a tangible briefing and holographic map, not exposition.
+
+The result feels more like an anime episode: characters carry the story, while the visuals and gameplay communicate the world around them.

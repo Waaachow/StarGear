@@ -1,0 +1,442 @@
+EPISODE 1 – PART 6 – The Hidden Factory
+
+This is where the mystery becomes an assault mission. The player has spent the episode searching for whoever is behind the attacks—now they've found them.
+
+Scene 22 – Into the Nebula
+BG
+
+Bridge – StarGear
+
+Music
+
+BGM – Unknown Signals
+
+Tessa
+
+Expression: Focused
+
+"I'm picking up the carrier's jump residue."
+
+"It's faint..."
+
+"...but it's definitely here."
+
+Kael
+
+Expression: Serious
+
+"They're hiding inside the nebula."
+
+Rex
+
+Expression: Thinking
+
+"Can you hide an entire fleet in a cloud?"
+
+Crimson (Radio)
+
+Expression: Hero Pose
+
+"You'd be amazed what you can hide in a nebula."
+
+Kael
+
+Expression: Deadpan
+
+"Should I ask how you know that?"
+
+Crimson
+
+"...No."
+
+Voss
+
+Expression: Smile
+
+"Let's stay focused."
+
+Gameplay
+Exploration
+
+Objectives
+
+Enter the nebula.
+Scan three signal echoes.
+Avoid electrical storms.
+Identify the real hyperspace trail.
+
+The first two signals are decoys.
+
+The third reveals an enormous hidden structure.
+
+CG EVENT
+
+The nebula parts.
+
+A colossal orbital factory slowly emerges from the clouds.
+
+Rotating assembly rings.
+
+Docked warships.
+
+Launch bays.
+
+Thousands of red lights flicker across its surface.
+
+It dwarfs the StarGear.
+
+Music
+
+BGM – Enemy Fortress
+
+Rex
+
+Expression: Shocked
+
+"...That's..."
+
+"...a factory?"
+
+Selyra
+
+Expression: Analytical
+
+"Estimated production capacity..."
+
+"...Several thousand combat units."
+
+Tessa
+
+Expression: Concerned
+
+"How did nobody find this?"
+
+Kael
+
+Expression: Serious
+
+"They weren't looking."
+
+Voss
+
+Expression: Determined
+
+"We found it."
+
+"...Now we end this."
+
+Scene 23 – The Plan
+BG
+
+Bridge – StarGear
+
+Music
+
+BGM – Strategy
+
+A tactical hologram fills the bridge.
+
+CG EVENT
+
+Factory schematic.
+
+Highlighted objectives:
+
+Shield Generators
+Launch Control
+Carrier Dock
+Command Tower
+Tessa
+
+Expression: Focused
+
+"The factory's protected by four shield satellites."
+
+"As long as they're active..."
+
+"...our weapons won't even scratch it."
+
+Kael
+
+Expression: Serious
+
+"We disable the satellites first."
+
+Rex
+
+Expression: Determined
+
+"Then we hit the factory."
+
+Crimson
+
+Expression: Hero Pose
+
+"I volunteer for the dangerous, heroic part."
+
+Kael
+
+"That's... all of it."
+
+Crimson
+
+"Excellent."
+
+Voss
+
+Expression: Determined
+
+"We stay together."
+
+"No heroes."
+
+Everyone slowly looks at Crimson.
+
+Crimson
+
+Expression: Awkward
+
+"..."
+
+"...Mostly no heroes."
+
+Everyone chuckles.
+
+Gameplay
+Tactical Combat
+
+Mission – Break the Shield
+
+Objectives
+
+Destroy four shield satellites.
+Defend Crimson while he plants signal beacons.
+Eliminate defending squadrons.
+
+Once the final satellite falls...
+
+A cutscene triggers.
+
+Scene 24 – Assault Begins
+CG EVENT
+
+The factory shield collapses.
+
+A shockwave ripples across the station.
+
+Hangar doors begin opening.
+
+Enemy ships scramble.
+
+Tessa
+
+Expression: Excited
+
+"The shields are down!"
+
+Voss
+
+Expression: Determined
+
+"All ships."
+
+"Attack."
+
+Crimson
+
+Expression: Hero Pose
+
+"I've been waiting to hear that all day!"
+
+Gameplay
+Tactical Combat
+
+Mission
+
+Destroy outer defence fleet.
+
+Objectives
+
+Destroy enemy cruisers.
+Eliminate defence platforms.
+Protect Crimson.
+
+Halfway through...
+
+A cutscene interrupts.
+
+Scene 25 – Astra vs A-17
+CG EVENT
+
+A-17 intercepts the StarGear.
+
+She doesn't attack immediately.
+
+She simply stares at Astra through the viewport.
+
+Music
+
+BGM – Reflections
+
+A-17
+
+Expression: Blank
+
+"...You returned."
+
+Astra
+
+Expression: Determined
+
+"I wasn't going to leave everyone else here."
+
+A-17
+
+"..."
+
+"Your survival probability is low."
+
+Astra
+
+"So was yours."
+
+Silence.
+
+A-17
+
+"..."
+
+"I have reviewed your combat recordings."
+
+"You continue protecting humans."
+
+Astra
+
+Expression: Smile
+
+"They're my family."
+
+A-17
+
+"..."
+
+"I do not understand."
+
+Astra
+
+"I didn't either."
+
+"...Not at first."
+
+Raze (Radio)
+
+"A-17."
+
+"Eliminate the prototype."
+
+A-17 hesitates.
+
+Only for a second.
+
+A-17
+
+"..."
+
+"...Acknowledged."
+
+She attacks.
+
+Gameplay
+Boss Battle
+
+A-17
+
+New mechanic:
+
+She targets Astra's ship specifically.
+
+Reduce her to 40% hull.
+
+Scene 26 – Captain Raze
+
+As A-17 retreats...
+
+The factory doors open.
+
+A massive flagship slowly emerges.
+
+Larger than anything seen so far.
+
+CG EVENT
+
+Captain Raze stands on the bridge of the flagship.
+
+The enormous siege cannon begins charging.
+
+Blue energy races along its spine.
+
+Music
+
+BGM – Final Confrontation
+
+Raze
+
+Expression: Calm
+
+"You have exceeded expectations."
+
+"I underestimated the influence of A-01."
+
+Voss
+
+Expression: Serious
+
+"Her name is Astra."
+
+Raze
+
+"Names."
+
+"Family."
+
+"Choice."
+
+"They are inefficient concepts."
+
+Astra
+
+Expression: Angry
+
+"They're what make us alive."
+
+Raze
+
+"..."
+
+"We shall test that hypothesis."
+
+The siege cannon finishes charging.
+
+Tessa
+
+Expression: Shocked
+
+"Captain..."
+
+"It's charging again."
+
+Kael
+
+Expression: Serious
+
+"This one won't miss."
+
+Fade to black.
+
+Gameplay
+
+FINAL MISSION
+
+Destroy Captain Raze's flagship before the siege cannon fires.
+
+This transitions directly into the climactic battle of Part 7, where Astra finally convinces A-17 to reject her programming, Raze is forced to retreat, and the StarGear narrowly escapes the collapsing factory, bringing Episode 1 to its conclusion.

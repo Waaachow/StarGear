@@ -1,0 +1,455 @@
+EPISODE 1 – PART 4 – Hold the Line
+
+This part should feel like the episode suddenly gets much bigger. Up until now it's been a fleet threatening a station. Now the player realises this is an invasion.
+
+Scene 13 – The Battle Turns
+BG
+
+Bridge – StarGear
+
+Music
+
+BGM – Frontline
+
+Enemy ships continue dropping from hyperspace.
+
+Tessa
+
+Expression: Focused
+
+"More contacts!"
+
+"They're still coming!"
+
+Kael
+
+Expression: Serious
+
+"This wasn't an attack."
+
+"It's an occupation force."
+
+Rex
+
+Expression: Shocked
+
+"How many ships does this guy have?"
+
+Selyra
+
+Expression: Analytical
+
+"Estimate..."
+
+"...Too many."
+
+Crimson (Radio)
+
+Expression: Smile
+
+"That's the spirit!"
+
+Kael
+
+Expression: Deadpan
+
+"...Nobody said anything inspiring."
+
+Crimson
+
+"I know."
+
+"I was encouraging myself."
+
+Everyone smiles.
+
+Gameplay
+Tactical Combat
+
+Mission
+
+Hold the defensive line.
+
+Objectives
+
+Defend Cogwheel Station
+Protect evacuation ships
+Destroy enemy frigates
+
+Mid-battle cutscene.
+
+Scene 14 – Something New
+CG EVENT
+
+The enormous carrier slowly opens.
+
+Massive hangar doors separate.
+
+Rows...
+
+Hundreds...
+
+Of identical androids stand inside.
+
+Motionless.
+
+Red eyes illuminate together.
+
+Music
+
+BGM – Mechanical Army
+
+Rex
+
+Expression: Shocked
+
+"..."
+
+"...That's..."
+
+Tessa
+
+Expression: Shocked
+
+"They're all..."
+
+Astra
+
+Expression: Worried
+
+"...Like me."
+
+Raze (Radio)
+
+Expression: Calm
+
+"Deploy the A-Series."
+
+Pods launch from the carrier.
+
+Dozens streak toward the battlefield.
+
+Kael
+
+Expression: Serious
+
+"New contacts incoming."
+
+"They're extremely fast."
+
+Combat resumes.
+
+Enemy reinforcements arrive.
+
+Gameplay Continues
+
+Player fights android squadrons.
+
+Enemy ships begin targeting civilians less...
+
+...and the StarGear more.
+
+Scene 15 – A-17
+
+Mid-battle cutscene.
+
+CG EVENT
+
+One android lands on a drifting cargo platform.
+
+Unlike the others...
+
+She doesn't attack.
+
+She simply watches the StarGear.
+
+Astra
+
+Expression: Shocked
+
+"..."
+
+Astra
+
+"...She..."
+
+"...looks exactly like me."
+
+A-17
+
+Expression: Blank
+
+"Designation confirmed."
+
+"A-01."
+
+Astra
+
+"My name..."
+
+"...is Astra."
+
+A-17 pauses.
+
+Processing.
+
+A-17
+
+"...Invalid."
+
+Astra
+
+"No."
+
+"It's my name."
+
+Raze (Radio)
+
+"A-17."
+
+"Recover the prototype."
+
+A-17
+
+"Understood."
+
+She launches toward the StarGear.
+
+Combat resumes.
+
+Gameplay
+
+Mini-boss encounter.
+
+Fight A-17 alongside enemy fighters.
+
+Reduce her health to 50%.
+
+Scene 16 – The Cannon
+CG EVENT
+
+The enemy carrier unfolds.
+
+Panels shift.
+
+A massive energy cannon rises from its centre.
+
+Power surges through glowing conduits.
+
+Tessa
+
+Expression: Shocked
+
+"...Captain..."
+
+"That's not targeting the station."
+
+Kael
+
+Expression: Serious
+
+"It's targeting us."
+
+Rowan (Radio)
+
+Expression: Serious
+
+"StarGear!"
+
+"Move!"
+
+Tessa
+
+Expression: Panicked
+
+"We don't have enough time!"
+
+Voss
+
+Expression: Determined
+
+"Maximum shields."
+
+SFX
+
+Massive energy blast
+
+CG EVENT
+
+The StarGear swings broadside.
+
+The beam slams directly into its shields.
+
+Everything becomes white.
+
+Silence.
+
+The shields shatter.
+
+One engine explodes.
+
+Smoke fills the bridge.
+
+Consoles spark.
+
+The ship drifts.
+
+Music
+
+Stops.
+
+Rex
+
+Expression: Shocked
+
+"..."
+
+"...Status!"
+
+Tessa
+
+Expression: Panicked
+
+"Engines offline!"
+
+"Main reactor unstable!"
+
+Kael
+
+Expression: Serious
+
+"We're dead in space."
+
+Enemy ships begin closing in.
+
+Scene 17 – Crimson's Decision
+BG
+
+Bridge – StarGear
+
+Music
+
+BGM – Fading Hope
+
+Rowan (Radio)
+
+Expression: Serious
+
+"StarGear, respond!"
+
+Static.
+
+Crimson (Radio)
+
+"..."
+
+"Captain."
+
+Voss
+
+Expression: Serious
+
+"I'm here."
+
+Crimson
+
+"I've got this."
+
+Voss
+
+"Crimson—"
+
+Crimson
+
+Expression: Smile
+
+"You've done enough."
+
+"My turn."
+
+Kael
+
+Expression: Serious
+
+"You'll be alone."
+
+Crimson
+
+"Wouldn't be the first time."
+
+Rex
+
+Expression: Concerned
+
+"Crimson..."
+
+Crimson
+
+"Hey."
+
+"No long faces."
+
+"I've always wanted to make a really dramatic entrance."
+
+"..."
+
+"Turns out..."
+
+"...this one's going to be my best."
+
+He cuts the transmission.
+
+CG EVENT
+
+Crimson's fighter accelerates away from the crippled StarGear.
+
+Straight toward the entire enemy fleet.
+
+Tiny against impossible odds.
+
+Astra
+
+Expression: Worried
+
+"..."
+
+Voss
+
+Expression: Determined
+
+"Tessa."
+
+Tessa
+
+Expression: Focused
+
+"I'm already on it."
+
+Voss
+
+"Get us flying."
+
+Tessa
+
+"...I will."
+
+Fade to gameplay.
+
+Gameplay
+
+NEW PLAYABLE SHIP
+
+Crimson Nova
+
+Mission:
+
+Hold the Line
+
+Objectives:
+
+Survive.
+Keep enemy forces occupied.
+Buy time for the StarGear's repairs.
+End of Part 4
+
+This ending creates a strong "I have to keep playing" moment. The player leaves the VN immediately taking control of Crimson, while emotionally invested in saving the crew rather than simply winning another battle.

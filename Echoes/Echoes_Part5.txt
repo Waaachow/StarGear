@@ -1,0 +1,474 @@
+EPISODE 1 – PART 5 – The Greatest Pilot
+
+This is Crimson's episode. Up until now he's been comic relief. This part reveals why Captain Voss respected him from the very beginning.
+
+Scene 18 – One Against Many
+BG
+
+Deep Space
+
+Music
+
+BGM – Lone Hero
+
+Crimson's fighter races toward the enemy fleet.
+
+Pirate Pilot
+
+"One fighter?"
+
+Another pirate laughs.
+
+Pirate Pilot
+
+"Destroy him."
+
+Crimson
+
+Expression: Hero Pose
+
+"Gladly."
+
+Gameplay
+
+Playable Ship: Crimson Nova
+
+Mission:
+
+Hold the Line
+
+Objectives:
+
+Survive for 8 minutes.
+Destroy enemy fighters.
+Prevent enemies reaching the disabled StarGear.
+
+During gameplay Crimson comments frequently.
+
+Crimson
+
+"You'll have to do better than that!"
+
+"Come on!"
+
+"I've flown through tighter parking!"
+
+"Almost clipped me!"
+
+"...Almost."
+
+Enemy chatter.
+
+Pirate Pilot
+
+"How is he behind us?!"
+
+Pirate Pilot
+
+"He's impossible to lock!"
+
+Pirate Pilot
+
+"Don't chase him!"
+
+"...He wants us to chase him!"
+
+As the timer counts down...
+
+More enemy ships ignore the StarGear.
+
+They begin chasing Crimson.
+
+Exactly what he wanted.
+
+Mid Mission Cutscene
+CG EVENT
+
+Crimson dives through an asteroid cluster.
+
+Enemy fighters collide trying to follow him.
+
+He skims across the hull of an enemy cruiser before firing directly into its engines.
+
+The cruiser spins into another ship.
+
+Explosions ripple through the formation.
+
+Rex (Radio)
+
+Expression: Shocked
+
+"..."
+
+"I knew he was good..."
+
+"...I didn't know he was THAT good."
+
+Kael
+
+Expression: Serious
+
+"I owe him an apology."
+
+Selyra
+
+Expression: Analytical
+
+"His flight path cannot be predicted."
+
+Tessa
+
+Expression: Focused
+
+"Keep distracting them..."
+
+"...Almost there..."
+
+Gameplay Continues
+
+New objective:
+
+Destroy three command frigates.
+
+Each destroyed frigate delays the enemy advance.
+
+Scene 19 – The Duel
+CG EVENT
+
+A sleek black interceptor leaves the carrier.
+
+It accelerates directly toward Crimson.
+
+Inside...
+
+A-17.
+
+A-17
+
+Expression: Blank
+
+"Mercenary identified."
+
+"Eliminate."
+
+Crimson
+
+Expression: Smile
+
+"Aw."
+
+"I was hoping I'd impressed somebody."
+
+A-17
+
+"You are interfering."
+
+Crimson
+
+"That's generally what heroes do."
+
+Mini Boss begins.
+
+Gameplay
+
+Fight A-17.
+
+Objective:
+
+Reduce her shields.
+
+During combat.
+
+Crimson
+
+"You're quick!"
+
+A-17
+
+"Combat efficiency: 98.7%."
+
+Crimson
+
+"Mine's at least..."
+
+"...99."
+
+A-17
+
+"Statement unsupported."
+
+Crimson
+
+"I support it."
+
+Eventually...
+
+Combat pauses.
+
+CG EVENT
+
+Astra's voice comes over the radio.
+
+Astra (Radio)
+
+Expression: Concerned
+
+"Please..."
+
+"Stop."
+
+A-17 freezes.
+
+Astra
+
+"You don't have to do this."
+
+A-17
+
+"..."
+
+"...You continue protecting humans."
+
+Astra
+
+"Yes."
+
+A-17
+
+"...Why?"
+
+Astra
+
+"Because they're my family."
+
+Silence.
+
+A-17
+
+"...Family..."
+
+She slowly backs away.
+
+Raze (Radio)
+
+"A-17."
+
+"Resume the mission."
+
+She hesitates...
+
+Then reluctantly turns away.
+
+Crimson
+
+"..."
+
+"Kid."
+
+"I think you've already started asking the right questions."
+
+She says nothing.
+
+Leaves.
+
+Scene 20 – StarGear Repairs
+BG
+
+Bridge – StarGear
+
+Music
+
+BGM – Rising Hope
+
+Tessa
+
+Expression: Focused
+
+"Come on..."
+
+"Come on..."
+
+SFX
+
+Power Restored
+
+Lights return.
+
+Rex
+
+Expression: Happy
+
+"We're back!"
+
+Kael
+
+Expression: Serious
+
+"Engines online."
+
+Tessa
+
+"We've only got partial power."
+
+Voss
+
+"Enough."
+
+Astra
+
+Expression: Determined
+
+"Captain."
+
+Voss
+
+"Let's go get our hero."
+
+Gameplay
+
+Return to StarGear.
+
+Mission:
+
+Break through enemy lines.
+
+Reach Crimson before his timer expires.
+
+Objectives:
+
+Destroy blockade ships.
+Protect Crimson.
+Regroup with him.
+Scene 21 – Hero's Welcome
+CG EVENT
+
+The StarGear bursts through the enemy formation.
+
+Its main cannons fire.
+
+Enemy ships scatter.
+
+Crimson flies beneath the ship, smoke pouring from one engine.
+
+Crimson
+
+Expression: Laughing
+
+"Took your time!"
+
+Rex
+
+Expression: Laughing
+
+"You said you had it handled!"
+
+Crimson
+
+"I did!"
+
+"..."
+
+"I'd just reached..."
+
+"...the difficult part."
+
+Kael
+
+Expression: Smirk
+
+"You've exceeded expectations."
+
+Crimson
+
+"Wait."
+
+"Was that..."
+
+"...a compliment?"
+
+Kael
+
+"Don't get used to it."
+
+Crimson
+
+"I'll treasure it forever."
+
+Voss
+
+Expression: Smile
+
+"You bought us exactly the time we needed."
+
+Crimson
+
+"I told you."
+
+"..."
+
+"I'm worth every credit."
+
+Rex
+
+Expression: Laughing
+
+"We'll see what the invoice says."
+
+Everyone laughs.
+
+Tessa
+
+Expression: Focused
+
+"Captain."
+
+"I've tracked where the carrier jumped."
+
+Selyra
+
+Expression: Analytical
+
+"It did not leave the sector."
+
+Kael
+
+"It disappeared."
+
+Tessa
+
+"No..."
+
+"It went somewhere we couldn't see."
+
+Voss
+
+Expression: Serious
+
+"Can you find it?"
+
+Tessa
+
+Expression: Confident
+
+"I've got fragments of its jump signature."
+
+"It won't be easy..."
+
+"...but I can track it."
+
+Voss
+
+"Then that's our next mission."
+
+Gameplay
+Exploration
+
+A new search area opens around the Nebula.
+
+Objectives:
+
+Scan hyperspace residue.
+Investigate false signatures.
+Locate the hidden Android Factory.
+
+The player is given freedom to explore, with the story advancing only after they've pieced together the trail. This makes the discovery of the factory feel earned rather than simply marked on the map.

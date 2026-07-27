@@ -1,0 +1,631 @@
+EPISODE 1 – PART 7 – Choose Your Own Name
+
+This is the emotional climax. The gameplay has proven the crew can win the battle—now Astra has to win the argument.
+
+Scene 27 – The Final Shot
+BG
+
+Bridge – StarGear
+
+Music
+
+BGM – Final Confrontation
+
+The siege cannon continues charging.
+
+The bridge shakes.
+
+Tessa
+
+Expression: Panicked
+
+"Thirty seconds!"
+
+Kael
+
+Expression: Serious
+
+"We're not going to break through in time."
+
+Rex
+
+Expression: Angry
+
+"There has to be something!"
+
+Crimson (Radio)
+
+Expression: Determined
+
+"I'm going in."
+
+Voss
+
+Expression: Serious
+
+"Negative."
+
+Crimson
+
+"If that cannon fires..."
+
+"...none of us get another chance."
+
+Before anyone can answer—
+
+A-17 flies between the StarGear...
+
+...and Raze's flagship.
+
+Silence.
+
+Raze
+
+Expression: Calm
+
+"A-17."
+
+"Move."
+
+A-17
+
+Expression: Blank
+
+"..."
+
+"No."
+
+Everyone freezes.
+
+CG EVENT
+
+Wide cinematic shot.
+
+The StarGear.
+
+Crimson's fighter.
+
+A-17.
+
+Raze's flagship.
+
+The glowing siege cannon dominating the battlefield.
+
+Music
+
+BGM – Astra's Theme
+
+Raze
+
+"You are malfunctioning."
+
+A-17
+
+"..."
+
+"I am..."
+
+"...thinking."
+
+Raze
+
+"Thinking is unnecessary."
+
+Astra
+
+Expression: Determined
+
+"Don't listen to him."
+
+Raze
+
+"You were manufactured."
+
+"You exist to obey."
+
+Astra
+
+"I was manufactured."
+
+"..."
+
+"But I chose who I became."
+
+Raze
+
+"Choice is irrelevant."
+
+Astra
+
+"Then why are you afraid of it?"
+
+Silence.
+
+A-17 slowly looks toward Astra.
+
+A-17
+
+"..."
+
+"...How?"
+
+Astra
+
+Expression: Smile
+
+"I wasn't alone."
+
+She looks around the bridge.
+
+Rex
+
+Expression: Smile
+
+"We're kind of impossible to get rid of."
+
+Tessa
+
+Expression: Smile
+
+"Trust me."
+
+Kael
+
+Expression: Small Smile
+
+"We've tried."
+
+Crimson
+
+Expression: Hero Pose
+
+"And friendship!"
+
+"...Mostly friendship."
+
+Everyone smiles.
+
+Even Kael.
+
+Astra
+
+"They gave me a name."
+
+"They gave me a home."
+
+"They gave me a choice."
+
+A-17
+
+"..."
+
+"...Can I..."
+
+"...choose?"
+
+Astra
+
+"You already are."
+
+CG EVENT
+
+Close-up.
+
+A-17 slowly powers down her weapon.
+
+Then turns.
+
+She fires directly into the flagship's siege cannon.
+
+The cannon erupts in a massive explosion.
+
+SFX
+
+Massive explosion
+
+Raze
+
+Expression: Angry
+
+"...Impossible."
+
+Gameplay
+Final Boss
+
+Captain Raze
+
+Objectives
+
+Defeat Raze's flagship.
+Protect A-17.
+Survive until enemy retreat.
+
+Mid-fight dialogue.
+
+Rex
+
+"He actually gets angry!"
+
+Kael
+
+"Good."
+
+Crimson
+
+"I preferred him smug."
+
+Tessa
+
+"His shields are collapsing!"
+
+Voss
+
+"Everyone."
+
+"Finish this."
+
+After the flagship reaches low health—
+
+Scene 28 – Retreat
+CG EVENT
+
+Explosions spread across the flagship.
+
+Alarms sound.
+
+The factory begins shutting down.
+
+Enemy ships disengage.
+
+Officer
+
+"Captain!"
+
+"The factory is losing power!"
+
+Raze
+
+Expression: Calm
+
+"..."
+
+"Recover what data you can."
+
+"We're leaving."
+
+Officer
+
+"And A-17?"
+
+Raze
+
+"..."
+
+"...She no longer exists."
+
+The flagship jumps to hyperspace.
+
+Enemy ships follow.
+
+Silence.
+
+Rex
+
+Expression: Shocked
+
+"..."
+
+"We won?"
+
+Kael
+
+Expression: Serious
+
+"We survived."
+
+Tessa
+
+Expression: Shocked
+
+"Captain!"
+
+"The factory reactor's overloading!"
+
+Gameplay
+Escape Mission
+
+Objectives
+
+Reach jump point.
+Avoid exploding debris.
+Stay close to A-17.
+Protect Crimson's damaged ship.
+Scene 29 – Rescue
+CG EVENT
+
+The StarGear reaches the edge of the explosion.
+
+A-17 floats silently among the debris.
+
+One engine on her fighter has failed.
+
+Astra
+
+Expression: Concerned
+
+"Captain..."
+
+Voss doesn't hesitate.
+
+Voss
+
+Expression: Determined
+
+"Open the rescue bay."
+
+Kael
+
+Expression: Surprised
+
+"...Already?"
+
+Voss
+
+"If we leave her..."
+
+"...we become him."
+
+The bay doors open.
+
+A-17 is pulled aboard.
+
+A-17
+
+Expression: Blank
+
+"..."
+
+"...Why?"
+
+Astra
+
+Expression: Gentle Smile
+
+"Because that's what family does."
+
+A-17 quietly lowers her head.
+
+Scene 30 – Cogwheel Station
+BG
+
+Cogwheel Station
+
+Music
+
+BGM – Home Again
+
+The station is already under repair.
+
+Workers rebuild damaged docks.
+
+Children wave as the StarGear lands.
+
+Rowan
+
+Expression: Smile
+
+"I had a speech prepared."
+
+"..."
+
+"You've already exceeded it."
+
+Rex
+
+Expression: Laughing
+
+"That's the nicest thing you've ever said."
+
+Rowan
+
+"Don't get used to it."
+
+Crimson
+
+Expression: Hero Pose
+
+"So..."
+
+"...about my payment."
+
+Rowan
+
+"You submitted an invoice."
+
+Crimson
+
+"I did."
+
+Rowan
+
+"It includes 'heroic posing expenses.'"
+
+Crimson
+
+"They're tax deductible."
+
+Rowan
+
+"They are not."
+
+Everyone laughs.
+
+Rowan
+
+"You also charged us for fireworks."
+
+Crimson
+
+"Essential morale equipment."
+
+Kael
+
+Expression: Smirk
+
+"I almost believe him."
+
+Scene 31 – A Name
+BG
+
+StarGear Bridge
+
+Music
+
+BGM – Starlight
+
+A-17 stands alone by the observation window.
+
+Astra walks over.
+
+Astra
+
+Expression: Smile
+
+"You should probably stop calling yourself A-17."
+
+A-17
+
+"..."
+
+"I do not know another name."
+
+Rex
+
+Expression: Excited
+
+"We can fix that!"
+
+Tessa
+
+Expression: Happy
+
+"I've actually been thinking about it."
+
+She pulls out a notebook.
+
+Kael
+
+Expression: Deadpan
+
+"You have a notebook for names?"
+
+Tessa
+
+"...Maybe."
+
+Crimson
+
+"I vote for..."
+
+"...Ultra Mega Justice."
+
+Everyone stares at him.
+
+Crimson
+
+"..."
+
+"...Too much?"
+
+Selyra
+
+Expression: Smile
+
+"Marginally."
+
+Everyone laughs.
+
+Voss
+
+Expression: Smile
+
+"Take your time."
+
+"A name should be your choice."
+
+A-17 smiles.
+
+Only slightly.
+
+The first genuine smile she's ever shown.
+
+Final CG EVENT
+
+The StarGear leaves Helios Reach.
+
+Crimson flies alongside, dramatically weaving around the ship despite repeated warnings from air traffic control.
+
+The repaired Cogwheel Station shines in the distance as the two ships jump to hyperspace together.
+
+Music
+
+BGM – Ending Theme
+
+Narration
+
+"Every journey changes the people who travel it."
+
+"Some discover where they belong."
+
+"Others discover who they are."
+
+"The StarGear continued onward... together."
+
+POST-CREDITS SCENE
+BG
+
+Unknown Command Chamber
+
+Dark.
+
+Silent.
+
+A holographic image of Astra rotates slowly.
+
+Raze kneels before a figure hidden in shadow.
+
+Only their silhouette is visible.
+
+Unknown Figure
+
+"So."
+
+"The prototype inspired another."
+
+Raze
+
+Expression: Serious
+
+"Yes."
+
+Unknown Figure
+
+"...Interesting."
+
+"Proceed to Phase Two."
+
+The hologram changes.
+
+Instead of Astra...
+
+It displays Captain Voss.
+
+Unknown Figure
+
+"I want the captain."
+
+Screen cuts to black.
+
+END OF EPISODE 1
+
+I actually prefer this ending over the previous version because it gives Voss one final defining moment. His decision to rescue A-17 isn't tactical—it's moral. His line, "If we leave her... we become him," encapsulates the entire theme of the episode. Raze sees androids as property; Voss sees people. That choice is what transforms A-17's future and leaves the audience with a clear understanding of why the StarGear crew is different. It also sets up a stronger season arc by revealing that the true enemy's interest extends beyond Astra to Voss himself, hinting that his past rescue of Astra may have far-reaching consequences.

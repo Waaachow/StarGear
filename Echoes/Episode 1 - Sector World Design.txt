@@ -1,0 +1,189 @@
+Episode 1 - Sector World Design
+Overview
+
+Episode 1 takes place entirely within a single handcrafted sector of space.
+
+The sector should feel like an active frontier region with industry, commerce and infrastructure. Every location should have a believable purpose within the sector, creating the impression that it exists independently of the player.
+
+The environment should favour quality over scale. Rather than a vast procedural map, this sector should consist of a small number of carefully designed locations connected by open space.
+
+Sector Layout
+                  Asteroid Mining Belt
+                         │
+                         │
+ Trade Lane ───── Main Station ───── Communications Relay
+      │                                    │
+      │                                    │
+ Mercenary Hangar                     Nebula
+                                           │
+                                           │
+                                   Hidden Installation
+                                           │
+                                           │
+                                      Jump Gate
+
+The locations should feel naturally connected, with the surrounding space acting as the travel corridors between them.
+
+Trade Lane
+
+The central artery of the sector.
+
+This area represents the safest and busiest part of local space.
+
+Visual Identity
+Constant civilian traffic
+Cargo freighters
+Ore haulers
+Passenger transports
+Navigation buoys
+Automated maintenance drones
+Security patrol craft
+
+The area should feel alive, with ships following predictable routes and passing one another naturally.
+
+Main Station
+
+The largest structure in the sector.
+
+This serves as the commercial and industrial centre of the region.
+
+Visual Identity
+Large rotating habitation ring
+Multiple docking bays
+Cargo cranes
+Repair docks
+Service craft moving around the station
+Bright navigation lighting
+Heavy industrial architecture
+
+The station should immediately stand out as the centrepiece of the sector.
+
+Asteroid Mining Belt
+
+A large asteroid field under active industrial operation.
+
+Visual Identity
+Dense asteroid clusters
+Mining lasers
+Automated drills
+Cargo containers
+Ore processing equipment
+Large mining barges
+Excavation platforms
+
+The area should feel busy but hazardous, with industrial equipment built directly into the asteroids.
+
+Communications Relay
+
+A small orbital infrastructure platform positioned away from the main traffic routes.
+
+Visual Identity
+Large communications arrays
+Solar panels
+Long-range antennae
+Docking arm
+Maintenance walkways
+Exterior lighting
+Utility modules
+
+Its isolated position should contrast with the activity around the station.
+
+Mercenary Hangar
+
+A privately operated outpost built into a hollowed asteroid.
+
+Visual Identity
+Reinforced docking platform
+Workshop structures
+External repair gantries
+Storage containers
+Fuel tanks
+Exposed maintenance equipment
+Makeshift construction
+
+It should feel practical rather than military, with a rough, independent character.
+
+Nebula
+
+A dense cloud formation occupying the edge of the sector.
+
+Visual Identity
+Bright coloured gas clouds
+Thick dust formations
+Electrical discharges
+Reduced visibility
+Floating debris
+Distorted lighting
+
+The nebula should create a dramatic change in atmosphere compared to the open space elsewhere in the sector.
+
+Hidden Installation
+
+A massive industrial complex concealed deep within the nebula.
+
+Visual Identity
+Gigantic rotating construction rings
+Heavy armour plating
+Large docking ports
+Massive internal hangars
+Defensive satellite network
+Dense mechanical detail
+Red warning lights throughout
+
+The installation should be one of the largest structures seen so far, giving the impression of enormous manufacturing capability.
+
+Jump Gate
+
+A permanent hyperspace gateway located on the outer edge of the sector.
+
+Visual Identity
+Large circular gate structure
+Navigation beacons
+Long-range communication towers
+Minimal surrounding traffic
+Clean, symmetrical architecture
+
+Its isolated location should reinforce that it is the primary route into and out of the sector.
+
+Open Space
+
+The empty space between major locations is just as important as the locations themselves.
+
+It should never feel completely empty.
+
+Include subtle environmental details such as:
+
+Distant planets and moons
+Starfields
+Small asteroid clusters
+Derelict satellites
+Wreckage drifting through space
+Navigation buoys
+Cargo containers
+Civilian traffic
+Passing patrol ships
+Light nebula haze in distant regions
+
+These details should create the impression that the sector is inhabited and continuously operating.
+
+Visual Progression
+
+The sector should evolve over time without changing its fundamental layout.
+
+Examples include:
+
+New debris fields appearing
+Damage to existing structures
+Increased repair activity
+Additional emergency lighting
+More visible patrols
+Burned-out ships drifting through trade lanes
+Repair vessels working around damaged infrastructure
+
+These changes should make the world feel responsive and lived-in.
+
+Art Direction
+
+The overall aesthetic should evoke a vibrant, anime-inspired space opera rather than a hard science-fiction simulation.
+
+The sector should feel colourful, optimistic and adventurous, with exaggerated silhouettes, bold lighting and memorable landmarks. Every major location should be instantly recognisable from a distance through its shape, scale and colour palette, making navigation intuitive without relying heavily on interface elements.

@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StarGear — Project Echoes</title>
+<style>
+  :root{
+    --accent:#46c7ff;
+    --glow: 150, 200, 255;
+    --panel-bg:rgba(8,14,28,0.9); --panel-border:rgba(120,180,255,0.35);
+    --barH:210px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:"Segoe UI",system-ui,sans-serif;
+    background:#04060e; color:#eaf2ff; overflow:hidden; user-select:none;
+  }
+
+  /* ---------- title screen ----------
+     No dedicated art for Project Echoes yet — this is a procedural placeholder
+     (starfield + glow), not a stand-in image, so it needs no new assets and is
+     obviously temporary until real title art lands. Swap the .peBg gradient/
+     .peShip block for real art the same way episode1.html's sgFrame does. */
+  #startOverlay{position:fixed; inset:0; z-index:40; display:flex; flex-direction:column;
+       align-items:center; justify-content:flex-end; padding-bottom:8vh;
+       transition:opacity .6s ease;}
+  #startOverlay.fading{opacity:0; pointer-events:none;}
+  #startOverlay.hidden{display:none;}
+
+  .peBg{position:fixed; inset:0; z-index:0; overflow:hidden;
+       background:
+         radial-gradient(1px 1px at 8% 22%, #cfe4ff 0, transparent 100%),
+         radial-gradient(1px 1px at 18% 68%, #9fc0ff 0, transparent 100%),
+         radial-gradient(2px 2px at 32% 14%, #eaf3ff 0, transparent 100%),
+         radial-gradient(1px 1px at 46% 82%, #cfe4ff 0, transparent 100%),
+         radial-gradient(1px 1px at 61% 38%, #eaf3ff 0, transparent 100%),
+         radial-gradient(2px 2px at 74% 60%, #9fc0ff 0, transparent 100%),
+         radial-gradient(1px 1px at 85% 20%, #cfe4ff 0, transparent 100%),
+         radial-gradient(1px 1px at 93% 76%, #eaf3ff 0, transparent 100%),
+         radial-gradient(1400px 900px at 50% 110%, rgba(40,80,160,0.35), transparent 60%),
+         radial-gradient(900px 600px at 80% -10%, rgba(80,50,150,0.28), transparent 60%),
+         linear-gradient(180deg, #04060e 0%, #070a16 55%, #050710 100%);
+  }
+  .peGlow{position:fixed; inset:0; z-index:1; pointer-events:none;
+       background:radial-gradient(600px 400px at 50% 42%, rgba(70,150,255,0.10), transparent 70%);
+       animation:peGlowPulse 5s ease-in-out infinite;}
+  @keyframes peGlowPulse{
+    0%,100%{opacity:.6;} 50%{opacity:1;}
+  }
+
+  .peTitleWrap{position:relative; z-index:2; display:flex; flex-direction:column;
+       align-items:center; gap:.5rem; margin-bottom:6vh;}
+  .peKicker{font-size:.85rem; letter-spacing:.5em; color:rgba(160,210,255,0.75);
+       text-transform:uppercase;}
+  .peTitle{font-size:clamp(2.2rem,7vw,4.2rem); letter-spacing:.1em; font-weight:800;
+       color:#eaf3ff; text-transform:uppercase;
+       text-shadow:0 0 20px rgba(var(--glow),.55), 0 0 60px rgba(var(--glow),.3);
+       animation:peTitleGlow 3.2s ease-in-out infinite;}
+  @keyframes peTitleGlow{
+    0%,100%{ filter:drop-shadow(0 0 6px rgba(var(--glow),.35)); }
+    50%    { filter:drop-shadow(0 0 18px rgba(var(--glow),.7)); }
+  }
+  .peSub{font-size:.9rem; letter-spacing:.3em; color:rgba(255,255,255,0.4); text-transform:uppercase;}
+  .pePlaceholderTag{margin-top:.6rem; font-size:.7rem; letter-spacing:.18em;
+       color:rgba(255,190,110,0.75); text-transform:uppercase; border:1px dashed rgba(255,190,110,0.4);
+       border-radius:6px; padding:.25rem .8rem;}
+
+  #startMenu{position:relative; z-index:2; display:flex; flex-direction:column;
+       align-items:center; gap:14px; margin:0;}
+  .menuBtn{font-family:inherit; cursor:pointer; min-width:260px;
+       font-size:1.15rem; letter-spacing:.28em; text-transform:uppercase; font-weight:600;
+       color:#eafcff; padding:.9rem 2.6rem; border-radius:10px;
+       background:linear-gradient(180deg, rgba(20,80,122,0.92), rgba(11,32,58,0.92));
+       border:1px solid var(--accent);
+       box-shadow:0 0 22px rgba(70,150,255,0.35), inset 0 0 18px rgba(70,150,255,0.15);
+       transition:transform .15s ease, box-shadow .2s ease, background .2s ease;}
+  .menuBtn:hover{transform:translateY(-2px);
+       background:linear-gradient(180deg, rgba(30,110,160,0.96), rgba(16,44,78,0.96));
+       box-shadow:0 0 34px rgba(70,150,255,0.6), inset 0 0 22px rgba(70,150,255,0.25);}
+  .menuBtn:active{transform:translateY(0);}
+  #startMenu .hint{margin-top:.4rem; color:rgba(255,255,255,0.6); font-size:.85rem;
+       text-shadow:0 2px 8px rgba(0,0,0,0.9);}
+  kbd{background:#101a30; border:1px solid rgba(255,255,255,0.2); border-bottom-width:2px;
+      border-radius:5px; padding:1px 7px; font-size:.72rem; color:#cfe0ff;}
+
+  /* full-screen black used for the fade-to-black transition into the story */
+  #fadeBlack{position:fixed; inset:0; z-index:60; background:#000; opacity:0;
+       pointer-events:none; transition:opacity .5s ease;}
+  #fadeBlack.on{opacity:1;}
+
+  /* ---------- VN engine (ported/trimmed from episode1.html) ---------- */
+  #bgWrap{position:fixed; inset:0; z-index:0; overflow:hidden;}
+  #bgImg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+         filter:brightness(.62) saturate(.95); transition:opacity .5s ease;}
+  #bgPh{position:absolute; inset:0; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; gap:.4rem; text-align:center;
+        background:
+          radial-gradient(1200px 600px at 70% -10%, rgba(40,80,160,0.35), transparent 60%),
+          radial-gradient(900px 500px at 20% 110%, rgba(80,40,140,0.30), transparent 60%),
+          linear-gradient(180deg,#070b18 0%, #04060e 100%);}
+  #bgPh .id{font-size:.8rem; letter-spacing:.3em; color:#6fa6c8;}
+  #bgPh .nm{font-size:clamp(1.2rem,3vw,2rem); letter-spacing:.1em; color:#9fc0ff;
+            text-shadow:0 0 30px rgba(70,150,255,0.4);}
+  #bgPh .tag{font-size:.7rem; letter-spacing:.25em; color:rgba(255,255,255,0.3); text-transform:uppercase;}
+
+  #cast{position:fixed; left:0; right:0; bottom:0; top:0; z-index:2;
+        display:flex; align-items:flex-end; justify-content:space-around;
+        padding:0 2vw; pointer-events:none;}
+  .char{position:relative; display:flex; flex-direction:column; align-items:center;
+        justify-content:flex-end; width:clamp(170px,21vw,290px); height:86vh;
+        flex:0 0 auto; z-index:1;
+        opacity:.85; transform:translateY(10px); transition:opacity .4s ease, transform .4s ease, filter .4s ease;
+        filter:brightness(.45) saturate(.8);}
+  .char.active{opacity:1; transform:translateY(0); filter:brightness(1) saturate(1); z-index:3;}
+  #cast[data-n="5"] .char{margin:0 -1.2vw;}
+  #cast[data-n="6"] .char{margin:0 -2.8vw;}
+  #cast[data-n="7"] .char{margin:0 -4.2vw; width:clamp(150px,18vw,250px);}
+  .char::before{content:""; position:absolute; bottom:18%; left:50%; transform:translateX(-50%);
+        width:78%; height:46%; opacity:0; filter:blur(28px); transition:opacity .4s ease; z-index:0;
+        background:radial-gradient(ellipse at center, var(--c,#46c7ff) 0%, transparent 65%);}
+  .char.active::before{opacity:.32;}
+  .cimg{position:relative; z-index:1; max-height:100%; max-width:100%; object-fit:contain;
+        align-self:flex-end; transform-origin:bottom center; transform:scale(2.75);
+        filter:drop-shadow(0 12px 24px rgba(0,0,0,0.6));}
+  .cph{position:relative; z-index:1; width:min(80%,250px); aspect-ratio:3/4; align-self:flex-end;
+       margin-bottom:6vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+       border-radius:14px; border:1px solid rgba(255,255,255,0.14);
+       background:linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01));}
+  .cph .i{font-size:clamp(40px,7vw,90px); font-weight:800; color:var(--c,#46c7ff);
+          text-shadow:0 0 26px var(--c,#46c7ff);}
+  .cph .n{margin-top:.2rem; letter-spacing:.22em; text-transform:uppercase; font-size:.74rem; color:rgba(255,255,255,0.7);}
+  .cph .x{margin-top:.15rem; font-size:.66rem; letter-spacing:.12em; color:var(--c,#46c7ff); text-transform:uppercase;}
+
+  /* ---------- hologram cast card — for a speaker who isn't physically present
+     (Crimson's Scene 1 radio cameo, see the "holo" step field / holoOf map).
+     Cyan/blue duotone recolor, soft glow, scanlines, and a periodic flicker with a
+     brief RGB-separated "weak signal" glitch. mix-blend-mode:overlay on the scanline
+     layer keeps it invisible over the card's transparent margins and only readable
+     over the actual portrait pixels, so it doesn't need to be hand-clipped to the
+     character's silhouette. ---------- */
+  .char.holo .cimg{
+    opacity:.76;
+    filter: grayscale(1) brightness(1.2) sepia(1) hue-rotate(152deg) saturate(4.5)
+            drop-shadow(0 0 4px rgba(120,220,255,.55)) drop-shadow(0 0 22px rgba(70,180,255,.45))
+            drop-shadow(0 10px 20px rgba(0,0,0,.5));
+    animation: holoFlicker 6.4s ease-in-out infinite;
+  }
+  .char.holo .cph{opacity:.76; filter:sepia(1) hue-rotate(152deg) saturate(3);}
+  .char.holo::before{background:radial-gradient(ellipse at center, rgba(90,200,255,0.9) 0%, transparent 65%) !important;}
+  .char.holo::after{
+    content:""; position:absolute; inset:0; z-index:2; pointer-events:none; opacity:.7;
+    mix-blend-mode:overlay;
+    background:repeating-linear-gradient(0deg,
+      rgba(170,230,255,0.16) 0px, rgba(170,230,255,0.16) 1px, transparent 1px, transparent 4px);
+  }
+  @keyframes holoFlicker{
+    0%,90%,100%{ opacity:.76;
+      filter: grayscale(1) brightness(1.2) sepia(1) hue-rotate(152deg) saturate(4.5)
+              drop-shadow(0 0 4px rgba(120,220,255,.55)) drop-shadow(0 0 22px rgba(70,180,255,.45))
+              drop-shadow(0 10px 20px rgba(0,0,0,.5)); }
+    91%{ opacity:.4; }
+    92%{ opacity:.92;                              /* brief RGB split — signal cutting out */
+      filter: grayscale(1) brightness(1.4) sepia(1) hue-rotate(148deg) saturate(5)
+              drop-shadow(3px 0 0 rgba(255,80,80,.55)) drop-shadow(-3px 0 0 rgba(70,190,255,.6))
+              drop-shadow(0 10px 20px rgba(0,0,0,.5)); }
+    93%{ opacity:.55;
+      filter: grayscale(1) brightness(1) sepia(1) hue-rotate(160deg) saturate(4)
+              drop-shadow(-2px 0 0 rgba(255,80,80,.4)) drop-shadow(2px 0 0 rgba(70,190,255,.4))
+              drop-shadow(0 10px 20px rgba(0,0,0,.5)); }
+    95%,100%{ opacity:.76;
+      filter: grayscale(1) brightness(1.2) sepia(1) hue-rotate(152deg) saturate(4.5)
+              drop-shadow(0 0 4px rgba(120,220,255,.55)) drop-shadow(0 0 22px rgba(70,180,255,.45))
+              drop-shadow(0 10px 20px rgba(0,0,0,.5)); }
+  }
+
+  #cg{position:fixed; inset:0; z-index:14; display:none; background:#02030a;}
+  #cg.show{display:block;}
+  #cgImg{position:absolute; inset:0; width:100%; height:100%; object-fit:contain;}
+  #cgPh{position:absolute; inset:0; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; gap:.5rem; text-align:center;
+        background:radial-gradient(900px 600px at 50% 30%, rgba(40,70,150,0.4), transparent 70%), #03040c;}
+  #cgPh .id{font-size:.85rem; letter-spacing:.35em; color:#7fb0e0;}
+  #cgPh .nm{font-size:clamp(1.5rem,4vw,2.6rem); letter-spacing:.08em; color:#dceaff;
+            text-shadow:0 0 40px rgba(70,150,255,0.5);}
+  #cgPh .desc{max-width:640px; font-size:.95rem; line-height:1.5; color:rgba(255,255,255,0.55); padding:0 20px;}
+
+  #bar{position:fixed; left:0; right:0; bottom:0; z-index:18; min-height:var(--barH);
+       background:linear-gradient(180deg, transparent, rgba(4,7,15,0.55) 18%, var(--panel-bg) 46%);
+       border-top:1px solid var(--panel-border); padding:30px clamp(24px,6vw,90px) 26px;
+       backdrop-filter:blur(6px); cursor:pointer;}
+  #bar.hidden{display:none;}
+  #nameplate{display:inline-block; padding:.32rem 1.2rem; border-radius:8px; font-weight:700;
+       letter-spacing:.12em; text-transform:uppercase; font-size:1rem; background:#0b1426;
+       border:1px solid var(--accent); color:var(--accent);
+       box-shadow:0 0 18px color-mix(in srgb, var(--accent) 40%, transparent); margin-bottom:.7rem;}
+  #nameplate.hidden{visibility:hidden;}
+  #bar.speaking #nameplate{animation:talk 1.1s ease-in-out infinite;}
+  @keyframes talk{0%,100%{box-shadow:0 0 18px color-mix(in srgb,var(--accent) 40%,transparent);}
+                  50%{box-shadow:0 0 30px color-mix(in srgb,var(--accent) 85%,transparent);}}
+  #text{font-size:clamp(1.1rem,2.1vw,1.65rem); line-height:1.5; max-width:1100px; min-height:2.6em;}
+  #text.narr{font-style:italic; color:#adbfe0;}
+  #bar.overCg{bottom:auto; top:7%; min-height:0; background:transparent; border-top:0;
+       backdrop-filter:none; padding:20px clamp(24px,6vw,90px); text-align:center;}
+  #bar.overCg #nameplate{margin-bottom:.7rem;}
+  #bar.overCg #text{margin:0 auto; text-shadow:0 3px 16px rgba(0,0,0,0.95), 0 1px 4px rgba(0,0,0,0.9);}
+  #bar.overCg #advance{display:none;}
+  .cursor{display:inline-block; width:.55ch; animation:blink 1s steps(1) infinite; color:#9fc0ff;}
+  @keyframes blink{50%{opacity:0;}}
+  #advance{position:absolute; right:clamp(24px,6vw,90px); bottom:14px; font-size:.74rem;
+       letter-spacing:.15em; color:rgba(255,255,255,0.5); display:flex; align-items:center; gap:.5rem;}
+  #advance .arrow{display:inline-block; animation:bob 1.1s ease-in-out infinite; color:#9fc0ff;}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(4px);}}
+
+  #hud{position:fixed; top:16px; left:24px; z-index:22; opacity:.92;}
+  #epScene{font-size:.82rem; letter-spacing:.2em; color:#9fc0ff; text-transform:uppercase;}
+  #autoPlay{position:fixed; top:14px; right:18px; z-index:30; cursor:pointer; font-family:inherit;
+       font-size:.74rem; letter-spacing:.1em; line-height:1; color:#cfe3ff;
+       background:rgba(10,18,32,0.82); border:1px solid var(--panel-border);
+       border-radius:8px; padding:.46rem .6rem;}
+  #autoPlay:hover{border-color:var(--accent);}
+  #autoPlay.on{background:#14507a; border-color:var(--accent); color:#eafcff;}
+  #skipVN{position:fixed; top:14px; right:106px; z-index:30; cursor:pointer; font-family:inherit;
+       font-size:.74rem; letter-spacing:.1em; line-height:1; color:#cfe3ff;
+       background:rgba(10,18,32,0.82); border:1px solid var(--panel-border);
+       border-radius:8px; padding:.46rem .6rem;}
+  #skipVN:hover{border-color:var(--accent); color:#eafcff;}
+
+  /* ---------- gameplay beat (embedded flight engine) ---------- */
+  #gameplay{position:fixed; inset:0; z-index:26; display:flex; flex-direction:column; background:#04060e;}
+  #gameplay.hidden{display:none;}
+  #gpHeader{display:flex; align-items:center; gap:18px; padding:12px 22px;
+       background:linear-gradient(180deg,rgba(10,18,32,0.96),rgba(8,14,26,0.9));
+       border-bottom:1px solid var(--panel-border);}
+  #gpKind{font-size:.72rem; letter-spacing:.25em; text-transform:uppercase; color:#0b0e14;
+       background:var(--accent); padding:.3rem .8rem; border-radius:6px; font-weight:700;}
+  #gpTitle{font-weight:700; letter-spacing:.04em; font-size:1.05rem; color:#eaf2ff;}
+  #gpObj{font-size:.82rem; color:#9fc0ff; margin-left:auto; max-width:56%; text-align:right;}
+  #gpFrame{flex:1; border:0; width:100%; background:#04060e;}
+</style>
+</head>
+<body>
+  <div id="bgWrap">
+    <img id="bgImg" alt="" hidden />
+    <div id="bgPh"><div class="id"></div><div class="nm"></div><div class="tag">background placeholder</div></div>
+  </div>
+
+  <div id="cast"></div>
+
+  <div id="cg">
+    <img id="cgImg" alt="" hidden />
+    <div id="cgPh"><div class="id"></div><div class="nm"></div><div class="desc"></div></div>
+  </div>
+
+  <div id="hud"><div id="epScene"></div></div>
+  <button id="skipVN" title="Skip to the end of this scene" aria-label="Skip scene">Skip ▸</button>
+  <button id="autoPlay" title="Auto-play off — click to play the story automatically" aria-label="Toggle auto-play">▶ AUTO</button>
+
+  <div id="bar" class="hidden">
+    <div id="nameplate">Voss</div>
+    <div id="text"></div>
+    <div id="advance"><span>Press <kbd>Space</kbd></span><span class="arrow">▼</span></div>
+  </div>
+
+  <div id="gameplay" class="hidden">
+    <div id="gpHeader">
+      <span id="gpKind">Flight</span>
+      <span id="gpTitle"></span>
+      <span id="gpObj"></span>
+    </div>
+    <iframe id="gpFrame" title="Project Echoes flight"></iframe>
+  </div>
+
+  <div id="startOverlay">
+    <div class="peBg"></div>
+    <div class="peGlow"></div>
+    <div class="peTitleWrap">
+      <div class="peKicker">StarGear</div>
+      <div class="peTitle">Project Echoes</div>
+      <div class="peSub">Space explore &middot; flight &middot; combat</div>
+      <div class="pePlaceholderTag">Placeholder title art — foundation build</div>
+    </div>
+    <div id="startMenu">
+      <button id="startBtn" class="menuBtn">Start</button>
+      <div class="hint">Press <kbd>Space</kbd> or <kbd>Enter</kbd> to begin</div>
+    </div>
+  </div>
+
+  <div id="fadeBlack"></div>
+
+<script>
+"use strict";
+// ============================================================
+// REGISTRIES — ported from episode1.html's Episode 0 pattern. Placeholders render
+// until real art is dropped in (see charFile/bgFile/cgFile below and the onerror
+// fallback wiring) — nothing here blocks Part 1 from playing today.
+// ============================================================
+const BACKGROUNDS = {
+  BG_BRIDGE:    "StarGear Bridge",
+  BG_COGWHEEL:  "Cogwheel Station Dock",
+  BG_OPSOFFICE: "Operations Office",
+};
+const CGS = {
+  CG_CRIMSON_FLYBY: ["Crimson's Entrance",
+    "His fighter streaks past the StarGear, spinning three unnecessary barrel rolls before flying upside down beside the bridge."],
+  CG_SECTOR_MAP: ["The Sector Map",
+    "A holographic display: several mining locations highlighted, a communications relay flashing amber, one patrol route ending abruptly."],
+};
+const CHARS = {
+  Voss:  {color:"#46c7ff", i:"V"},
+  Kael:  {color:"#5be3c4", i:"K"},
+  Selyra:{color:"#ff9ec4", i:"S"},
+  Rex:   {color:"#ffae42", i:"R"},
+  Tessa: {color:"#5be38b", i:"T"},
+  Astra: {color:"#b481ff", i:"A"},
+  Crimson:{color:"#ff5a4a", i:"C"},     // Crimson Nova — the frontier's self-appointed hero
+  Rowan: {color:"#8a9bb0", i:"R"},      // Cogwheel Station's commander — no art yet, always the placeholder card
+};
+// Real character art lives in Assets/char/<NAME>/<Expression>.png — folders are
+// UPPERCASE, basenames are per-character. Rowan has no entry (no art drawn yet), so
+// he always falls through to the labelled placeholder card in buildCard().
+const CHAR_ART = {
+  ASTRA: ["Alert","Angry","Curious","Injured","Laughing","Neutral","Shocked","Smile","Stern","Thinking"],
+  KAEL:  ["Angry","Concerned","Curious","Deadpan","Determined","Embarrassed","Excited","Injured","Laughing","Neutral","Shocked","Thinking"],
+  REX:   ["Angry","Battle","Injured","Laughing","Neutral","Serious","Shocked","Smirk","Thinking","Uneasy"],
+  SELYRA:["Angry","Concerned","GentleSmile","Injured","Laughing","Neutral","Serious","Shocked","Smile","Thinking"],
+  TESSA: ["Angry","Determined","Focused","Injured","Laughing","Neutral","Shocked","Smile","Smirk","Thinking"],
+  VOSS:  ["Angry","Concerned","Injured","Laughing","Neutral","Shocked","Smirk","Stern","Thinking"],
+  CRIMSON: ["Neutral","Heroic_Smile","Finger_Point","Heroic_Pose","Sparkling_Confidence","Proud",
+            "Finger_Up","Dramatic_Shock","Heroic_Concern","Laughing","Serious","Wink","Salute"],
+};
+// normalize for matching: "Shocked (4)"->"shocked", "Gentle Smile"->"gentlesmile"
+const enorm = s => (s||"").toLowerCase().replace(/\s*\(\d+\)\s*/g,"").replace(/[^a-z0-9]/g,"");
+// script expression -> ordered fallback candidates (matched via enorm to real files).
+// Ported verbatim from episode1.html, plus three Part-1-specific additions at the end
+// (happy/serious/heropose — see the plan's expression audit).
+const EXPR_ALIAS = {
+  analytical:["Curious","Stern","Thinking","Alert"],
+  worried:   ["Concerned","Uneasy","Thinking","Shocked"],
+  confident: ["Sparkling_Confidence","Heroic_Smile","Smirk","Determined","Smile"],
+  smallsmile:["Smile","GentleSmile","Smirk","Laughing"],
+  softsmile: ["Heroic_Concern","Smile","GentleSmile","Smirk","Laughing"],
+  gentlesmile:["GentleSmile","Smile","Laughing"],
+  focused:   ["Focused","Serious","Determined","Stern"],
+  determined:["Determined","Serious","Stern"],
+  stern:     ["Stern","Serious","Uneasy"],
+  concerned: ["Concerned","Uneasy","Serious"],
+  curious:   ["Curious","Thinking","Alert"],
+  excited:   ["Excited","Laughing","Smile"],
+  smirk:     ["Smirk","Smile","Laughing"],
+  smile:     ["Smile","GentleSmile","Heroic_Smile","Smirk","Laughing"],
+  calmsmile: ["Smirk","Smile","Neutral"],
+  respectful:["Stern","Concerned","Neutral"],
+  confused:  ["Thinking","Concerned","Shocked"],
+  grinning:  ["Smirk","Laughing","Smile"],
+  embarrassed:["Embarrassed","Uneasy","Concerned","Shocked"],
+  annoyed:   ["Angry","Determined","Concerned"],
+  irritated: ["Angry","Concerned","Determined"],
+  deadpan:   ["Neutral","Concerned","Thinking"],
+  eyesclosedsmile:["Heroic_Smile","Laughing","Neutral"],
+  humblesmile:    ["Heroic_Concern","Heroic_Smile","Neutral"],
+  professional:   ["Serious","Confident","Stern","Neutral"],
+  heroic:         ["Heroic_Pose","Heroic_Smile","Sparkling_Confidence","Neutral"],
+  // Part 1 additions:
+  happy:     ["Smile","Laughing","GentleSmile"],           // Tessa has no "Happy" pose
+  serious:   ["Determined","Concerned","Stern","Deadpan"], // Kael has no "Serious" pose (Rex/Selyra do — exact match wins first)
+  heropose:  ["Heroic_Pose","Sparkling_Confidence","Neutral"], // "Hero Pose" -> enorm "heropose", Crimson's file is Heroic_Pose
+};
+const CHAR_DIR = { CRIMSON: "Mercenaries/CRIMSON" };
+function charFile(who, expr){
+  const dir = (who||"").toUpperCase();
+  const path = CHAR_DIR[dir] || dir;
+  const files = CHAR_ART[dir] || [];
+  const byNorm = {}; files.forEach(f => { byNorm[enorm(f)] = f; });
+  const cands = [expr||"Neutral", ...(EXPR_ALIAS[enorm(expr||"neutral")] || [])];
+  for(const c of cands){ const hit = byNorm[enorm(c)]; if(hit) return `Assets/char/${path}/${hit}.png`; }
+  const nf = byNorm["neutral"] || files[0];
+  return `Assets/char/${path}/${nf || "Neutral"}.png`;
+}
+// Cogwheel Station Dock / Operations Office have no art yet — fall to the placeholder.
+// The bridge reuses Episode 0's existing painted background (same file, same room).
+const BG_OVERRIDE = { BG_BRIDGE: "Assets/Bridge.png" };
+const CG_OVERRIDE = {};   // no real CGs drawn yet — every id falls to the placeholder
+const bgFile = id => BG_OVERRIDE[id] || `Assets/bg/${id.toLowerCase()}.png`;
+const cgFile = id => CG_OVERRIDE[id] || `Assets/cg/${id.toLowerCase()}.png`;
+
+// ============================================================
+// PART 1 SCRIPT — Echoes/Echoes_Part1.txt, transcribed into the beat format.
+// Step fields: bg, cg(string|null), clearCast, who, expr, text, narr, pause, quiet.
+// ============================================================
+const EP1 = [
+  { type:"vn", scene:"Scene 1 · Entering Helios Reach", steps:[
+    {bg:"BG_BRIDGE", clearCast:true},
+    {who:"Rex",    expr:"Excited",    text:"Whoa..."},
+    {who:"Rex",    expr:"Excited",    text:"We've got actual traffic."},
+    {who:"Tessa",  expr:"Happy",      text:"And nobody's shooting at us."},
+    {who:"Kael",   expr:"Serious",    text:"Don't jinx it."},
+    {who:"Selyra", expr:"Analytical", text:"I'm detecting over two hundred civilian vessels."},
+    {who:"Selyra", expr:"Analytical", text:"Cargo ships."},
+    {who:"Selyra", expr:"Analytical", text:"Mining barges."},
+    {who:"Selyra", expr:"Analytical", text:"Passenger liners."},
+    {who:"Astra",  expr:"Smile",      text:"It's... peaceful."},
+    {who:"Voss",   expr:"Smile",      text:"Enjoy it."},
+    {who:"Voss",   expr:"Smile",      text:"It never lasts."},
+    {narr:"Radio crackles."},
+    {who:"Crimson", expr:"Hero Pose", text:"Captain Voss!", holo:true},
+    {who:"Crimson", expr:"Hero Pose", text:"I sensed your arrival from several million kilometres away!", holo:true},
+    {who:"Rex",    expr:"Laughing",   text:"Haha!"},
+    {who:"Rex",    expr:"Laughing",   text:"Crimson!"},
+    {who:"Kael",   expr:"Annoyed",    text:"...How?"},
+    {who:"Crimson", expr:"Neutral",   text:"I saw you.", holo:true},
+    {who:"Crimson", expr:"Neutral",   text:"...", holo:true},
+    {who:"Crimson", expr:"Neutral",   text:"...From several million kilometres away.", holo:true},
+    {who:"Kael",   expr:"Deadpan",    text:"That's not how space works."},
+    {who:"Crimson", expr:"Smile",     text:"It did today.", holo:true},
+    {cg:"CG_CRIMSON_FLYBY"},
+    {narr:"Crimson's fighter streaks past the StarGear, spinning three unnecessary barrel rolls before flying upside down beside the bridge."},
+    {cg:null},
+    {who:"Crimson", expr:"Hero Pose", text:"I welcome you...", holo:true},
+    {who:"Crimson", expr:"Hero Pose", text:"...to Helios Reach!", holo:true},
+    {who:"Rex",    expr:"Laughing",   text:"You've definitely been practicing."},
+    {who:"Crimson", expr:"Neutral",   text:"Every.", holo:true},
+    {who:"Crimson", expr:"Neutral",   text:"Single.", holo:true},
+    {who:"Crimson", expr:"Neutral",   text:"Day.", holo:true},
+    {who:"Kael",   expr:"Deadpan",    text:"I can tell."},
+    {who:"Voss",   expr:"Smile",      text:"It's good to see you again."},
+    {who:"Crimson", expr:"Smile",     text:"You too, Captain.", holo:true},
+    {who:"Crimson", expr:"Smile",     text:"Try not to leave before I can show you my latest spectacular entrance.", holo:true},
+    {who:"Kael",   expr:"Deadpan",    text:"I'm already worried."},
+  ]},
+  { type:"travel", kind:"Flight", loc:"Helios Reach", title:"Cogwheel Station",
+    objective:"Explore Helios Reach. Dock at Cogwheel Station.",
+    recap:"Arrived at Cogwheel Station and met with Commander Rowan.",
+    embed:"project_echoes_flight.html" },
+];
+
+// ============================================================
+// STANDALONE SCENES — played on demand, triggered by the flight game posting
+// {type:"playScene", id}. Same step format as EP1. cogwheel_arrival is the FIRST
+// dock at Cogwheel Station (see project_echoes_flight.html's acceptDock()): it
+// covers both Part 1's Scene 2 (the dock, Crimson's welcome) and Scene 3 (Rowan's
+// briefing) as one continuous scene, chaining straight from one to the other with
+// a bg/cast change partway through — same as the script, which has no gameplay gap
+// between them. Hands control back with {type:"sceneDone", id} when it ends.
+// ============================================================
+const SCENES = {
+  cogwheel_arrival: { scene:"Scene 2 · Cogwheel Station Dock", steps:[
+    {bg:"BG_COGWHEEL", clearCast:true, pause:600, quiet:true},
+    {who:"Crimson", expr:"Hero Pose", text:"And here we are!"},
+    {who:"Crimson", expr:"Hero Pose", text:"The finest station in the frontier!"},
+    {who:"Crimson", expr:"Neutral",   text:"..."},
+    {who:"Crimson", expr:"Neutral",   text:"...Please ignore Dock Seven."},
+    {who:"Tessa",   expr:"Thinking",  text:"Why?"},
+    {who:"Crimson", expr:"Neutral",   text:"There was..."},
+    {who:"Crimson", expr:"Neutral",   text:"...a fireworks incident."},
+    {who:"Kael",    expr:"Deadpan",   text:"You mean your fireworks incident."},
+    {who:"Crimson", expr:"Neutral",   text:"I prefer..."},
+    {who:"Crimson", expr:"Neutral",   text:"...'unexpected atmospheric celebration.'"},
+    {who:"Rex",     expr:"Laughing",  text:"I'm using that."},
+    {who:"Voss",    expr:"Smile",     text:"We'll catch up later."},
+    {who:"Crimson", expr:"Smile",     text:"Looking forward to it."},
+    {narr:"Crimson leaves."},
+    // Scene 3 · Rowan's Operations Office — same visit, new room.
+    {bg:"BG_OPSOFFICE", clearCast:true, pause:600, quiet:true},
+    {who:"Rowan", expr:"Serious", text:"Captain Voss."},
+    {who:"Rowan", expr:"Serious", text:"Good timing."},
+    {who:"Voss",  expr:"Neutral", text:"What happened?"},
+    {who:"Rowan", expr:"Serious", text:"We've had three mining crews disappear this week."},
+    {who:"Tessa", expr:"Concerned", text:"Pirates?"},
+    {who:"Rowan", expr:"Serious", text:"Maybe."},
+    {who:"Rowan", expr:"Serious", text:"They aren't stealing cargo."},
+    {who:"Rowan", expr:"Serious", text:"They're taking ships."},
+    {who:"Kael",  expr:"Serious", text:"Any distress calls?"},
+    {who:"Rowan", expr:"Serious", text:"None."},
+    {who:"Selyra",expr:"Analytical", text:"Statistically improbable."},
+    {who:"Rowan", expr:"Serious", text:"Exactly."},
+    {narr:"He places a sector map onto the table."},
+    {cg:"CG_SECTOR_MAP"},
+    {narr:"Several mining locations are highlighted. A communications relay flashes amber. One patrol route ends abruptly."},
+    {cg:null},
+    {who:"Rowan", expr:"Serious", text:"I don't have enough evidence to send a fleet."},
+    {who:"Rowan", expr:"Serious", text:"But I do have enough to hire you."},
+    {who:"Voss",  expr:"Smile",   text:"We'll take a look."},
+    {who:"Rowan", expr:"Serious", text:"Start with the mining belt."},
+    {who:"Rowan", expr:"Serious", text:"If you find anything..."},
+    {who:"Rowan", expr:"Serious", text:"Call me before you shoot it."},
+    {who:"Rex",   expr:"Smile",   text:"No promises."},
+    {who:"Rowan", expr:"Serious", text:"...I was afraid you'd say that."},
+  ]},
+};
+
+// ============================================================
+// ELEMENTS
+// ============================================================
+const $ = id => document.getElementById(id);
+const bgImg=$("bgImg"), bgPh=$("bgPh");
+const castEl=$("cast");
+const cgEl=$("cg"), cgImg=$("cgImg"), cgPh=$("cgPh");
+const bar=$("bar"), nameplate=$("nameplate"), textEl=$("text");
+const epScene=$("epScene");
+const gameplay=$("gameplay"), gpKind=$("gpKind"), gpTitle=$("gpTitle"), gpObj=$("gpObj"), gpFrame=$("gpFrame");
+const startOverlay=$("startOverlay"), fadeBlack=$("fadeBlack");
+const autoBtn=$("autoPlay"), skipBtn=$("skipVN");
+const root=document.documentElement;
+
+let beatIdx=-1, stepIdx=-1, started=false;
+let sceneMode=false, activeScene=null;
+function curSteps(){ return sceneMode ? activeScene.steps : (EP1[beatIdx] ? EP1[beatIdx].steps : []); }
+function inVN(){ return sceneMode || (beatIdx>=0 && EP1[beatIdx] && EP1[beatIdx].type==="vn"); }
+let typing=false, fullText="", typeTimer=null;
+let autoPlay=false, autoTimer=null;
+let pausing=false, pauseTimer=null, pauseQuiet=false;
+let present=[], exprOf={}, cardOf={};
+let holoOf={};   // who's rendered as a hologram (not physically present) — see the "holo" step field
+
+// ============================================================
+// ASSET HELPERS — try the real file, fall back to a labelled placeholder.
+// ============================================================
+function setBackground(id){
+  const name = BACKGROUNDS[id] || id;
+  bgPh.querySelector(".id").textContent = id;
+  bgPh.querySelector(".nm").textContent = name;
+  bgImg.onload  = ()=>{ bgImg.hidden=false; bgPh.style.display="none"; };
+  bgImg.onerror = ()=>{ bgImg.hidden=true;  bgPh.style.display="flex"; };
+  bgImg.src = bgFile(id);
+  if(bgImg.complete && bgImg.naturalWidth){ bgImg.hidden=false; bgPh.style.display="none"; }
+  else { bgImg.hidden=true; bgPh.style.display="flex"; }
+}
+let curCG = null;
+function setCG(id){
+  if(id===null || id===undefined){ curCG=null; cgEl.classList.remove("show"); return; }
+  curCG = id;
+  const [name,desc] = CGS[id] || [id,""];
+  cgPh.querySelector(".id").textContent = id;
+  cgPh.querySelector(".nm").textContent = name;
+  cgPh.querySelector(".desc").textContent = desc;
+  cgImg.onload  = ()=>{ cgImg.hidden=false; cgPh.style.display="none"; };
+  cgImg.onerror = ()=>{ cgImg.hidden=true;  cgPh.style.display="flex"; };
+  cgImg.src = cgFile(id);
+  if(cgImg.complete && cgImg.naturalWidth){ cgImg.hidden=false; cgPh.style.display="none"; }
+  else { cgImg.hidden=true; cgPh.style.display="flex"; }
+  cgEl.classList.add("show");
+}
+
+// ---- cast ----
+function buildCard(who){
+  const c = CHARS[who] || {color:"#46c7ff", i:"?"};
+  const el = document.createElement("div");
+  el.className = "char" + (holoOf[who] ? " holo" : ""); el.dataset.who = who;
+  el.style.setProperty("--c", c.color);
+  el.innerHTML =
+    `<img class="cimg" alt="${who}" hidden>` +
+    `<div class="cph"><span class="i">${c.i}</span><span class="n">${who}</span><span class="x"></span></div>`;
+  castEl.appendChild(el);
+  cardOf[who] = el;
+  return el;
+}
+function rebuildCast(){
+  castEl.innerHTML = ""; cardOf = {};
+  castEl.dataset.n = present.length;
+  present.forEach(buildCard);
+  present.forEach(updateCard);
+}
+function setCast(list){ present = list.slice(); rebuildCast(); }
+// Cast cap (Steve, 2026-07-27): the stage was reading crowded once everyone who'd ever
+// spoken piled up together. Up to 3 on stage at a time, chosen by who spoke most
+// recently. A non-crew NPC (Crimson, Rowan, ...) is a "guest" — pinned to the rightmost
+// slot for as long as they're part of the scene, with up to 2 crew (instead of 3) filling
+// the slots to its left, ordered oldest-of-the-visible-set to newest so the most recent
+// crew speaker sits nearest the guest.
+const CREW_NAMES = ["Voss","Kael","Selyra","Rex","Tessa","Astra"];
+let crewRecency = [];    // crew names, most-recently-spoken first (untrimmed history)
+let guest = null;        // current NPC guest, or null
+function restageCast(){
+  const cap = guest ? 2 : 3;
+  const crew = crewRecency.slice(0, cap).reverse();
+  const want = guest ? [...crew, guest] : crew;
+  if(want.join("|") !== present.join("|")) setCast(want);
+}
+function ensurePresent(who){
+  if(CREW_NAMES.includes(who)) crewRecency = [who, ...crewRecency.filter(w => w !== who)];
+  else guest = who;
+  restageCast();
+}
+function updateCard(who){
+  const el = cardOf[who]; if(!el) return;
+  const expr = exprOf[who] || "Neutral";
+  const img = el.querySelector(".cimg"), ph = el.querySelector(".cph");
+  el.classList.toggle("holo", !!holoOf[who]);
+  el.querySelector(".x").textContent = expr;
+  img.onload  = ()=>{ img.hidden=false; ph.style.display="none"; };
+  img.onerror = ()=>{ img.hidden=true;  ph.style.display="flex"; };
+  img.src = charFile(who, expr);
+  if(img.complete && img.naturalWidth){ img.hidden=false; ph.style.display="none"; }
+  else { img.hidden=true; ph.style.display="flex"; }
+}
+function setActive(who){
+  for(const name in cardOf) cardOf[name].classList.toggle("active", name===who);
+}
+function faceSpeaker(speaker, expr){
+  for(const who of present){
+    const want = (who===speaker) ? (expr || exprOf[who] || "Neutral") : "Neutral";
+    if(exprOf[who] !== want){ exprOf[who] = want; updateCard(who); }
+  }
+}
+
+// ============================================================
+// DIALOGUE
+// ============================================================
+function typeLine(str, speed){
+  typing=true; fullText=str; textEl.textContent="";
+  let i=0;
+  const cursor=document.createElement("span"); cursor.className="cursor"; cursor.textContent="▍";
+  clearInterval(typeTimer);
+  typeTimer=setInterval(()=>{
+    textEl.textContent = str.slice(0,i); textEl.appendChild(cursor); i++;
+    if(i>str.length){ clearInterval(typeTimer); typing=false; textEl.textContent=str; }
+  }, speed||20);
+}
+function finishTyping(){ clearInterval(typeTimer); textEl.textContent=fullText; typing=false; }
+
+function clearAuto(){ if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; } }
+function armAuto(){ clearAuto(); if(autoPlay) autoTimer=setTimeout(autoTick, 200); }
+function autoTick(){
+  autoTimer=null;
+  if(!autoPlay || !inVN()) return;
+  if(typing){ autoTimer=setTimeout(autoTick, 150); return; }
+  const holdMs = Math.min(4600, 1400 + 55*(fullText||"").length);
+  autoTimer=setTimeout(()=>{
+    autoTimer=null;
+    if(autoPlay && inVN()) nextStep();
+  }, holdMs);
+}
+function toggleAuto(){
+  autoPlay=!autoPlay;
+  autoBtn.classList.toggle("on", autoPlay);
+  autoBtn.textContent = autoPlay ? "⏸ AUTO" : "▶ AUTO";
+  autoBtn.title = autoPlay ? "Auto-play on — click to stop" : "Auto-play off — click to play the story automatically";
+  clearAuto();
+  if(autoPlay) autoTick();
+}
+
+function showLine(s){
+  textEl.className = "";
+  clearAuto();
+  bar.classList.toggle("overCg", !!curCG);
+  if(s.narr!==undefined){
+    nameplate.classList.add("hidden");
+    bar.classList.remove("speaking");
+    textEl.classList.add("narr");
+    typeLine(s.narr, 16);
+    armAuto();
+    return;
+  }
+  const who=s.who, c=CHARS[who]||{color:"#46c7ff"};
+  root.style.setProperty("--accent", c.color);
+  nameplate.classList.remove("hidden");
+  nameplate.textContent = who;
+  bar.classList.add("speaking");
+  if(s.holo!==undefined) holoOf[who] = !!s.holo;   // set before staging so buildCard sees it immediately
+  ensurePresent(who);
+  updateCard(who);   // holoOf may have just changed on an already-staged card
+  faceSpeaker(who, s.expr);
+  setActive(who);
+  typeLine(s.text, 20);
+  armAuto();
+}
+
+// ============================================================
+// SEQUENCER
+// ============================================================
+function runBeat(i){
+  beatIdx=i; stepIdx=-1;
+  if(i>=EP1.length){ hideGameplay(); return; }
+  const b=EP1[i];
+  if(b.type==="vn"){
+    hideGameplay();
+    epScene.textContent = b.scene || "";
+    bar.classList.remove("hidden");
+    nextStep();
+  } else {
+    epScene.textContent = `${b.loc} · ${b.title}`;
+    bar.classList.add("hidden");
+    showGameplay(b);
+  }
+}
+function nextStep(){
+  const steps=curSteps();
+  stepIdx++;
+  if(stepIdx>=steps.length){ if(sceneMode){ endScene(); return; } runBeat(beatIdx+1); return; }
+  const s=steps[stepIdx];
+  if(s.bg!==undefined) setBackground(s.bg);
+  if(s.cg!==undefined) setCG(s.cg);
+  if(s.clearCast){ present=[]; guest=null; holoOf={}; rebuildCast(); }
+  if(s.cast) setCast(s.cast);
+  if(s.pause!==undefined){ doPause(s.pause, !!s.quiet); return; }
+  if(s.text!==undefined || s.narr!==undefined) showLine(s);
+  else nextStep();
+}
+function doPause(ms, quiet){
+  clearAuto(); clearPause();
+  pausing=true; pauseQuiet=!!quiet;
+  if(pauseQuiet) bar.classList.add("hidden");
+  pauseTimer=setTimeout(()=>{ pauseTimer=null; clearPause(); nextStep(); }, ms||900);
+}
+function clearPause(){
+  if(pauseTimer){ clearTimeout(pauseTimer); pauseTimer=null; }
+  pausing=false;
+  if(pauseQuiet){ pauseQuiet=false; bar.classList.remove("hidden"); }
+}
+function skipVNSection(){
+  if(!inVN()) return;
+  clearAuto(); clearPause();
+  if(typing) finishTyping();
+  stepIdx = curSteps().length - 1;
+  nextStep();
+}
+function advance(){
+  if(!started && !sceneMode) return;
+  if(!inVN()) return;
+  if(typing){ finishTyping(); return; }
+  if(pausing){ clearPause(); nextStep(); return; }
+  nextStep();
+}
+
+// ---- gameplay beats ----
+function bustCache(url){
+  const h = url.indexOf("#");
+  const path = h < 0 ? url : url.slice(0, h);
+  const hash = h < 0 ? "" : url.slice(h);
+  return path + (path.indexOf("?") < 0 ? "?" : "&") + "n=" + Date.now() + hash;
+}
+function showGameplay(b){
+  gpKind.textContent = b.kind || (b.type==="combat" ? "Combat" : "Flight");
+  gpTitle.textContent = `${b.loc} — ${b.title}`;
+  gpObj.textContent = b.objective || "";
+  clearAuto(); clearPause();
+  autoBtn.style.display = "none"; skipBtn.style.display = "none";
+  gpFrame.onload = ()=>{ try{ gpFrame.focus(); gpFrame.contentWindow.focus(); }catch(err){} };
+  gpFrame.src = bustCache(b.embed);
+  gameplay.classList.remove("hidden");
+}
+function hideGameplay(){
+  autoBtn.style.display = ""; skipBtn.style.display = "";
+  if(!gameplay.classList.contains("hidden")){
+    gameplay.classList.add("hidden");
+    gpFrame.onload=null; gpFrame.src="about:blank";
+    try{ window.focus(); }catch(e){}
+  }
+}
+// Like hideGameplay, but the flight iframe stays MOUNTED so its live state survives —
+// used when a standalone scene plays over the running game and hands control back.
+function hideGameplayKeep(){
+  autoBtn.style.display = ""; skipBtn.style.display = "";
+  gameplay.classList.add("hidden");
+  try{ window.focus(); }catch(e){}
+}
+function startScene(id){
+  const sc=SCENES[id]; if(!sc || sceneMode) return;
+  hideGameplayKeep();
+  sceneMode=true; activeScene={ id, steps:sc.steps, scene:sc.scene||"" };
+  epScene.textContent = sc.scene || "";
+  bar.classList.remove("hidden");
+  present=[]; exprOf={}; guest=null; holoOf={}; rebuildCast();
+  stepIdx=-1;
+  nextStep();
+}
+function endScene(){
+  const id = activeScene ? activeScene.id : null;
+  sceneMode=false; activeScene=null; stepIdx=-1;
+  clearAuto(); clearPause();
+  bar.classList.add("hidden");
+  setCG(null);
+  present=[]; exprOf={}; guest=null; holoOf={}; rebuildCast();
+  autoBtn.style.display = "none"; skipBtn.style.display = "none";
+  gameplay.classList.remove("hidden");
+  try{ gpFrame.contentWindow.focus(); }catch(e){}
+  // Rowan's briefing ends the "explore Helios Reach" leg — the STORY tab's still-active
+  // beat 1 now describes the NEXT leg of the same chain (the flight engine's own pin
+  // advances station->belt independently; see setStoryStage in project_echoes_flight.html).
+  if(id==="cogwheel_arrival" && EP1[1]){
+    EP1[1].objective = "Investigate the Asteroid Belt.";
+    EP1[1].title = "Investigate the Asteroid Belt";
+  }
+  try{ gpFrame.contentWindow.postMessage({ type:"sceneDone", id }, "*"); }catch(e){}
+}
+// Story log for the flight engine's Missions → STORY tab: every travel/combat beat
+// up to and including the current one (earlier = complete, current = active).
+// Future beats (Part 2+) are withheld to avoid spoilers. Mirrors episode1.html's
+// buildMissionLog().
+function buildMissionLog(){
+  const items=[]; let active=0;
+  EP1.forEach((b,i)=>{
+    if((b.type==="travel"||b.type==="combat") && i<=beatIdx){
+      const status = (i===beatIdx) ? "active" : "done";
+      if(status==="active") active=items.length;
+      items.push({
+        title: `${b.loc} — ${b.title}`,
+        kind:  b.kind || (b.type==="combat" ? "Combat" : "Flight"),
+        status,
+        text:  status==="active" ? (b.objective||"") : (b.recap || b.objective || "")
+      });
+    }
+  });
+  return { items, active };
+}
+window.addEventListener("message", (e)=>{
+  if(!e.data) return;
+  if(e.data.type==="playScene"){ if(!sceneMode) startScene(e.data.id); return; }
+  if(e.data.type==="requestMissions"){
+    try{ gpFrame.contentWindow.postMessage({type:"missions", log:buildMissionLog()}, "*"); }catch(err){}
+    return;
+  }
+});
+
+// ============================================================
+// INPUT
+// ============================================================
+document.addEventListener("click", (e)=>{
+  if(e.target.closest("#autoPlay") || e.target.closest("#skipVN")) return;
+  if(!gameplay.classList.contains("hidden")) return;   // flight game owns clicks while it's up
+  advance();
+});
+window.addEventListener("keydown", (e)=>{
+  if(e.code==="Space" || e.code==="Enter"){
+    if(!gameplay.classList.contains("hidden")) return;
+    e.preventDefault(); advance();
+  }
+});
+autoBtn.addEventListener("click", toggleAuto);
+skipBtn.addEventListener("click", skipVNSection);
+
+// ============================================================
+// START
+// ============================================================
+function startGame(){
+  if(started) return;
+  started = true;
+  startOverlay.classList.add("fading");
+  fadeBlack.classList.add("on");
+  setTimeout(() => {
+    startOverlay.classList.add("hidden");
+    setTimeout(() => { fadeBlack.classList.remove("on"); }, 120);
+    runBeat(0);
+  }, 550);
+}
+document.getElementById("startBtn").addEventListener("click", startGame);
+window.addEventListener("keydown", e => {
+  if (started) return;
+  if (e.code === "Space" || e.code === "Enter") { e.preventDefault(); startGame(); }
+});
+</script>
+</body>
+</html>

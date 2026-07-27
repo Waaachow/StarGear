@@ -1,0 +1,478 @@
+EPISODE 1 – PART 3 – The Truth
+
+This is the turning point of the episode. The mystery ends, and the emotional story begins.
+
+Scene 8 – The Briefing
+BG
+
+Cogwheel Station – Operations Room
+
+Music
+
+BGM – Quiet Tension
+
+Everyone is gathered around Rowan's briefing table.
+
+Nobody speaks.
+
+Rowan
+
+Expression: Serious
+
+"I asked what they were looking for."
+
+"They weren't looking for cargo."
+
+"They were looking for someone."
+
+He looks directly at Astra.
+
+Rowan
+
+"Was it her?"
+
+Silence.
+
+Voss
+
+Expression: Serious
+
+"...Yes."
+
+Everyone turns.
+
+Rex
+
+Expression: Shocked
+
+"Captain..."
+
+Voss
+
+"I should have told you sooner."
+
+Astra
+
+Expression: Concerned
+
+"..."
+
+Voss
+
+"Astra wasn't built."
+
+"...She was manufactured."
+
+Silence.
+
+Tessa
+
+Expression: Shocked
+
+"...What?"
+
+Voss
+
+"Years ago..."
+
+"I found a transport under attack."
+
+"It wasn't carrying cargo."
+
+"It was carrying experimental battle androids."
+
+CG EVENT
+
+A damaged military transport drifting through space.
+
+Small explosions across the hull.
+
+Escape pods drifting away.
+
+A younger Voss boards the wreck with a flashlight.
+
+Inside the cargo bay...
+
+Rows of inactive androids.
+
+One pod is open.
+
+A frightened Astra sits inside, looking no older than she does now.
+
+Music
+
+BGM – Memories
+
+Voss (Voice Over)
+
+"Every unit onboard was inactive..."
+
+"...except one."
+
+CG changes.
+
+Young Astra looks up at Voss.
+
+Scared.
+
+Confused.
+
+Astra (Voice Over)
+
+"...Are you here to recycle me?"
+
+CG fades.
+
+Back to briefing room.
+
+Rex
+
+Expression: Sad
+
+"..."
+
+Tessa
+
+Expression: Concerned
+
+"Captain..."
+
+Voss
+
+"I couldn't leave her there."
+
+"So I didn't."
+
+Astra
+
+Expression: Sad
+
+"..."
+
+"I don't remember any of it."
+
+Voss
+
+Expression: Smile
+
+"I know."
+
+"You didn't have to."
+
+Scene 9 – Interrupted
+SFX
+
+ALARM
+
+Red emergency lights.
+
+Tessa
+
+Expression: Shocked
+
+"Incoming hyperspace signatures!"
+
+Kael
+
+Expression: Serious
+
+"...Multiple."
+
+Rowan
+
+Expression: Serious
+
+"How many?"
+
+Tessa
+
+"..."
+
+"...Too many."
+
+CG EVENT
+
+Outside Cogwheel Station.
+
+Dozens of enemy warships emerge from hyperspace.
+
+One after another.
+
+A gigantic carrier appears behind them.
+
+The station is dwarfed.
+
+Music
+
+BGM – Enemy Fleet
+
+Rex
+
+Expression: Shocked
+
+"...That's..."
+
+"...not pirates."
+
+Rowan
+
+"Battle stations."
+
+Scene 10 – Captain Raze
+BG
+
+Operations Room
+
+Transmission screen activates.
+
+CG EVENT
+
+Captain Raze appears.
+
+Elegant black armour.
+
+White cape.
+
+Expressionless.
+
+The bridge behind him glows red.
+
+Raze
+
+Expression: Calm
+
+"Station Commander."
+
+"You are harbouring stolen military property."
+
+Rowan
+
+Expression: Serious
+
+"I don't take orders from trespassers."
+
+Raze
+
+"I was not addressing you."
+
+He looks directly at Astra.
+
+Raze
+
+"Designation A-01."
+
+"Return."
+
+Silence.
+
+Astra
+
+Expression: Worried
+
+"..."
+
+"I don't know you."
+
+Raze
+
+"You are not required to."
+
+"You are required..."
+
+"...to obey."
+
+Astra
+
+"..."
+
+"...No."
+
+Raze
+
+"..."
+
+"...Curious."
+
+Raze
+
+"The defect has progressed."
+
+Rex
+
+Expression: Angry
+
+"She's not defective!"
+
+Kael
+
+Expression: Serious
+
+"Rex."
+
+Rex
+
+"No!"
+
+"She's our friend!"
+
+Tessa
+
+Expression: Determined
+
+"And she's staying."
+
+Selyra
+
+Expression: Gentle Smile
+
+"I concur."
+
+Voss
+
+Expression: Determined
+
+"You heard my crew."
+
+"Astra made her choice years ago."
+
+"She isn't yours."
+
+Raze
+
+"..."
+
+"Incorrect."
+
+"Everything manufactured by Aegis Dynamics remains company property."
+
+Astra
+
+Expression: Angry
+
+"I'm not property."
+
+Silence.
+
+For the first time...
+
+Raze studies her.
+
+Raze
+
+"..."
+
+"Interesting."
+
+Scene 11 – Crimson Arrives
+SFX
+
+Radio crackles
+
+Crimson
+
+Expression: Hero Pose
+
+"Captain!"
+
+"I've arrived!"
+
+Rex
+
+Expression: Happy
+
+"Perfect timing!"
+
+Crimson
+
+"I brought dramatic music!"
+
+Silence.
+
+Kael
+
+Expression: Deadpan
+
+"...How?"
+
+Crimson
+
+"..."
+
+"I have speakers."
+
+Rex
+
+Expression: Laughing
+
+"Hahaha!"
+
+Even Astra smiles.
+
+The tension breaks for just a second.
+
+Crimson
+
+Expression: Smile
+
+"So..."
+
+"...Who's the cape?"
+
+Raze
+
+"..."
+
+"Irrelevant."
+
+Crimson
+
+"Ouch."
+
+"I liked mine better."
+
+Scene 12 – Evacuation
+BG
+
+Operations Room
+
+Music
+
+BGM – Mobilise
+
+Rowan
+
+Expression: Serious
+
+"Civilians first."
+
+"I'll coordinate the evacuation."
+
+Kael
+
+"We'll buy you the time."
+
+Rowan
+
+"You'll be heavily outnumbered."
+
+Voss
+
+"Then we'd better not waste any."
+
+Rowan
+
+"..."
+
+"Good luck."
+
+Gameplay
+Mission – Evacuation Escort
+
+Objectives:
+
+Escort three civilian transports.
+Destroy enemy interceptors.
+Prevent station damage.
+Crimson joins as AI support.
+
+As the mission begins, Raze's fleet advances in formation toward Cogwheel Station, setting up the next major confrontation.
