@@ -3992,10 +3992,11 @@ function saveEvacWon() { try { localStorage.setItem(EVAC_WON_KEY, evacWon ? "1" 
 // (sceneActive pauses tickCombat, see update()'s pause gate) rather than ending
 // it. The script's own Phase 1/2/3 each bundle two sequential beats, hence 5
 // stages here, not 3:
-//   1 — Initial Assault (4 fighters + 2 bombers)
-//   2 — Evacuation (adds 3 fighters + 2 bombers + 2 civilian escorts; win = no
+//   1 — Initial Assault (2 fighters + 1 bomber)
+//   2 — Evacuation (adds 2 fighters + 2 bombers + 2 civilian escorts; win = no
 //       bombers left, fighters may survive)
-//   3 — holding pattern once Crimson joins, counting 3 rounds before A-17 arrives
+//   3 — Crimson joins, escorts clear out immediately, a fresh 3-ship wave joins
+//       too; one round later A-17 arrives
 //   4 — A-17 boss (alongside any surviving fighters); ends at her 50% HP, not 0
 //   5 — handled entirely by the "final" cutscene's sceneDone handler (endEchoDefence)
 // See combat.echo (state) / updateEchoDefence() (per-tick watcher) below.
@@ -4038,10 +4039,18 @@ function placeEnemyWave(hullNames) {
 function placeEscorts(n) {
   const out = [];
   for (let i = 0; i < n; i++) {
-    let c, guard = 0;
-    do { c = bossFreeCell(2); guard++; }
-    while (guard < 30 && out.some(o => o.gx === c.gx && o.gy === c.gy));
-    out.push({ gx: c.gx, gy: c.gy, hp: 12, maxhp: 12, kind: "civilian", bob: Math.random() * 6.283 });
+    let gx, gy, guard = 0;
+    do {
+      gx = GRID_SIZE - 1 - ((Math.random() * 2) | 0);   // far right edge (they drift right-to-left)
+      gy = 1 + ((Math.random() * (GRID_SIZE - 2)) | 0);
+      guard++;
+    } while (guard < 40 && (
+      combat.enemies.some(e => e.gx === gx && e.gy === gy) ||
+      (combat.player.gx === gx && combat.player.gy === gy) ||
+      (combat.guest && combat.guest.gx === gx && combat.guest.gy === gy) ||
+      out.some(o => o.gx === gx && o.gy === gy)
+    ));
+    out.push({ gx, gy, vgx: gx, vgy: gy, hp: 12, maxhp: 12, kind: "civilian", bob: Math.random() * 6.283 });
   }
   return out;
 }
@@ -4063,7 +4072,7 @@ function spawnA17() {
   combat.enemies.push(a17);
   combat.flashes.push({ cells: [{ gx: c.gx, gy: c.gy }], color: "rgba(255,80,80,0.55)", t: 600 });
   combat.echo.a17Spawned = true;
-  combat.banner = { text: "OBJECTIVE UPDATED: Defeat A-17", kind: "enemy", t: 2400, dur: 2400 };
+  combat.banner = { text: "DEFEAT A-17", kind: "enemy", t: 2400, dur: 2400 };
   clog("A-17 has entered the battle, ignoring everyone but the StarGear.");
 }
 // Per-frame watcher for the scripted battle's stage transitions — HP/round-count/
@@ -4086,7 +4095,7 @@ function updateEchoDefence() {
       try { window.parent.postMessage({ type: "playScene", id: "cogwheel_defence_crimson", freeze: true }, "*"); } catch (err) {}
     }
   } else if (e.stage === 3) {
-    if (combat.turn - e.roundBase >= 3) {
+    if (combat.turn - e.roundBase >= 2) {      // two rounds after Crimson + the new wave join (Steve)
       e.stage = 3.5;                          // awaiting the A-17 arrival cutscene
       sceneActive = true;
       try { window.parent.postMessage({ type: "playScene", id: "cogwheel_defence_a17", freeze: true }, "*"); } catch (err) {}
@@ -4122,8 +4131,8 @@ function startEvacMission() {
   combat.enemies = placeEnemyWave([ECHO_FIGHTER_HULL, ECHO_FIGHTER_HULL, ECHO_BOMBER_HULL]);
   combat.escorts = [];
   combat.echo = { stage: 1, roundBase: 0, turrets: 2, a17Spawned: false, a17CutscenePlayed: false };
-  combat.banner = { text: "DEFEND COGWHEEL STATION", kind: "enemy", t: 1800, dur: 1800 };
-  clog("MISSION: Repel the first assault wave.");
+  combat.banner = { text: "REPEL THE ENEMY SHIPS", kind: "enemy", t: 1800, dur: 1800 };
+  clog("MISSION: Repel the enemy ships.");
 }
 // Enter the hangar → ask the parent (episode1) to play the scene. Full scene the first
 // time, a short greeting after. If we're running standalone (no episode1 parent) there's
@@ -5675,7 +5684,11 @@ function endPlayerTurn() {
     // falling through to a real winCombat().
     if (!combat.echo) { winCombat(); return; }
   }
-  if (combat.guest) beginGuestPhase(); else beginEnemyPhase();
+  // The civilian escorts count as guests too while they're on the field (Steve:
+  // "the evacuation ships are guests, they get a guest turn") — Phase 2 runs a
+  // guest phase for them even before Crimson joins; guestAdvance() itself skips
+  // the attack half of it when there's no real guest yet.
+  if (combat.guest || (combat.escorts && combat.escorts.length)) beginGuestPhase(); else beginEnemyPhase();
 }
 // Crimson's turn, between the player's and the enemy's. Only reached when he actually
 // joined this fight (combat.guest truthy — see the fee check in startCombat).
@@ -5721,29 +5734,26 @@ function beginEnemyPhase() {
 // alive" simplicity as the rest of the escort system.
 function moveEscortOneStep(c) {
   if (c.hp <= 0) return;
-  if (c._edx === undefined) {
-    const dx = c.gx - CENTER, dy = c.gy - CENTER;
-    c._edx = dx === 0 ? 0 : (dx > 0 ? 1 : -1);
-    c._edy = dy === 0 ? 0 : (dy > 0 ? 1 : -1);
-    if (!c._edx && !c._edy) c._edx = 1;    // dead centre — pick an arbitrary escape heading
-  }
-  const nx = c.gx + c._edx, ny = c.gy + c._edy;
-  if (!inBounds(nx, ny)) return;                                     // reached the rim — stop
+  const nx = c.gx - 1, ny = c.gy;   // fixed right-to-left drift (Steve) — same LEFT
+                                     // convention dirToward() uses (decreasing gx)
+  if (!inBounds(nx, ny)) return;                                     // reached the left edge — stop
   const guest = combat.guest;
   const occupied = combat.enemies.some(e => e.gx === nx && e.gy === ny) ||
                    (combat.player.gx === nx && combat.player.gy === ny) ||
                    (guest && guest.gx === nx && guest.gy === ny) ||
                    combat.escorts.some(o => o !== c && o.gx === nx && o.gy === ny);
   if (occupied) return;
-  c.gx = nx; c.gy = ny;
+  c.gx = nx; c.vgx = nx;
 }
 function guestAdvance() {
   const ai = combat.guestAi, g = combat.guest;
-  if (!g) { finishGuestTurn(); return; }
   if (ai.state === "start") {
-    if (!combat._crimsonJoined) { combat._crimsonJoined = true; crimsonBarkSay("join"); }
+    if (g && !combat._crimsonJoined) { combat._crimsonJoined = true; crimsonBarkSay("join"); }
+    // Escorts always get their move, whether or not Crimson has joined yet —
+    // this IS their guest turn. Without a real guest (g), or with nothing left
+    // to shoot at, the phase ends right here; no windup/attack half without him.
     if (combat.escorts) for (const c of combat.escorts) moveEscortOneStep(c);
-    if (!combat.enemies.length) { finishGuestTurn(); return; }
+    if (!g || !combat.enemies.length) { finishGuestTurn(); return; }
     ai.state = "windup"; ai.timer = 450; return;      // a beat of "Heroic Pose" flourish
   }
   if (ai.state === "windup") {
@@ -7730,7 +7740,21 @@ function drawBanner(b) {
   const fade = clamp01(b.t / 260);                      // fade out at the end
   const alpha = Math.min(appear, fade);
 
-  const h = 60, w = Math.min(r.width * 0.74, 460);
+  const h = 60;
+  // Some objective banners run much longer than the original "COMBAT!"/"YOUR
+  // TURN" shouts this box was sized for (e.g. "OBJECTIVE UPDATED: Protect Both
+  // Evacuation Ships") — measure the text and grow the box to fit it, shrinking
+  // the font as a last resort so nothing overflows the box or runs off-screen.
+  const maxW = r.width * 0.92, pad = 64;
+  let fontSize = 30;
+  ctx.font = "bold " + fontSize + "px Consolas, monospace";
+  let textW = ctx.measureText(b.text).width;
+  while (textW + pad > maxW && fontSize > 16) {
+    fontSize--;
+    ctx.font = "bold " + fontSize + "px Consolas, monospace";
+    textW = ctx.measureText(b.text).width;
+  }
+  const w = Math.min(maxW, Math.max(300, textW + pad));
   const cx = r.width / 2;
   const cy = r.height * 0.30 + (1 - slide) * 26;        // rises into place
   const x = cx - w / 2, y = cy - h / 2;
@@ -7755,7 +7779,7 @@ function drawBanner(b) {
   }
   // main text
   ctx.globalAlpha = alpha;
-  ctx.font = "bold 30px Consolas, monospace"; ctx.textAlign = "center";
+  ctx.font = "bold " + fontSize + "px Consolas, monospace"; ctx.textAlign = "center";
   ctx.fillStyle = st.text; ctx.fillText(b.text, cx, y + (st.tag ? 44 : 39));
   ctx.restore();
 }
@@ -7764,6 +7788,9 @@ function drawBanner(b) {
 function combatTurnOrder() {
   const order = [{ kind: "player", ent: combat.player }];
   if (combat.guest) order.push({ kind: "guest", ent: combat.guest });   // vanishes the instant he's knocked out
+  // The evacuation transports are guests too while they're on the field (Steve:
+  // "they should appear on the turn timeline") — same vanish-when-gone rule.
+  if (combat.escorts) for (const c of combat.escorts) if (c.hp > 0) order.push({ kind: "escort", ent: c });
   if (combat.boss) { const c = bossCore(); if (c) order.push({ kind: "enemy", ent: c }); }  // one boss avatar
   else for (const e of combat.enemies) order.push({ kind: "enemy", ent: e });
   return order;
@@ -7830,14 +7857,15 @@ function drawTurnOrder(layout, activeEnt, hoverEnt) {
     ctx.stroke();
   }
   layout.forEach((a, i) => {
-    const isPlayer = a.kind === "player", isGuest = a.kind === "guest";
+    const isPlayer = a.kind === "player", isGuest = a.kind === "guest", isEscort = a.kind === "escort";
     const active = a.ent === activeEnt, hover = a.ent === hoverEnt;
-    const team = isPlayer ? "#7ee787" : isGuest ? GUEST_TEAM_COLOR : "#ff6b6b";
+    const team = isPlayer ? "#7ee787" : isEscort ? "#7ecbff" : isGuest ? GUEST_TEAM_COLOR : "#ff6b6b";
     ctx.save();
     // backing circle
     ctx.beginPath(); ctx.arc(a.cx, a.cy, a.R, 0, 6.283);
-    ctx.fillStyle = isPlayer ? "rgba(14,38,26,0.95)" : isGuest ? "rgba(14,32,50,0.95)" : "rgba(46,16,16,0.95)"; ctx.fill();
-    // icon, clipped to the circle — a Nexus-core glyph for the boss, else a ship
+    ctx.fillStyle = isPlayer ? "rgba(14,38,26,0.95)" : (isGuest || isEscort) ? "rgba(14,32,50,0.95)" : "rgba(46,16,16,0.95)"; ctx.fill();
+    // icon, clipped to the circle — a Nexus-core glyph for the boss, a plain
+    // transport dot for an escort, else a ship
     ctx.save(); ctx.clip();
     if (a.ent.boss) {
       const puls = 0.6 + 0.4 * Math.sin(gTime * 0.006);
@@ -7850,6 +7878,11 @@ function drawTurnOrder(layout, activeEnt, hoverEnt) {
       ctx.beginPath(); ctx.arc(a.cx, a.cy, a.R * 0.58, 0, 6.283); ctx.stroke();
       ctx.fillStyle = `rgba(255,255,255,${0.6 + 0.3 * puls})`;
       ctx.beginPath(); ctx.arc(a.cx, a.cy, a.R * 0.24, 0, 6.283); ctx.fill();
+    } else if (isEscort) {
+      // No ship art exists for a civilian transport (see ASSETS_NEEDED.md) — the
+      // same plain glyph drawEscortShip() uses in the arena, scaled to the avatar.
+      ctx.fillStyle = "rgba(200,225,255,0.9)"; ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(a.cx, a.cy, a.R * 0.6, 0, 6.283); ctx.fill(); ctx.stroke();
     } else {
       const set = isPlayer ? null : isGuest ? CRIMSON_SHIP : enemyShipSet(a.ent);
       drawAvatarShip(a.cx, a.cy + 1, a.R * 2.0, a.ent.facing, null, set);
@@ -7885,7 +7918,7 @@ function drawTurnOrder(layout, activeEnt, hoverEnt) {
   // "active now" marker under the live actor
   const act = layout.find(a => a.ent === activeEnt);
   if (act) {
-    ctx.fillStyle = act.kind === "player" ? "#7ee787" : act.kind === "guest" ? GUEST_TEAM_COLOR : "#ff6b6b";
+    ctx.fillStyle = act.kind === "player" ? "#7ee787" : act.kind === "escort" ? "#7ecbff" : act.kind === "guest" ? GUEST_TEAM_COLOR : "#ff6b6b";
     ctx.font = "10px Consolas, monospace"; ctx.textAlign = "center";
     ctx.fillText("▲", act.cx, act.cy + act.R + 16);
   }
@@ -9532,7 +9565,7 @@ window.addEventListener("message", (e) => {
       combat.enemies.push(...placeEnemyWave([ECHO_FIGHTER_HULL, ECHO_FIGHTER_HULL,
                                               ECHO_BOMBER_HULL, ECHO_BOMBER_HULL]));
       combat.echo.stage = 2;
-      combat.banner = { text: "OBJECTIVE UPDATED: Protect the transports", kind: "info", t: 2400, dur: 2400 };
+      combat.banner = { text: "PROTECT THE TRANSPORT SHIPS", kind: "info", t: 2400, dur: 2400 };
       clog("MISSION: Protect the evacuation transports. Destroy the enemy bombers.");
     }
     if (e.data.id === "cogwheel_defence_crimson" && combat && combat.echo) {
@@ -9541,8 +9574,23 @@ window.addEventListener("message", (e) => {
                         hp: CRIMSON_MAX_HP, maxhp: CRIMSON_MAX_HP };
       combat.echo.stage = 3;
       combat.echo.roundBase = combat.turn;
-      combat.banner = { text: "OBJECTIVE UPDATED: Repel the second assault", kind: "enemy", t: 2400, dur: 2400 };
+      combat.banner = { text: "REPEL THE ENEMY SHIPS... AGAIN", kind: "enemy", t: 2400, dur: 2400 };
       clog("Crimson Nova has joined the fight.");
+      // The transports are considered safely away the moment Crimson joins —
+      // Steve: don't leave them lingering through the whole 3-round holding
+      // pattern just because that's how long it takes A-17 to show up (their
+      // exit has nothing to do with her timer). Clearing the array (rather than
+      // just no longer drawing it) also means the escorts-destroyed lose check
+      // in updateEchoDefence() naturally stops applying, same as it already did
+      // whenever combat.escorts was empty.
+      if (combat.escorts.length) {
+        clog("The evacuation transports have cleared the battle zone.");
+        combat.escorts = [];
+      }
+      // A fresh 3-ship wave joins the fight the moment Crimson does (Steve) —
+      // A-17 herself arrives one round later (see updateEchoDefence()'s stage-3
+      // round check), not alongside these.
+      combat.enemies.push(...placeEnemyWave([ECHO_FIGHTER_HULL, ECHO_FIGHTER_HULL, ECHO_FIGHTER_HULL]));
     }
     if (e.data.id === "cogwheel_defence_a17" && combat && combat.echo) {
       spawnA17();
