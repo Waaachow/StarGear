@@ -1706,7 +1706,8 @@ function update(dt) {
   // too, but for the opposite reason — that leg (the fleet's arrival) is deliberately NOT
   // a confirm-first beat, see the proximity trigger just below.
   if (storyTarget && !MISSION_MODE && !objectiveReached &&
-      storyStage !== "station" && storyStage !== "station2" && storyStage !== "station3") {
+      storyStage !== "station" && storyStage !== "station2" && storyStage !== "station3" &&
+      (storyStage !== "belt" || beltScanDone())) {
     const px = world.worldOriginX + CENTER, py = world.worldOriginY + CENTER;
     const within = Math.hypot(px - storyTarget.ax, py - storyTarget.ay) <= ARRIVE_DIST;
     if (within && !objectivePrompt && !objectiveDeclined) objectivePrompt = true;  // ask first
@@ -3787,6 +3788,16 @@ function doScan() {
   // a "scan at the marker" step only counts if we're actually at the marker
   { const st = activeSideStep();
     if (st && st.mark) { const mk = st.mark(); if (mk && nearPoint(mk.ax, mk.ay, 4)) _sideScanned = true; } }
+  // Story: "Scan the Asteroid Belt" needs an actual sweep at each of two wreckage
+  // clusters, not just flying close — see BELT_SCAN_POINTS/updateBeltLabel(). Once
+  // both are in, the leg flips to a normal "fly to the belt centre" objective.
+  let beltHit = null;
+  if (storyStage === "belt" && !beltScanDone()) {
+    for (const pt of BELT_SCAN_POINTS) {
+      if (beltScanned.has(pt.id)) continue;
+      if (nearPoint(pt.ax, pt.ay, R)) { beltScanned.add(pt.id); saveBeltScanned(); updateBeltLabel(); beltHit = pt; break; }
+    }
+  }
   const px = world.worldOriginX + CENTER, py = world.worldOriginY + CENTER;
   const finds = [];
   for (let ax = px - R; ax <= px + R; ax++)
@@ -3797,7 +3808,7 @@ function doScan() {
       const p = poiAt(ax, ay);
       if (p) { poiFound.add(key); finds.push(p); }
     }
-  if (!finds.length) { setScanMsg("Sweep complete — nothing out there."); return; }
+  if (!finds.length) { setScanMsg(beltHit ? beltScanMsg(beltHit) : "Sweep complete — nothing out there."); return; }
   savePoi();
   say("scanFind");
   // Aggregate by category so the readout is one clean line however much turned up.
@@ -3818,8 +3829,12 @@ function doScan() {
   if (gotScrap) parts.push("+" + gotScrap + " scrap");
   for (const g in gotGoods) parts.push("+" + gotGoods[g] + " " + COMMODITY_BY_ID[g].name);
   if (missed) { parts.push("some left behind — hold full"); _holdFullNoted = true; }
-  setScanMsg(finds.length + " contact" + (finds.length > 1 ? "s" : "") +
+  setScanMsg(beltHit ? beltScanMsg(beltHit) : finds.length + " contact" + (finds.length > 1 ? "s" : "") +
              (parts.length ? ": " + parts.join(", ") : " — but no room to take anything."));
+}
+function beltScanMsg(pt) {
+  return pt.label + " scanned (" + beltScanned.size + "/" + BELT_SCAN_POINTS.length + ")" +
+         (beltScanDone() ? " — belt survey complete." : "");
 }
 // If you'd rather scanning always work and the module only widen it, flip this.
 const SCAN_WORKS_UNPOWERED = false;
@@ -4296,11 +4311,14 @@ function drawMiniMap() {
   ctx.globalAlpha = 1;
   // objective + hostiles, drawn in the same local frame
   const toX = ax => cx + (ax - px) * scale, toY = ay => cy + (ay - py) * scale;
-  if (storyTarget && !objectiveReached) {
-    let tx = toX(storyTarget.ax), ty = toY(storyTarget.ay);
+  const objMarks = (storyStage === "belt" && !beltScanDone())
+    ? BELT_SCAN_POINTS.filter(pt => !beltScanned.has(pt.id)).map(pt => ({ ax: pt.ax, ay: pt.ay, rgb: UNSCANNED_RGB }))
+    : (storyTarget && !objectiveReached) ? [{ ax: storyTarget.ax, ay: storyTarget.ay, rgb: "126,231,135" }] : [];
+  for (const m of objMarks) {
+    let tx = toX(m.ax), ty = toY(m.ay);
     const d = Math.hypot(tx - cx, ty - cy);
     if (d > rad - 8) { const k = (rad - 8) / d; tx = cx + (tx - cx) * k; ty = cy + (ty - cy) * k; }  // clamp to the rim
-    ctx.strokeStyle = `rgba(126,231,135,${0.6 + 0.4 * pulse})`; ctx.lineWidth = 1.8;
+    ctx.strokeStyle = `rgba(${m.rgb},${0.6 + 0.4 * pulse})`; ctx.lineWidth = 1.8;
     ctx.beginPath();
     ctx.moveTo(tx, ty - 5); ctx.lineTo(tx + 5, ty); ctx.lineTo(tx, ty + 5); ctx.lineTo(tx - 5, ty);
     ctx.closePath(); ctx.stroke();
@@ -4485,6 +4503,15 @@ function absTileToScreen(ax, ay) {
 // Draws the story objective as a pulsing in-world waypoint; when it's off the
 // edge of the view, an arrow at the screen border points the way to fly.
 function drawObjectiveMarker() {
+  // Belt scan phase: two sensor-cyan marks (one per unscanned wreckage cluster)
+  // instead of the usual single green "fly here" waypoint — see BELT_SCAN_POINTS.
+  if (storyStage === "belt" && !beltScanDone()) {
+    for (const pt of BELT_SCAN_POINTS) {
+      if (beltScanned.has(pt.id)) continue;
+      drawWorldMark(pt.ax, pt.ay, pt.label, UNSCANNED_RGB, "SCAN", isPinned("story"));
+    }
+    return;
+  }
   if (!storyTarget || objectiveReached) return;
   const r = canvas.getBoundingClientRect();
   // The embedded canvas is taller than the visible iframe, so clamp the edge arrow
@@ -4778,7 +4805,7 @@ const NEXUS_ARENA_CELL = { gx: 9, gy: 4 };   // grid cell the fortress centre ma
 // called from the cogwheel_arrival sceneDone handler below.
 const STORY_TARGETS = {
   station:  { ax: MAIN_STATION_POS.ax, ay: MAIN_STATION_POS.ay, label: "Dock at Cogwheel Station" },
-  belt:     { ax: 0, ay: -55, label: "Investigate the Asteroid Belt" },
+  belt:     { ax: 0, ay: -55, label: "Scan the Asteroid Belt" },
   // Part 2 (Echoes/Echoes_Part2.txt): belt -> relay -> back to Cogwheel Station for the
   // debrief -> (after the optional-activity window) back again for the fleet arrival.
   // "station2"/"station3" are the same physical coordinates as "station" under a
@@ -4799,6 +4826,31 @@ function setStoryStage(id) {
   storyTarget = storyStage ? STORY_TARGETS[storyStage] : null;
   objectiveReached = false;
   objectivePrompt = false; objectiveDeclined = false;
+  updateBeltLabel();
+}
+
+// The "belt" leg (Steve, 2026-07-28: "investigate" -> "scan") is two beats in one
+// stage: first sweep BOTH wreckage clusters below with an actual sensor scan
+// (doScan(), not just flying close — see the belt-point check inside doScan()),
+// then fly in to the belt centre to trigger the VN like every other story leg.
+// storyTarget.label is flipped in place once both are in so every existing render
+// site (HUD, minimap, star map) that reads storyTarget.label picks it up for free.
+const BELT_SCAN_POINTS = [
+  { id: "a", ax: -16, ay: -64, label: "Debris Cluster Alpha" },
+  { id: "b", ax: 14,  ay: -42, label: "Debris Cluster Beta"  },
+];
+const BELT_SCAN_KEY = "echoes_belt_scan_v1";
+function loadBeltScanned() {
+  try { return new Set(JSON.parse(localStorage.getItem(BELT_SCAN_KEY)) || []); }
+  catch (e) { return new Set(); }
+}
+let beltScanned = loadBeltScanned();          // ids from BELT_SCAN_POINTS already swept
+function saveBeltScanned() { try { localStorage.setItem(BELT_SCAN_KEY, JSON.stringify([...beltScanned])); } catch (e) {} }
+function beltScanDone() { return beltScanned.size >= BELT_SCAN_POINTS.length; }
+function updateBeltLabel() {
+  if (storyStage === "belt" && storyTarget) {
+    storyTarget.label = beltScanDone() ? "Investigate the Asteroid Belt" : "Scan the Asteroid Belt";
+  }
 }
 const ARRIVE_DIST = 2;                    // tiles — how close counts as "arrived" (was 1: too tight, made players circle the marker hunting for the popup)
 const FLEET_ARRIVE_DIST = 14;             // tiles — Part 2's "station3" leg triggers wide, so the fleet is seen arriving rather than already there
@@ -4843,6 +4895,12 @@ function primaryInfo() {
       return { tint: "126,231,135", label: "Explore & Investigate",
         count: "(" + Math.min(part2Activity, PART2_ACTIVITY_NEEDED) + "/" + PART2_ACTIVITY_NEEDED + ")",
         target: null };
+    }
+    if (storyStage === "belt" && !beltScanDone()) {
+      const next = BELT_SCAN_POINTS.find(pt => !beltScanned.has(pt.id));
+      return { tint: UNSCANNED_RGB, label: "Scan the Asteroid Belt",
+        count: "(" + beltScanned.size + "/" + BELT_SCAN_POINTS.length + ")",
+        target: next || null };
     }
     if (!storyTarget || objectiveReached) return null;
     return { tint: "126,231,135", label: storyTarget.label, count: "", target: storyTarget };
@@ -8272,6 +8330,10 @@ function skipObjective() {
   // waypoint and answer it — proceedObjective() doesn't require objectivePrompt to
   // already be showing, so this works from anywhere on the map.
   if (storyTarget && REACHED_OBJECTIVE_STAGES.has(storyStage)) {
+    if (storyStage === "belt" && !beltScanDone()) {   // skip the scan sub-steps too, not just the fly-in
+      for (const pt of BELT_SCAN_POINTS) beltScanned.add(pt.id);
+      saveBeltScanned(); updateBeltLabel();
+    }
     world.worldOriginX = storyTarget.ax - CENTER; world.worldOriginY = storyTarget.ay - CENTER;
     proceedObjective();
     return;
@@ -8542,6 +8604,8 @@ try {
     crimsonHired = false; crimsonFreeUsed = false;
     localStorage.removeItem(ROWAN_KEY);          // ...and never had the Part 1 briefing
     rowanBriefed = false;
+    localStorage.removeItem(BELT_SCAN_KEY); beltScanned = new Set();   // ...and never scanned the belt
+
     localStorage.removeItem(PART2_KEY); localStorage.removeItem(FLEET_CALLED_KEY); localStorage.removeItem(PART2_ACT_KEY);
     part2Debriefed = false; fleetCalled = false; part2Activity = 0;   // ...and never touched Part 2 either
     localStorage.removeItem(TRUTH_KEY); localStorage.removeItem(EVAC_WON_KEY);
@@ -8578,11 +8642,12 @@ function readStoryProgress() {
 }
 function saveSnapshot() {
   return {
-    v: 11, at: Date.now(),               // v3 econ.basis + intel; v4 crew swaps; v5 waypoint; v6 pinned objective; v7 met Crimson; v8 Crimson hire state + free-battle flag; v9 Part 1 story stage; v10 Part 2 story stage; v11 Part 3 story stage
+    v: 12, at: Date.now(),               // v3 econ.basis + intel; v4 crew swaps; v5 waypoint; v6 pinned objective; v7 met Crimson; v8 Crimson hire state + free-battle flag; v9 Part 1 story stage; v10 Part 2 story stage; v11 Part 3 story stage; v12 belt scan progress
     creweq: (() => { const m = {}; for (const c of CREW) m[c.name] = c.slot0.equipped; return m; })(),
     crimsonMet,                          // whether the Crimson Nova scene has played
     crimsonHired, crimsonFreeUsed,       // whether he's currently hired, and whether the free battle is spent
     rowanBriefed, storyStage,            // Part 1 progress — has the Cogwheel briefing played, and which story waypoint is live
+    beltScanned: [...beltScanned],       // which of the two belt wreckage clusters have been swept
     part2Debriefed, fleetCalled, part2Activity,   // Part 2 progress — see the sceneDone handler + noteOptionalActivity()
     truthBriefed, evacWon,               // Part 3 progress — see the sceneDone handler + startEvacMission()
 
@@ -8717,6 +8782,7 @@ function loadFromSlot(i) {
   truthBriefed = !!s.truthBriefed; saveTruthBriefed();            // pre-v11 saves → not yet briefed
   evacWon = !!s.evacWon; saveEvacWon();                           // pre-v11 saves → not yet won
   evacActive = false;                   // a save is a snapshot in time — never resume mid-battle
+  beltScanned = new Set(s.beltScanned || []); saveBeltScanned();   // pre-v12 saves → belt not yet scanned
   setStoryStage(s.storyStage || (rowanBriefed ? "belt" : "station"));
   regenerateGrid();
   // crew action swaps: reset to defaults, then apply what the save carries
@@ -8775,7 +8841,8 @@ let manSel = 0, manPage = 0, manScroll = 0;   // Field Manual: index row, open c
 function requestMissions() {
   try {
     window.parent.postMessage({ type: "requestMissions", flags: {
-      rowanBriefed, part2Debriefed, fleetCalled, truthBriefed, evacWon, storyStage
+      rowanBriefed, part2Debriefed, fleetCalled, truthBriefed, evacWon, storyStage,
+      beltScanned: [...beltScanned], beltScanTotal: BELT_SCAN_POINTS.length
     } }, "*");
   } catch (e) {}
 }
@@ -11409,16 +11476,21 @@ function drawMapView() {
   const px = world.worldOriginX + CENTER, py = world.worldOriginY + CENTER;
   const mx = ox + (px + MAP_RADIUS) * scale, my = oy + (py + MAP_RADIUS) * scale;
   const pulse = 0.5 + 0.5 * Math.sin(gTime * 0.006);
-  // story objective waypoint + dashed course line from the player
-  if (storyTarget && !objectiveReached) {
-    const tx = ox + (storyTarget.ax + MAP_RADIUS) * scale, ty = oy + (storyTarget.ay + MAP_RADIUS) * scale;
+  // story objective waypoint(s) + dashed course line(s) from the player. During the
+  // belt scan phase this is the two unscanned wreckage clusters (sensor cyan);
+  // otherwise the usual single green "fly here" waypoint.
+  const mapObjMarks = (storyStage === "belt" && !beltScanDone())
+    ? BELT_SCAN_POINTS.filter(pt => !beltScanned.has(pt.id)).map(pt => ({ ax: pt.ax, ay: pt.ay, rgb: UNSCANNED_RGB, glow: "#7fe3f5" }))
+    : (storyTarget && !objectiveReached) ? [{ ax: storyTarget.ax, ay: storyTarget.ay, rgb: "126,231,135", glow: "#7ee787" }] : [];
+  for (const m of mapObjMarks) {
+    const tx = ox + (m.ax + MAP_RADIUS) * scale, ty = oy + (m.ay + MAP_RADIUS) * scale;
     ctx.setLineDash([5, 5]);
-    ctx.strokeStyle = "rgba(126,231,135,0.5)"; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = `rgba(${m.rgb},0.5)`; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(tx, ty); ctx.stroke();
     ctx.setLineDash([]);
     const wsz = 6 + 2 * pulse;
-    ctx.strokeStyle = `rgba(126,231,135,${0.55 + 0.45 * pulse})`; ctx.lineWidth = 2;
-    ctx.shadowColor = "#7ee787"; ctx.shadowBlur = 10;
+    ctx.strokeStyle = `rgba(${m.rgb},${0.55 + 0.45 * pulse})`; ctx.lineWidth = 2;
+    ctx.shadowColor = m.glow; ctx.shadowBlur = 10;
     ctx.beginPath();
     ctx.moveTo(tx, ty - wsz); ctx.lineTo(tx + wsz, ty);
     ctx.lineTo(tx, ty + wsz); ctx.lineTo(tx - wsz, ty); ctx.closePath(); ctx.stroke();
@@ -11582,7 +11654,10 @@ function drawMapView() {
     ctx.fillText("⚠ " + contacts + " hostile contact" + (contacts > 1 ? "s" : "") + " in charted space", cx, ly); ly += 20;
   }
   const closeHint = mapFromMenu ? "Q / M — back to menu" : "Q / M to close";
-  if (storyTarget && !objectiveReached) {
+  if (storyStage === "belt" && !beltScanDone()) {
+    ctx.fillStyle = "#bff6ea"; ctx.font = "bold 13px Consolas, monospace";
+    ctx.fillText("◆ SCAN THE ASTEROID BELT (" + beltScanned.size + "/" + BELT_SCAN_POINTS.length + ")", cx, ly); ly += 18;
+  } else if (storyTarget && !objectiveReached) {
     ctx.fillStyle = "#bfffce"; ctx.font = "bold 13px Consolas, monospace";
     ctx.fillText("◆ FLY TO: " + storyTarget.label, cx, ly); ly += 18;
   }
@@ -12261,7 +12336,9 @@ function frame(now) {
   _skipBtnRect = null;
   if (testingMode && !menuOpen && !mapOpen && !objectivePrompt) drawSkipButton();   // testing skip button on top
   const px = world.worldOriginX + CENTER, py = world.worldOriginY + CENTER;
-  const objHint = (storyTarget && !objectiveReached)
+  const objHint = (storyStage === "belt" && !beltScanDone())
+    ? `  ·  ◆ SCAN THE ASTEROID BELT (${beltScanned.size}/${BELT_SCAN_POINTS.length}) (M → Star Map)`
+    : (storyTarget && !objectiveReached)
     ? `  ·  ◆ FLY TO ${storyTarget.label.toUpperCase()} (M → Star Map)` : "";
   statusEl.textContent = combat
     ? `COMBAT — turn ${combat.turn} · ${combat.phase} · enemies:${combat.enemies.length}`

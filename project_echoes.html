@@ -1039,7 +1039,7 @@ function endScene(){
   present=[]; exprOf={}; guest=null; holoOf={}; rebuildCast();
   autoBtn.style.display = "none"; skipBtn.style.display = "none";
   gameplay.classList.remove("hidden");
-  try{ gpFrame.contentWindow.focus(); }catch(e){}
+  try{ gpFrame.focus(); gpFrame.contentWindow.focus(); }catch(e){}
   try{ gpFrame.contentWindow.postMessage({ type:"sceneDone", id }, "*"); }catch(e){}
 }
 // ============================================================
@@ -1059,7 +1059,8 @@ function endScene(){
 // slot, not just during live scene playback.
 function buildMissionLog(flags){
   flags = flags || {};
-  const { rowanBriefed, part2Debriefed, fleetCalled, truthBriefed, evacWon, storyStage } = flags;
+  const { rowanBriefed, part2Debriefed, fleetCalled, truthBriefed, evacWon, storyStage,
+          beltScanned, beltScanTotal } = flags;
   const items = []; let active = 0;
   function leg(title, kind, isActive, activeText, doneText){
     if(isActive) active = items.length;
@@ -1072,9 +1073,15 @@ function buildMissionLog(flags){
       "Arrived at Cogwheel Station and met with Commander Rowan.");
   if(!rowanBriefed) return { items, active };
 
-  // Leg 2 (Part 2, Scenes 4-5) — the mining belt.
-  leg("Asteroid Mining Belt — Investigate the Wreckage", "Flight", storyStage==="belt",
-      "Investigate the Asteroid Belt for signs of the missing mining crews.",
+  // Leg 2 (Part 2, Scenes 4-5) — the mining belt. Two wreckage clusters need an actual
+  // sensor sweep (Steve, 2026-07-28: "investigate" -> "scan the belt", two scan
+  // objectives before the leg completes — see BELT_SCAN_POINTS in the flight engine),
+  // then the leg becomes a normal "fly to the belt centre" objective.
+  const beltDone = (beltScanned || []).length >= (beltScanTotal || 2);
+  leg("Asteroid Mining Belt — Scan the Wreckage", "Flight", storyStage==="belt",
+      beltDone
+        ? "Investigate the Asteroid Belt for signs of the missing mining crews."
+        : `Scan the Asteroid Belt — sweep both wreckage clusters (${(beltScanned || []).length}/${beltScanTotal || 2} scanned).`,
       "Found a destroyed pirate fighter — someone with precision weapons got there first.");
   if(storyStage==="belt") return { items, active };
 
