@@ -3985,31 +3985,145 @@ const EVAC_WON_KEY = "echoes_evac_won_v1";
 let truthBriefed = false, evacWon = false, evacActive = false;
 function saveTruthBriefed() { try { localStorage.setItem(TRUTH_KEY, truthBriefed ? "1" : "0"); } catch (e) {} }
 function saveEvacWon() { try { localStorage.setItem(EVAC_WON_KEY, evacWon ? "1" : "0"); } catch (e) {} }
-// The script's "Escort three civilian transports / destroy enemy interceptors / prevent
-// station damage" plays out as one real combat encounter — the actual escort/station-
-// damage tracking the script names has no system to hook into yet (same call Part 2 made
-// for its "optional activities": represent the beat with real gameplay that already
-// exists rather than building new subsystems for it). Crimson formally joins as an ally
-// from here on (not a paid hire) — that's the "AI support" the script calls for.
+// ============================================================
+// "DEFENCE OF COGWHEEL STATION" — Echoes_Part3.txt Scene 12's "Evacuation Escort"
+// mission, played out as one continuous scripted battle (never reloads) across 5
+// internal stages, advancing via mid-combat VN cutscenes that FREEZE the fight
+// (sceneActive pauses tickCombat, see update()'s pause gate) rather than ending
+// it. The script's own Phase 1/2/3 each bundle two sequential beats, hence 5
+// stages here, not 3:
+//   1 — Initial Assault (4 fighters + 2 bombers)
+//   2 — Evacuation (adds 3 fighters + 2 bombers + 2 civilian escorts; win = no
+//       bombers left, fighters may survive)
+//   3 — holding pattern once Crimson joins, counting 3 rounds before A-17 arrives
+//   4 — A-17 boss (alongside any surviving fighters); ends at her 50% HP, not 0
+//   5 — handled entirely by the "final" cutscene's sceneDone handler (endEchoDefence)
+// See combat.echo (state) / updateEchoDefence() (per-tick watcher) below.
+const ECHO_FIGHTER_HULL = "Wing", ECHO_BOMBER_HULL = "Tank";
+const ECHO_A17_MAXHP = 40;
+function hullByName(name) { return ENEMY_SHIPS.find(s => s.shipName === name); }
+// Places an explicit list of named hulls onto free grid cells — factored out of
+// startCombat()'s inline random/cluster-seeded placement loop so a scripted wave
+// can place *specific* hulls instead. Tags each entry `kind` for the stage-2 "no
+// bombers left" win check.
+function placeEnemyWave(hullNames) {
+  const used = new Set([CENTER + "," + CENTER]);
+  for (const e of combat.enemies) for (const c of enemyCells(e)) used.add(c.gx + "," + c.gy);
+  if (combat.guest) used.add(combat.guest.gx + "," + combat.guest.gy);
+  for (const c of (combat.escorts || [])) used.add(c.gx + "," + c.gy);
+  const out = [];
+  for (const name of hullNames) {
+    const shipSet = hullByName(name) || randomEnemyShip();
+    const prof = shipSet.profile || SHIP_PROFILES.Gunner;
+    let gx = CENTER, gy = 1, guard = 0;
+    while (guard++ < 400) {
+      gx = 1 + ((Math.random() * (GRID_SIZE - 2)) | 0);
+      gy = 1 + ((Math.random() * (GRID_SIZE - 2)) | 0);
+      const md = Math.abs(gx - CENTER) + Math.abs(gy - CENTER);
+      if (md < 3 || !enemyFootFits(gx, gy)) continue;
+      const cells = enemyCells({ gx, gy });
+      if (cells.some(c => used.has(c.gx + "," + c.gy))) continue;
+      cells.forEach(c => used.add(c.gx + "," + c.gy));
+      break;
+    }
+    out.push({ gx, gy, vgx: gx, vgy: gy, walk: null, facing: dirToward(gx, gy, CENTER, CENTER),
+               ship: shipSet, profile: prof, hp: prof.hp, maxhp: prof.hp, ammo: prof.ammo,
+               bob: Math.random() * 6.283, kind: name === ECHO_BOMBER_HULL ? "bomber" : "fighter" });
+  }
+  return out;
+}
+// Two stationary civilian evacuation transports — friendly, real HP, no dedicated
+// art yet (drawEscortShip renders them as a glyph, same idea as a boss part).
+// Placed the same way bossFreeCell() warps in reinforcements.
+function placeEscorts(n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    let c, guard = 0;
+    do { c = bossFreeCell(2); guard++; }
+    while (guard < 30 && out.some(o => o.gx === c.gx && o.gy === c.gy));
+    out.push({ gx: c.gx, gy: c.gy, hp: 12, maxhp: 12, kind: "civilian", bob: Math.random() * 6.283 });
+  }
+  return out;
+}
+// A-17 is deliberately NOT the combat.boss framework: bossAdvance() takes over the
+// ENTIRE enemy turn the instant combat.boss is set (enemyAdvance(), see the
+// combat.boss check near its top), which would silently stop any surviving
+// stage-3 fighters from ever acting. She fights alongside them instead, so she's
+// just another (very tough) entry in combat.enemies, walked by the ordinary
+// per-index grunt loop like anyone else.
+function spawnA17() {
+  const c = bossFreeCell(3);
+  const shipSet = hullByName(ECHO_FIGHTER_HULL) || randomEnemyShip();   // placeholder hull reuse — see ASSETS_NEEDED.md
+  const prof = { hp: ECHO_A17_MAXHP, moves: 4, speed: 1.3, ammo: 99, phaserDmg: 4, missileDmg: 6,
+                 prefRange: 2, rangeW: 5, missileBias: 0.3, role: "flagship", scrap: 0 };
+  const a17 = { gx: c.gx, gy: c.gy, vgx: c.gx, vgy: c.gy, walk: null,
+                facing: dirToward(c.gx, c.gy, CENTER, CENTER), ship: shipSet, profile: prof,
+                hp: prof.hp, maxhp: prof.hp, ammo: prof.ammo, bob: Math.random() * 6.283,
+                elite: true, name: "A-17" };
+  combat.enemies.push(a17);
+  combat.flashes.push({ cells: [{ gx: c.gx, gy: c.gy }], color: "rgba(255,80,80,0.55)", t: 600 });
+  combat.echo.a17Spawned = true;
+  combat.banner = { text: "OBJECTIVE UPDATED: Defeat A-17", kind: "enemy", t: 2400, dur: 2400 };
+  clog("A-17 has entered the battle, ignoring everyone but the StarGear.");
+}
+// Per-frame watcher for the scripted battle's stage transitions — HP/round-count/
+// kind-count triggers a normal fight never needs. Called from tickCombat(), once
+// combat.pending shot-resolution has fully settled (dead entries already pruned).
+function updateEchoDefence() {
+  const e = combat.echo; if (!e) return;
+  if (e.stage >= 2 && combat.escorts.length && !e.escortsLostSaid &&
+      combat.escorts.every(c => c.hp <= 0)) {
+    e.escortsLostSaid = true;
+    clog("Both evacuation transports are gone. Falling back to regroup.");
+    loseCombat();
+    return;
+  }
+  if (e.stage === 2) {
+    const bombersLeft = combat.enemies.some(en => en.kind === "bomber" && en.hp > 0);
+    if (!bombersLeft) {
+      e.stage = 2.5;                          // awaiting the Crimson/carrier cutscene
+      sceneActive = true;
+      try { window.parent.postMessage({ type: "playScene", id: "cogwheel_defence_crimson", freeze: true }, "*"); } catch (err) {}
+    }
+  } else if (e.stage === 3) {
+    if (combat.turn - e.roundBase >= 3) {
+      e.stage = 3.5;                          // awaiting the A-17 arrival cutscene
+      sceneActive = true;
+      try { window.parent.postMessage({ type: "playScene", id: "cogwheel_defence_a17", freeze: true }, "*"); } catch (err) {}
+    }
+  } else if (e.stage === 4 && e.a17Spawned && !e.a17CutscenePlayed) {
+    const a17 = combat.enemies.find(en => en.elite);
+    if (a17 && a17.hp > 0 && a17.hp <= a17.maxhp * 0.5) {
+      e.a17CutscenePlayed = true;
+      a17.hp = Math.max(1, a17.hp);           // the scripted ending takes it from here, never a normal kill
+      sceneActive = true;
+      try { window.parent.postMessage({ type: "playScene", id: "cogwheel_defence_final", freeze: true }, "*"); } catch (err) {}
+    }
+  }
+}
+// The siege cannon fires and the script ends the battle outright ("End battle
+// immediately. Transition directly into Part 4.") — Part 4 doesn't exist yet, so
+// this is the same "stop at the documented boundary" every prior part used: back
+// to ordinary free-roam, no cliffhanger screen, evacWon marks Part 3 complete.
+function endEchoDefence() {
+  evacActive = false; evacWon = true; saveEvacWon();
+  combat.echo = null;
+  clog("Cogwheel Station's defence ends here — for now.");
+  bgm("explore");
+  recenterAndExit();
+}
 function startEvacMission() {
-  crimsonHired = true; crimsonPos = null; saveCrimsonHire();
   evacActive = true;
   const px = playerAX(), py = playerAY();
-  // Guarantee a real wave regardless of what happened to be nearby when the cutscene
-  // ended — clear any stray hostiles close enough to blend into the count, then place
-  // a fresh cluster just outside the ship so startCombat()'s cluster-detection (which
-  // reads AGGRO_TILES) picks up all of them.
+  // Guarantee a clean stage-1 wave regardless of what happened to be nearby when
+  // the cutscene ended — clear stray hostiles close enough to blend into the count.
   enemies = enemies.filter(e => !e.hostile || Math.hypot(e.ax - px, e.ay - py) > AGGRO_TILES);
-  let trigger = null;
-  for (let i = 0; i < 4; i++) {
-    const e = spawnEnemy(true);
-    const ang = Math.random() * 6.283, dist = 3 + Math.random() * 3;
-    e.ax = px + Math.cos(ang) * dist; e.ay = py + Math.sin(ang) * dist;
-    enemies.push(e);
-    if (!trigger) trigger = e;
-  }
-  startCombat(trigger);   // builds combat.log — clog() needs to run after this, not before
-  clog("MISSION: Defend Cogwheel Station — hold the interceptors off the evacuation.");
+  startCombat(null);                          // sets up arena/player/crew state; enemies overwritten below
+  combat.enemies = placeEnemyWave([ECHO_FIGHTER_HULL, ECHO_FIGHTER_HULL, ECHO_BOMBER_HULL]);
+  combat.escorts = [];
+  combat.echo = { stage: 1, roundBase: 0, turrets: 2, a17Spawned: false, a17CutscenePlayed: false };
+  combat.banner = { text: "DEFEND COGWHEEL STATION", kind: "enemy", t: 1800, dur: 1800 };
+  clog("MISSION: Repel the first assault wave.");
 }
 // Enter the hangar → ask the parent (episode1) to play the scene. Full scene the first
 // time, a short greeting after. If we're running standalone (no episode1 parent) there's
@@ -5546,7 +5660,21 @@ function endPlayerTurn() {
     cs.reviveIn = (cs.reviveIn || 1) - 1;
     if (cs.reviveIn <= 0) { cs.incap = false; clog(CREW[cs.idx].name + " is back up!"); }
   }
-  if (combat.enemies.length === 0) { winCombat(); return; }
+  if (combat.enemies.length === 0) {
+    if (combat.echo && combat.echo.stage === 1) {
+      combat.echo.stage = 1.5;               // awaiting the wave-1 reveal cutscene
+      sceneActive = true;
+      try { window.parent.postMessage({ type: "playScene", id: "cogwheel_defence_wave1", freeze: true }, "*"); } catch (err) {}
+      return;
+    }
+    // Past stage 1, an empty board does NOT mean the scripted battle is over —
+    // stage 2's win condition is "bombers destroyed" (fighters may already be
+    // gone too), and stage 3 just counts rounds toward A-17's arrival. Those are
+    // watched independently in updateEchoDefence(); "no enemies left" here should
+    // just let the turn cycle continue (round count keeps advancing) rather than
+    // falling through to a real winCombat().
+    if (!combat.echo) { winCombat(); return; }
+  }
   if (combat.guest) beginGuestPhase(); else beginEnemyPhase();
 }
 // Crimson's turn, between the player's and the enemy's. Only reached when he actually
@@ -5585,11 +5713,36 @@ function beginEnemyPhase() {
 // Reuses fireCrewWeapon's exact damage/kill/pending pipeline so kills explode and grant
 // scrap through the one existing code path, and the guest phase ends the same way a
 // crew shot would (combat.pending's endAfter dispatch, see tickCombat).
+// Civilian transports edge toward the rim of the grid during the fight (Steve:
+// "the transport should move one square in the guest phase") — a fixed escape
+// heading picked the first time each is moved (away from the board centre), one
+// tile per guest phase, stopping for good once it would leave the grid or the
+// next tile is already occupied. No pathfinding — same "just enough to read as
+// alive" simplicity as the rest of the escort system.
+function moveEscortOneStep(c) {
+  if (c.hp <= 0) return;
+  if (c._edx === undefined) {
+    const dx = c.gx - CENTER, dy = c.gy - CENTER;
+    c._edx = dx === 0 ? 0 : (dx > 0 ? 1 : -1);
+    c._edy = dy === 0 ? 0 : (dy > 0 ? 1 : -1);
+    if (!c._edx && !c._edy) c._edx = 1;    // dead centre — pick an arbitrary escape heading
+  }
+  const nx = c.gx + c._edx, ny = c.gy + c._edy;
+  if (!inBounds(nx, ny)) return;                                     // reached the rim — stop
+  const guest = combat.guest;
+  const occupied = combat.enemies.some(e => e.gx === nx && e.gy === ny) ||
+                   (combat.player.gx === nx && combat.player.gy === ny) ||
+                   (guest && guest.gx === nx && guest.gy === ny) ||
+                   combat.escorts.some(o => o !== c && o.gx === nx && o.gy === ny);
+  if (occupied) return;
+  c.gx = nx; c.gy = ny;
+}
 function guestAdvance() {
   const ai = combat.guestAi, g = combat.guest;
   if (!g) { finishGuestTurn(); return; }
   if (ai.state === "start") {
     if (!combat._crimsonJoined) { combat._crimsonJoined = true; crimsonBarkSay("join"); }
+    if (combat.escorts) for (const c of combat.escorts) moveEscortOneStep(c);
     if (!combat.enemies.length) { finishGuestTurn(); return; }
     ai.state = "windup"; ai.timer = 450; return;      // a beat of "Heroic Pose" flourish
   }
@@ -6109,6 +6262,7 @@ function enemyWeaponShot(e, p) { return shotFromTile(e.gx, e.gy, p, e); }
 function enemyFire(e, weapon, face, target) {
   target = target || combat.player;
   const isGuest = target === combat.guest;
+  const isEscort = !isGuest && target !== combat.player;
   e.facing = face;
   const cells = attackCells(e.gx, e.gy, face, weapon);
   const pr = e.profile || SHIP_PROFILES.Gunner;
@@ -6136,6 +6290,22 @@ function enemyFire(e, weapon, face, target) {
       crimsonBarkSay("knockedOut");
     } else if (taken >= CRIMSON_MAX_HP * 0.34) {
       crimsonBarkSay("heavyHit");
+    }
+    return;
+  }
+  if (isEscort) {                           // civilian transport — no dodge/shield/crew, just HP
+    const taken = dmg;
+    target.hp -= taken;
+    combat.flashes.push({ cells: [{ gx: target.gx, gy: target.gy }], color: "rgba(255,140,74,0.6)", t: 520 });
+    if (target.hp <= 0 && !target._destroyed) {
+      target._destroyed = true;
+      spawnExplosion(target.gx, target.gy, false);
+      spawnFloater(target.gx, target.gy, "TRANSPORT LOST", "#ff6a5a");
+      clog("An evacuation transport is destroyed!");
+    } else {
+      sfx("hit");
+      spawnFloater(target.gx, target.gy, "-" + taken, "#ff6a5a");
+      clog("An evacuation transport takes " + taken + " damage!");
     }
     return;
   }
@@ -6294,13 +6464,46 @@ function enemyAdvance() {
 // him if he already happens to be in a valid firing line from wherever they'd move
 // anyway for the player. A deliberate first-pass simplification: he's a bonus target,
 // never hunted.
+const ESCORT_TARGET_CHANCE = 0.35;   // chance an enemy that CAN hit a civilian transport does, over the player
 function pickEnemyTarget(e) {
   const p = combat.player, g = combat.guest;
-  if (!g) return p;
-  const canHitGuest = !!shotFromTile(e.gx, e.gy, g, e);
-  return canHitGuest && Math.random() < CRIMSON_TARGET_CHANCE ? g : p;
+  if (e.elite) return p;             // A-17 ignores everyone but the StarGear (Echoes_Part4.txt Scene 15)
+  const candidates = [];
+  if (g && shotFromTile(e.gx, e.gy, g, e) && Math.random() < CRIMSON_TARGET_CHANCE) candidates.push(g);
+  if (combat.escorts) for (const c of combat.escorts)
+    if (c.hp > 0 && shotFromTile(e.gx, e.gy, c, e) && Math.random() < ESCORT_TARGET_CHANCE) candidates.push(c);
+  return candidates.length ? candidates[(Math.random() * candidates.length) | 0] : p;
+}
+// Cogwheel Station's two defence turrets (Echoes_Part3.txt Phase 1 deployment) —
+// ambient support fire, not full independent units: no HP/targeting AI of their
+// own (the script names no turret-loss condition), just a small automatic chip of
+// damage into a random live enemy each enemy turn, with a flash for feedback.
+function tickTurretSupport() {
+  const e = combat.echo; if (!e || !e.turrets) return;
+  for (let i = 0; i < e.turrets; i++) {
+    const live = combat.enemies.filter(en => en.hp > 0);
+    if (!live.length) break;
+    const t = live[(Math.random() * live.length) | 0];
+    t.hp -= 1;
+    combat.flashes.push({ cells: enemyCells(t), color: "rgba(120,255,180,0.4)", t: 400 });
+    if (t.hp <= 0) {                        // turret fire can finish a ship off — kill it for real,
+      for (const c of enemyCells(t)) spawnExplosion(c.gx, c.gy, false);   // there's no "shot in flight"
+      grantScrapFor(t);                                                    // pending-resolution to lean on
+      combat.enemies = combat.enemies.filter(en => en !== t);
+      clog("Station turret fire finishes off an enemy!");
+    } else {
+      spawnFloater(t.gx, t.gy, "-1", "#8dffb0");
+    }
+  }
 }
 function finishEnemyTurn() {
+  tickTurretSupport();
+  if (combat.enemies.length === 0 && combat.echo && combat.echo.stage === 1) {
+    combat.echo.stage = 1.5;
+    sceneActive = true;
+    try { window.parent.postMessage({ type: "playScene", id: "cogwheel_defence_wave1", freeze: true }, "*"); } catch (err) {}
+    return;
+  }
   combat.ai = null;
   combat.phase = "player"; combat.turn++;
   // reset the crew's action budget; buffs (overclock, shield) last only one round
@@ -7380,7 +7583,17 @@ function tickCombat(dt) {
       combat.enemies = combat.enemies.filter(e => !dead.has(e));
       const endAfter = combat.pending.endAfter;
       combat.pending = null;
-      if (combat.enemies.length === 0) { winCombat(); return; }   // victory chatter handled by winCombat
+      if (combat.enemies.length === 0) {
+        if (combat.echo && combat.echo.stage === 1) {
+          combat.echo.stage = 1.5;
+          sceneActive = true;
+          try { window.parent.postMessage({ type: "playScene", id: "cogwheel_defence_wave1", freeze: true }, "*"); } catch (err) {}
+          return;
+        }
+        // See the matching comment in endPlayerTurn() — past stage 1, an empty
+        // board isn't a win, the echo stage machine drives what happens next.
+        if (!combat.echo) { winCombat(); return; }   // victory chatter handled by winCombat
+      }
       if (hadKill) crewBarkSay("kill");                           // a downed ship the fight outlives
       // crew shots always pass endAfter:false (they keep the turn open); Crimson's shot
       // is the one caller that passes true, so this only ever fires for his phase — but
@@ -7389,6 +7602,7 @@ function tickCombat(dt) {
     }
     return;                                        // freeze AI/turn logic while it resolves
   }
+  if (combat.echo) updateEchoDefence();
   if (combat.phase === "guest" && combat.guestAi) {
     combat.guestAi.timer -= dt;
     if (combat.guestAi.timer <= 0) guestAdvance();
@@ -7418,7 +7632,12 @@ function tickCombat(dt) {
       // but carrying the modules it just wrecked. evacActive gets the same treatment —
       // the Evacuation Escort battle (Part 3) is just as unavoidable as a MISSION_MODE
       // fight, it just isn't staged through that hash-driven system (see startEvacMission).
-      if (combat.phase === "lost" && (MISSION_MODE || evacActive)) {
+      if (combat.phase === "lost" && evacActive) {
+        combat = null;
+        startEvacMission();                                // restarts the whole scripted battle at stage 1
+        return;
+      }
+      if (combat.phase === "lost" && MISSION_MODE) {
         const trigger = combat.trigger || null;
         combat = null;
         startCombat(trigger);                              // rebuilds the same staged encounter
@@ -7947,8 +8166,10 @@ function drawCombat() {
   const ents = combat.enemies.map(e => ({ vgx: e.vgx, vgy: e.vgy, e }));
   ents.push({ vgx: p.vgx, vgy: p.vgy, player: true });
   if (combat.guest) ents.push({ vgx: combat.guest.gx, vgy: combat.guest.gy, guest: true });
+  if (combat.escorts) for (const c of combat.escorts) ents.push({ vgx: c.gx, vgy: c.gy, escort: c });
   ents.sort((a, b) => (a.vgx + a.vgy) - (b.vgx + b.vgy));
   for (const ent of ents) {
+    if (ent.escort) { drawEscortShip(ent.escort, ent.escort === hoverEnt); continue; }
     const e = ent.player ? p : ent.guest ? combat.guest : ent.e;
     const isEnemy = !ent.player && !ent.guest;
     if (ent.player && combat.phase === "lost") continue;   // destroyed — its explosion stands in
@@ -8013,6 +8234,28 @@ function drawCombat() {
   drawCrewBark();                              // crew combat barks (yields to bossSay)
   drawBossSay();                                // boss barks, over the arena
   if (combat.banner) drawBanner(combat.banner);
+}
+// A civilian evacuation transport — friendly, stationary, real HP. No dedicated
+// ship art exists for it yet (see ASSETS_NEEDED.md), so it draws as a glyph, the
+// same idea as drawBossPart just in a friendly cyan instead of a hostile color.
+function drawEscortShip(e, hovered) {
+  const s = cellToScreen(e.gx, e.gy);
+  const R = 15;
+  const cy = s.y - 6;
+  ctx.save();
+  const halo = ctx.createRadialGradient(s.x, cy, 2, s.x, cy, R * 1.6);
+  halo.addColorStop(0, "rgba(120,200,255,0.55)");
+  halo.addColorStop(1, "rgba(120,200,255,0)");
+  ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(s.x, cy, R * 1.6, 0, 6.283); ctx.fill();
+  ctx.fillStyle = e.hp > 0 ? "rgba(200,225,255,0.9)" : "rgba(90,100,110,0.6)";
+  ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(s.x, cy, R, 0, 6.283); ctx.fill(); ctx.stroke();
+  if (hovered) { ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2; ctx.shadowColor = "#fff"; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(s.x, cy, R + 3, 0, 6.283); ctx.stroke(); }
+  ctx.restore();
+  ctx.fillStyle = "#bcdcff"; ctx.font = "bold 9px Consolas, monospace"; ctx.textAlign = "center";
+  ctx.fillText(e.hp > 0 ? "TRANSPORT" : "TRANSPORT LOST", s.x, cy - R - 16);
+  if (e.hp > 0) drawHpBar(s.x, cy - R - 12, e.hp, e.maxhp, "#7ecbff");
 }
 // A Nexus boss part: a glowing shield-generator node or the central core (bigger,
 // amber, ringed with a shield while invulnerable). Replaces the ship sprite.
@@ -9278,6 +9521,35 @@ window.addEventListener("message", (e) => {
       truthBriefed = true; saveTruthBriefed();
       dockPrompt = null; dockDeclined = true;
       startEvacMission();
+    }
+    // ---- "Defence of Cogwheel Station" — the Evacuation Escort battle's own
+    // mid-combat cutscenes. Unlike every scene above, these fire while `combat` is
+    // still populated (frozen, not ended) — sceneActive=false above already lets
+    // tickCombat() resume; each branch here just does that stage's spawn/handoff
+    // work. See updateEchoDefence()/startEvacMission() (this file, ~4000-4160).
+    if (e.data.id === "cogwheel_defence_wave1" && combat && combat.echo) {
+      combat.escorts = placeEscorts(2);
+      combat.enemies.push(...placeEnemyWave([ECHO_FIGHTER_HULL, ECHO_FIGHTER_HULL,
+                                              ECHO_BOMBER_HULL, ECHO_BOMBER_HULL]));
+      combat.echo.stage = 2;
+      combat.banner = { text: "OBJECTIVE UPDATED: Protect the transports", kind: "info", t: 2400, dur: 2400 };
+      clog("MISSION: Protect the evacuation transports. Destroy the enemy bombers.");
+    }
+    if (e.data.id === "cogwheel_defence_crimson" && combat && combat.echo) {
+      crimsonHired = true; crimsonFreeUsed = true; saveCrimsonHire(); crimsonPos = null;
+      combat.guest = { gx: CENTER - 1, gy: CENTER + 1, facing: DIR.FWD, bob: Math.random() * 6.283,
+                        hp: CRIMSON_MAX_HP, maxhp: CRIMSON_MAX_HP };
+      combat.echo.stage = 3;
+      combat.echo.roundBase = combat.turn;
+      combat.banner = { text: "OBJECTIVE UPDATED: Repel the second assault", kind: "enemy", t: 2400, dur: 2400 };
+      clog("Crimson Nova has joined the fight.");
+    }
+    if (e.data.id === "cogwheel_defence_a17" && combat && combat.echo) {
+      spawnA17();
+      combat.echo.stage = 4;
+    }
+    if (e.data.id === "cogwheel_defence_final" && combat && combat.echo) {
+      endEchoDefence();
     }
   }
 });

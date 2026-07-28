@@ -87,6 +87,23 @@ today.
 | 25 | `CG_RAZE_REVEAL` | CG event — Captain Raze's transmission reveal: elegant black armour, white cape, expressionless, a red-lit bridge behind him. | P1 |
 | 26 | Raze (character art) | Antagonist commander — no folder yet (`Assets/char/RAZE/`). Always shows the placeholder card. **Do not reuse** the old `_archive/Episode1-v1/Episode 1 Prep/Captain Raze.png` concept art — that was drawn for the abandoned earlier draft (an older, grizzled engineer-captain look) and doesn't match this Raze's current description (elegant black armour, white cape, cold and formal). | P1 |
 
+## Story Part 3 Climax — "Defence of Cogwheel Station" (Echoes_Part3.txt Scene 12,
+## folded together with the A-17/siege-cannon beats Echoes_Part4.txt originally
+## scripted — see the note under Deferred)
+
+Scoped to the full scripted battle now built out in `startEvacMission()`/
+`combat.echo` (`project_echoes_flight.html`) and its 4 mid-combat cutscenes
+(`cogwheel_defence_wave1/_crimson/_a17/_final` in `project_echoes.html`). None of
+these cutscenes use a `bg`/`cg` step — the blurred, frozen battlefield itself is
+the visual backdrop, so no new BG/CG art is needed for them.
+
+| # | Asset | Notes | Pri |
+|---|---|---|---|
+| 27 | A-17 (character art) | Astra's android counterpart — no folder yet (`Assets/char/A-17/`). Always shows the placeholder card (`CHARS["A-17"]`). | P1 |
+| 28 | A-17 (in-combat hull) | She's a plain `combat.enemies` entry, not the `combat.boss` framework (see the comment above `spawnA17()`) — currently reuses the `Wing` hull's sprite as a labelled placeholder, tagged `elite:true`. A distinct small/fast android-fighter hull would read better. | P2 |
+| 29 | Civilian evacuation transport | `combat.escorts` entries (`drawEscortShip()`) render as a plain cyan glyph, same idea as a Nexus boss-part node — no ship sprite exists for a civilian transport in combat. | P2 |
+| 30 | The carrier (in-arena) | Deliberately NOT modeled as a persistent arena sprite — the script itself says it "cannot yet be targeted," so its Phase 2/3 reveals are conveyed through dialogue/narration only, no CG or in-combat art needed. | — |
+
 ## Deferred (explicitly out of scope this pass)
 
 - **Visual progression over time** — new debris fields, battle damage to structures,
@@ -100,14 +117,22 @@ today.
   actions instead — a scan find or a non-mission combat win (see
   `noteOptionalActivity()` in `project_echoes_flight.html`). Swap in real job systems
   later without changing the trigger's shape.
-- **Escort/station-damage mechanics for the Evacuation Escort battle** — the script
-  names escorting three civilian transports, destroying interceptors, and preventing
-  station damage as separate objectives. Only the real combat exists; the escort and
-  station-damage tracking have no systems to hook into yet, so the battle plays as one
-  real fight against a forced wave of interceptors (see `startEvacMission()` in
-  `project_echoes_flight.html`) — same simplification call as Part 2's optional
-  activities.
-- **Part 4** (`Echoes_Part4.txt`, "Hold the Line") — Part 3 stops the moment the
-  Evacuation Escort battle begins (`the_truth` scene ends, `startEvacMission()` fires),
-  matching the script's own boundary ("as the mission begins, Raze's fleet advances..."
-  — everything past that line is Part 4). A future pass picks up from there.
+- ~~Escort/station-damage mechanics for the Evacuation Escort battle~~ — **built**:
+  civilian transports are now real `combat.escorts` entries with HP (both destroyed
+  = a real lose condition), see the Story Part 3 Climax table above. Cogwheel
+  Station itself still has no `hp` field anywhere — the script names no
+  station-destruction condition, so it stays pure backdrop.
+- **Station Defence Turrets** — modeled as ambient support fire, not full
+  independent units: 2 turrets each chip 1 damage into a random live enemy every
+  enemy turn (`tickTurretSupport()`), no HP, not destructible (the script names no
+  turret-loss condition). A future pass could give them real sprites/independent
+  targeting if that ever matters mechanically.
+- **Part 4** (`Echoes_Part4.txt`, "Hold the Line") — Steve's plan for "Defence of
+  Cogwheel Station" pulled the A-17 mini-boss and the carrier's siege-cannon beats
+  forward from Echoes_Part4.txt into this same continuous battle, ending it there
+  ("End battle immediately") rather than at the old `the_truth`-ends-Part-3
+  boundary. What's left of Part 4's script is genuinely new territory: the
+  occupation-scale reveal (hundreds of androids in the carrier's hangar), and
+  Crimson's playable-ship sequence once the crippled StarGear drifts. A future
+  pass picks up from there — same "stop at the documented boundary" pattern every
+  part has used.
